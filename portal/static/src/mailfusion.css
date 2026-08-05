@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: "Inter", sans-serif;
+
+    --color-surface-container-highest: #e6e2df;
+    --color-on-primary-container: #cadcff;
+    --color-primary: #00488d;
+    --color-primary-container: #005fb8;
+    --color-on-primary: #ffffff;
+
+    --color-background: #fdf8f6;
+    --color-on-background: #1c1b1a;
+
+    --color-surface: #fdf8f6;
+    --color-surface-container: #f1edea;
+    --color-surface-container-high: #ece7e4;
+    --color-surface-container-low: #f7f3f0;
+    --color-surface-container-lowest: #ffffff;
+
+    --color-on-surface: #1c1b1a;
+    --color-on-surface-variant: #424752;
+
+    --color-secondary: #4a607c;
+    --color-secondary-container: #c5dcfd;
+
+    --color-tertiary: #7b3200;
+    --color-tertiary-container: #a04401;
+
+    --color-error: #ba1a1a;
+    --color-error-container: #ffdad6;
+
+    --color-outline: #727783;
+    --color-outline-variant: #c2c6d4;
+
+    --radius-default: 0.125rem;
+    --radius-lg: 0.25rem;
+    --radius-xl: 0.5rem;
+    --radius-full: 0.75rem;
+}
+
+@layer base {
+    body {
+        font-family: "Inter", sans-serif;
+    }
+}
+
+@source "../../templates";
+@source "../../../portal/templates";

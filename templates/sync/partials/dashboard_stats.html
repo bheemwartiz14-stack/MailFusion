@@ -1,0 +1,116 @@
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="mf-card">
+      <div class="mf-card__body mf-stat">
+        <span class="mf-stat__icon mf-stat__icon--primary"><i class="bi bi-envelope-paper"></i></span>
+        <div class="min-w-0">
+          <div class="mf-stat__value">{{ metrics.total_accounts }}</div>
+          <div class="mf-stat__label">Connected accounts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="mf-card">
+      <div class="mf-card__body mf-stat">
+        <span class="mf-stat__icon mf-stat__icon--success"><i class="bi bi-play-circle"></i></span>
+        <div class="min-w-0">
+          <div class="mf-stat__value">{{ metrics.active_accounts }}</div>
+          <div class="mf-stat__label">Active accounts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="mf-card">
+      <div class="mf-card__body mf-stat">
+        <span class="mf-stat__icon mf-stat__icon--neutral"><i class="bi bi-pause-circle"></i></span>
+        <div class="min-w-0">
+          <div class="mf-stat__value">{{ metrics.paused_accounts }}</div>
+          <div class="mf-stat__label">Paused accounts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="mf-card">
+      <div class="mf-card__body mf-stat">
+        <span class="mf-stat__icon mf-stat__icon--warning"><i class="bi bi-shield-exclamation"></i></span>
+        <div class="min-w-0">
+          <div class="mf-stat__value">{{ metrics.needs_reauthorization }}</div>
+          <div class="mf-stat__label">Needs reauthorization</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-2">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        <div class="fw-bold fs-5">{{ metrics.total_syncs }}</div>
+        <div class="small mf-muted">Total syncs</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        <div class="fw-bold fs-5 text-success">{{ metrics.successful_syncs }}</div>
+        <div class="small mf-muted">Successful</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        <div class="fw-bold fs-5 text-danger">{{ metrics.failed_syncs }}</div>
+        <div class="small mf-muted">Failed</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        <div class="fw-bold fs-5 text-primary">{{ metrics.emails_synced_today }}</div>
+        <div class="small mf-muted">Emails today</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        <div class="fw-bold fs-5 text-warning">{{ metrics.queued_jobs }}</div>
+        <div class="small mf-muted">Queued jobs</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        <div class="fw-bold fs-5 text-info">{{ queue_depth }}</div>
+        <div class="small mf-muted">Queue depth</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+  <span class="mf-muted small">Workers:</span>
+  {% if worker.active %}
+  <span class="mf-badge mf-badge--success"><i class="bi bi-cpu"></i>{{ worker.count }} online</span>
+  {% else %}
+  <span class="mf-badge mf-badge--danger"><i class="bi bi-cpu"></i>Offline</span>
+  {% endif %}
+
+  <span class="mf-muted small">Broker:</span>
+  {% if broker %}
+  <span class="mf-badge mf-badge--success"><i class="bi bi-hdd-network"></i>Redis OK</span>
+  {% else %}
+  <span class="mf-badge mf-badge--danger"><i class="bi bi-hdd-network"></i>Unreachable</span>
+  {% endif %}
+
+  <span class="mf-muted small ms-auto">Last sync: {% if metrics.last_sync %}{{ metrics.last_sync|timesince }} ago{% else %}never{% endif %}</span>
+  <span class="mf-muted small">Next scheduled: {{ metrics.next_scheduled_sync|time:"H:i:s" }} UTC</span>
+</div>

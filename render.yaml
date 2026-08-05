@@ -1,0 +1,104 @@
+services:
+  - type: web
+    name: mailfusion
+    runtime: python
+    plan: free
+    region: oregon
+
+    buildCommand: |
+      uv sync --frozen
+      uv run python manage.py collectstatic --noinput
+      uv run python manage.py migrate
+
+    startCommand: |
+      uv run gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+
+    autoDeploy: true
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13"
+
+      - key: DJANGO_SETTINGS_MODULE
+        value: "config.settings"
+
+      - key: DEBUG
+        value: "False"
+
+      - key: SECRET_KEY
+        sync: false
+
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: SESSION_COOKIE_AGE
+        value: "1209600"  # 2 weeks in seconds
+      
+      - key: SESSION_INACTIVITY_TIMEOUT
+        value: "1800"  # 2 weeks in seconds
+      
+      - key:SECURE_SSL_REDIRECT
+        value:true
+
+      # PostgreSQL
+      - key: POSTGRES_HOST
+        sync: false
+
+      - key: POSTGRES_DB
+        sync: false
+
+      - key: POSTGRES_USER
+        sync: false
+
+      - key: POSTGRES_PASSWORD
+        sync: false
+
+      - key: POSTGRES_PORT
+        sync: false
+
+
+      # Redis
+      - key: REDIS_URL
+        sync: false
+
+      # Microsoft OAuth
+      - key: MICROSOFT_CLIENT_ID
+        sync: false
+
+      - key: MICROSOFT_CLIENT_SECRET
+        sync: false
+
+      - key: MICROSOFT_TENANT_ID
+        value: "common"
+
+      - key: MICROSOFT_REDIRECT_URI
+        sync: false
+
+      - key: MICROSOFT_GRAPH_SCOPES
+        sync: false
+
+      - key: MICROSOFT_GRAPH_BASE_URL
+        sync: false
+
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "1800"  # 2 weeks in seconds
+      
+      - key: SYNC_INTERVAL_SECONDS
+        value: "1800"  # 2 weeks in seconds
+      
+      - key: TOKEN_REFRESH_INTERVAL_MINUTES
+        value: "10"  # 2 weeks in seconds
+      
+      - key: WEBHOOK_RENEW_INTERVAL_MINUTES
+        value: "15"  # 2 weeks in seconds
+      
+      - key: LOG_CLEANUP_INTERVAL_HOURS
+        value: "24"  # 2 weeks in seconds
+      
+      - key: HEALTH_CHECK_INTERVAL_MINUTES
+        value: "5"  # 2 weeks in seconds
+
+      - key: SYNC_LOG_RETENTION_DAYS
+        value: "30"  # 2 weeks in seconds
+
+      - key: SYNC_MAX_ATTACHMENT_BYTES
+        value: "26214400"  # 2 weeks in seconds

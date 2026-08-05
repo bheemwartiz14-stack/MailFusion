@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">Infrastructure and per-account sync health indicators.</p>
+{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-outline-secondary"
+  hx-get="{% url 'sync_health_partial' %}"
+  hx-target="#healthWrap" hx-swap="innerHTML">
+  <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Infrastructure -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        {% if broker %}
+        <span class="mf-badge mf-badge--success mb-2"><i class="bi bi-hdd-network"></i></span>
+        {% else %}
+        <span class="mf-badge mf-badge--danger mb-2"><i class="bi bi-hdd-network"></i></span>
+        {% endif %}
+        <div class="fw-bold">Redis / Broker</div>
+        <div class="small mf-muted">{% if broker %}reachable{% else %}unreachable{% endif %}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        {% if worker.active %}
+        <span class="mf-badge mf-badge--success mb-2"><i class="bi bi-cpu"></i></span>
+        {% else %}
+        <span class="mf-badge mf-badge--danger mb-2"><i class="bi bi-cpu"></i></span>
+        {% endif %}
+        <div class="fw-bold">Celery workers</div>
+        <div class="small mf-muted">{{ worker.count }} online</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        <span class="mf-badge mf-badge--info mb-2"><i class="bi bi-stack"></i></span>
+        <div class="fw-bold">Queue depth</div>
+        <div class="small mf-muted">{{ queue_depth }} waiting</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="mf-card">
+      <div class="mf-card__body text-center py-3">
+        <span class="mf-badge mf-badge--{% if systems_healthy %}success{% else %}warning{% endif %} mb-2"><i class="bi bi-shield-check"></i></span>
+        <div class="fw-bold">Overall</div>
+        <div class="small mf-muted">{% if systems_healthy %}systems healthy{% else %}attention required{% endif %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="healthWrap">
+  {% include "sync/partials/health_rows.html" %}
+</div>
+{% endblock %}

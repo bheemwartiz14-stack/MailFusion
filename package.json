@@ -1,0 +1,28 @@
+{
+  "name": "inboxfusion",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "jquery": "^4.0.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.2.0"
+  },
+  "scripts": {
+    "css:dev": "bunx @tailwindcss/cli -i ./portal/static/src/mailfusion.css -o ./portal/static/css/app.css --watch",
+    "css:build": "bunx @tailwindcss/cli -i ./portal/static/src/mailfusion.css -o ./portal/static/css/app.css --minify",
+    "js:dev": "bun build ./portal/static/src/mailfusion.js --outdir ./portal/static/js --watch",
+    "js:build": "bun build ./portal/static/src/mailfusion.js --outdir ./portal/static/js --minify",
+    "dev": "bun run css:dev & bun run js:dev",
+    "build": "bun run css:build && bun run js:build"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

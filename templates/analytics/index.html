@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% load static %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">Email trends, account activity, and workspace insights.</p>
+{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-outline-secondary" type="button" data-mf-toast="Report generated" title="Export">
+  <i class="bi bi-download me-1"></i>Export
+</button>
+<div class="dropdown">
+  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+    <i class="bi bi-calendar3 me-1"></i>Last 30 days
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><a class="dropdown-item" href="#">Last 7 days</a></li>
+    <li><a class="dropdown-item active" href="#">Last 30 days</a></li>
+    <li><a class="dropdown-item" href="#">Last 90 days</a></li>
+    <li><a class="dropdown-item" href="#">This year</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="#">Custom range</a></li>
+  </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+  {% for kpi in kpis %}
+  <div class="col-6 col-xl-3">
+    <div class="mf-card">
+      <div class="mf-card__body mf-stat">
+        <span class="mf-stat__icon mf-stat__icon--{{ kpi.tone }}"><i class="bi {{ kpi.icon }}"></i></span>
+        <div class="min-w-0">
+          <div class="mf-stat__value">{{ kpi.value }}</div>
+          <div class="mf-stat__label">{{ kpi.label }}</div>
+          <div class="mf-stat__trend">{{ kpi.trend }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <!-- Email Volume Chart -->
+  <div class="col-xl-8">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <h2 class="mf-card__title">Email Volume</h2>
+        <span class="mf-card__subtitle">Incoming & outgoing messages per day</span>
+      </div>
+      <div class="mf-card__body">
+        <div class="mf-chart mf-chart--bars" data-mf-chart="bars" data-mf-bars="{{ chart_data.email_volume }}">
+          {% for bar in chart_data.email_volume %}
+          <div class="bar" style="height: {{ bar }}%"></div>
+          {% endfor %}
+        </div>
+        <div class="d-flex gap-4 mt-3 small">
+          <div class="d-flex align-items-center gap-1">
+            <span style="width:12px;height:12px;border-radius:3px;background:var(--mf-primary)"></span>
+            <span class="mf-muted">Received</span>
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <span style="width:12px;height:12px;border-radius:3px;background:var(--mf-info)"></span>
+            <span class="mf-muted">Sent</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unread Distribution Donut -->
+  <div class="col-xl-4">
+    <div class="mf-card h-100">
+      <div class="mf-card__header">
+        <h2 class="mf-card__title">Unread Distribution</h2>
+        <span class="mf-card__subtitle">By account</span>
+      </div>
+      <div class="mf-card__body d-flex flex-column align-items-center justify-content-center">
+        <div class="mf-donut" style="width:160px;height:160px" data-mf-donut="{{ chart_data.unread_distribution }}">
+          <div class="position-absolute top-50 start-50 translate-middle text-center">
+            <div class="fw-bold" style="font-size:1.6rem">{{ chart_data.total_unread }}</div>
+            <div class="small mf-muted">Total Unread</div>
+          </div>
+        </div>
+        <div class="w-100 mt-3">
+          {% for item in chart_data.unread_distribution %}
+          <div class="d-flex align-items-center justify-content-between py-1">
+            <div class="d-flex align-items-center gap-2">
+              <span style="width:10px;height:10px;border-radius:50%;background:{{ item.color }}"></span>
+              <span class="small">{{ item.label }}</span>
+            </div>
+            <span class="fw-semibold">{{ item.value }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-4">
+  <!-- Top Senders -->
+  <div class="col-xl-5">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <h2 class="mf-card__title">Top Senders</h2>
+        <span class="mf-card__subtitle">Most frequent correspondents</span>
+      </div>
+      <div class="mf-card__body">
+        <div class="table-responsive">
+          <table class="table mf-table align-middle">
+            <thead>
+              <tr>
+                <th style="width:40px">#</th>
+                <th>Sender</th>
+                <th class="text-center">Emails</th>
+                <th class="text-center">Unread</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sender in top_senders %}
+              <tr>
+                <td class="fw-bold text-primary">{{ forloop.counter }}</td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="mf-avatar mf-avatar--{{ sender.tone }}">{{ sender.name|initials }}</span>
+                    <div>
+                      <div class="cell-strong text-truncate">{{ sender.name }}</div>
+                      <div class="small mf-muted text-truncate">{{ sender.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center">{{ sender.count }}</td>
+                <td class="text-center">
+                  {% if sender.unread > 0 %}
+                  <span class="mf-badge mf-badge--primary">{{ sender.unread }}</span>
+                  {% else %}
+                  <span class="mf-muted">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Activity -->
+  <div class="col-xl-7">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <h2 class="mf-card__title">Account Activity</h2>
+        <span class="mf-card__subtitle">Sync health & last activity per mailbox</span>
+      </div>
+      <div class="mf-card__body mf-card__body--flush">
+        <div class="table-responsive">
+          <table class="table mf-table align-middle">
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>Status</th>
+                <th>Last Sync</th>
+                <th class="text-center">Emails Today</th>
+                <th class="text-center">Unread</th>
+                <th>Sync Health</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for acc in account_activity %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="mf-avatar mf-avatar--{{ acc.tone }}">{{ acc.nickname|first|upper|default:acc.email|first|upper }}</span>
+                    <div class="min-w-0">
+                      <div class="cell-strong text-truncate">{{ acc.name }}</div>
+                      <div class="small mf-muted text-truncate">{{ acc.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  {% if acc.status == 'active' %}
+                  <span class="mf-badge mf-badge--success"><i class="bi bi-circle-fill"></i>Active</span>
+                  {% elif acc.status == 'error' %}
+                  <span class="mf-badge mf-badge--danger"><i class="bi bi-exclamation-circle-fill"></i>Error</span>
+                  {% else %}
+                  <span class="mf-badge mf-badge--neutral"><i class="bi bi-pause-circle"></i>Paused</span>
+                  {% endif %}
+                </td>
+                <td class="small">
+                  {% if acc.last_sync_at %}
+                    {{ acc.last_sync_at|timesince }} ago
+                  {% else %}
+                    <span class="mf-muted">Never</span>
+                  {% endif %}
+                </td>
+                <td class="text-center fw-semibold">{{ acc.emails_today }}</td>
+                <td class="text-center">
+                  {% if acc.unread_count > 0 %}
+                  <span class="mf-badge mf-badge--primary">{{ acc.unread_count }}</span>
+                  {% else %}
+                  <span class="mf-muted">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="flex-grow-1" style="height:6px">
+                      <div class="progress" style="height:6px">
+                        <div class="progress-bar bg-{{ acc.health_tone }}" style="width:{{ acc.health }}%"></div>
+                      </div>
+                    </div>
+                    <span class="small fw-semibold text-{{ acc.health_tone }}">{{ acc.health }}%</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/charts.js' %}"></script>
+<script>
+(function () {
+  // Render bar chart
+  var barsEl = document.querySelector('[data-mf-chart="bars"]');
+  if (barsEl && barsEl.dataset.mfBars) {
+    var data = JSON.parse(barsEl.dataset.mfBars.replace(/'/g, '"'));
+    var html = '';
+    data.forEach(function (val) {
+      html += '<div class="bar" style="height: ' + val + '%"></div>';
+    });
+    barsEl.innerHTML = html;
+  }
+})();
+</script>
+{% endblock %}

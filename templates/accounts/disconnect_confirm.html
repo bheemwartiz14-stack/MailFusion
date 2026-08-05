@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="text-sm text-gray-500">
+    This action cannot be undone.
+</p>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl">
+
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+        <!-- Header -->
+        <div class="border-b border-gray-200 px-6 py-5">
+            <div class="flex items-center gap-4">
+
+                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600">
+                    <i class="bi bi-envelope-x text-3xl"></i>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900">
+                        Disconnect account
+                    </h2>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        {{ account.email }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="space-y-6 p-6">
+
+            <!-- Warning -->
+            <div class="flex gap-3 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+
+                <i class="bi bi-exclamation-triangle-fill mt-0.5 text-xl text-yellow-600"></i>
+
+                <div>
+
+                    <h3 class="font-semibold text-yellow-900">
+                        This will permanently remove this account from Portal.
+                    </h3>
+
+                    <p class="mt-1 text-sm text-yellow-700">
+                        Once removed, the account and all associated data cannot be recovered.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- Consequences -->
+            <div>
+
+                <h3 class="mb-3 text-lg font-semibold text-gray-900">
+                    What will happen?
+                </h3>
+
+                <ul class="list-disc space-y-2 pl-5 text-sm text-gray-600">
+                    <li>All synced emails for this account will be removed from the Unified Inbox.</li>
+                    <li>OAuth access and refresh tokens will be permanently deleted.</li>
+                    <li>Sync history and account settings will be lost.</li>
+                    <li>This action cannot be undone.</li>
+                </ul>
+
+            </div>
+
+            <!-- Account Details -->
+            <div class="rounded-xl border border-gray-200">
+
+                <div class="border-b border-gray-200 px-5 py-4">
+                    <h3 class="font-semibold text-gray-900">
+                        Account Details
+                    </h3>
+                </div>
+
+                <div class="divide-y divide-gray-200">
+
+                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
+                        <span class="text-sm font-medium text-gray-500">
+                            Display Name
+                        </span>
+
+                        <span class="col-span-2 text-sm text-gray-900">
+                            {{ account.name }}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
+                        <span class="text-sm font-medium text-gray-500">
+                            Email
+                        </span>
+
+                        <span class="col-span-2 text-sm text-gray-900">
+                            {{ account.email }}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
+                        <span class="text-sm font-medium text-gray-500">
+                            Nickname
+                        </span>
+
+                        <span class="col-span-2 text-sm text-gray-900">
+                            {{ account.nickname|default:"—" }}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
+
+                        <span class="text-sm font-medium text-gray-500">
+                            Status
+                        </span>
+
+                        <div class="col-span-2">
+
+                            {% if account.oauth_status == 'connected' %}
+
+                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                Connected
+                            </span>
+
+                            {% elif account.oauth_status == 'expired' %}
+
+                            <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
+                                Expired
+                            </span>
+
+                            {% elif account.oauth_status == 'revoked' %}
+
+                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+                                Revoked
+                            </span>
+
+                            {% else %}
+
+                            <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                                Pending
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
+
+                        <span class="text-sm font-medium text-gray-500">
+                            Connected Since
+                        </span>
+
+                        <span class="col-span-2 text-sm text-gray-900">
+                            {{ account.created_at|date:"M d, Y" }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+
+            <a href="{% url 'accounts' %}"
+                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100">
+
+                <i class="bi bi-x"></i>
+                Cancel
+
+            </a>
+
+            <form method="post" action="{% url 'accounts_disconnect' account.pk %}">
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700">
+
+                    <i class="bi bi-trash"></i>
+                    Disconnect Account
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

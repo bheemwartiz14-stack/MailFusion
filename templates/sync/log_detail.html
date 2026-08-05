@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <div>
+          <h2 class="mf-card__title">Sync log</h2>
+          <p class="mf-card__subtitle">{{ log.account.email }}</p>
+        </div>
+        {% if log.status == 'completed' %}
+        <a href="{% url 'account_detail' log.account.pk %}" class="btn btn-sm btn-ghost">View account</a>
+        {% endif %}
+      </div>
+      <div class="mf-card__body">
+        <dl class="row mb-2 small">
+          <dt class="col-sm-4 mf-muted">Status</dt>
+          <dd class="col-sm-8">
+            {% if log.status == 'completed' %}<span class="mf-badge mf-badge--success">Completed</span>
+            {% elif log.status == 'failed' %}<span class="mf-badge mf-badge--danger">Failed</span>
+            {% else %}<span class="mf-badge mf-badge--neutral">Started</span>{% endif %}
+          </dd>
+          <dt class="col-sm-4 mf-muted">Start time</dt>
+          <dd class="col-sm-8">{{ log.start_time|date:"Y-m-d H:i:s" }}</dd>
+          <dt class="col-sm-4 mf-muted">End time</dt>
+          <dd class="col-sm-8">{{ log.end_time|date:"Y-m-d H:i:s"|default:"—" }}</dd>
+          <dt class="col-sm-4 mf-muted">Duration</dt>
+          <dd class="col-sm-8">{{ log.duration_seconds|floatformat:2 }}s</dd>
+          <dt class="col-sm-4 mf-muted">Emails processed</dt>
+          <dd class="col-sm-8">{{ log.emails_processed }}</dd>
+          <dt class="col-sm-4 mf-muted">Added / Updated</dt>
+          <dd class="col-sm-8"><span class="text-success">{{ log.emails_added }}</span> / {{ log.emails_updated }}</dd>
+          <dt class="col-sm-4 mf-muted">Attachments downloaded</dt>
+          <dd class="col-sm-8">{{ log.attachments_downloaded }}</dd>
+          <dt class="col-sm-4 mf-muted">Retry count</dt>
+          <dd class="col-sm-8">{{ log.retry_count }}</dd>
+          <dt class="col-sm-4 mf-muted">Worker</dt>
+          <dd class="col-sm-8"><code>{{ log.worker|default:"—" }}</code></dd>
+        </dl>
+        {% if log.error %}
+        <div class="alert alert-danger small mt-2">
+          <i class="bi bi-exclamation-triangle me-1"></i>{{ log.error }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% load ui_extras %}
+
+<div class="mb-8">
+  <button class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-container py-3 font-semibold text-on-primary shadow-sm transition-all hover:bg-primary-fixed-dim active:scale-95"
+          type="button" data-mf-open-compose="new" title="New message">
+    <span class="material-symbols-outlined">edit</span>
+    New Message
+  </button>
+</div>
+
+<div class="space-y-1">
+  <h3 class="px-3 text-[11px] uppercase tracking-wider text-outline mb-2">System</h3>
+  {% with inbox=folders.Inbox drafts=folders.Drafts sent=folders.SentItems archive=folders.Archive %}
+  <a href="{% url 'inbox' %}{% if folder != 'all' %}?folder=all{% endif %}"
+     class="flex items-center gap-3 rounded-lg {% if folder == 'all' or folder == 'inbox' or not folder %}bg-secondary-container text-on-secondary-container font-medium{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %} px-3 py-2.5 transition-colors"
+     data-folder="all">
+    <span class="material-symbols-outlined {% if folder == 'all' or folder == 'inbox' or not folder %}" data-weight="fill"{% endif %}>inbox</span>
+    <span class="flex-1">Inbox</span>
+    {% if inbox.unread %}<span class="text-xs font-bold">{{ inbox.unread }}</span>{% endif %}
+  </a>
+  <a href="{% url 'inbox' %}?folder=unread"
+     class="flex items-center gap-3 rounded-lg {% if folder == 'unread' %}bg-secondary-container text-on-secondary-container font-medium{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %} px-3 py-2.5 transition-colors" data-folder="unread">
+    <span class="material-symbols-outlined">mark_email_unread</span>
+    <span class="flex-1">Unread</span>
+    {% if inbox.unread %}<span class="text-xs font-bold">{{ inbox.unread }}</span>{% endif %}
+  </a>
+  <a href="{% url 'sent_items' %}"
+     class="flex items-center gap-3 rounded-lg {% if folder == 'sent' %}bg-secondary-container text-on-secondary-container font-medium{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %} px-3 py-2.5 transition-colors" data-folder="sent">
+    <span class="material-symbols-outlined">send</span>
+    <span class="flex-1">Sent</span>
+    {% if sent.total %}<span class="text-xs font-bold">{{ sent.total }}</span>{% endif %}
+  </a>
+  <a href="{% url 'inbox' %}?folder=archive"
+     class="flex items-center gap-3 rounded-lg {% if folder == 'archive' %}bg-secondary-container text-on-secondary-container font-medium{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %} px-3 py-2.5 transition-colors" data-folder="archive">
+    <span class="material-symbols-outlined">archive</span>
+    <span class="flex-1">Archive</span>
+    {% if archive.total %}<span class="text-xs font-bold">{{ archive.total }}</span>{% endif %}
+  </a>
+  <a href="{% url 'drafts' %}"
+     class="flex items-center gap-3 rounded-lg {% if folder == 'drafts' %}bg-secondary-container text-on-secondary-container font-medium{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %} px-3 py-2.5 transition-colors" data-folder="drafts">
+    <span class="material-symbols-outlined">drafts</span>
+    <span class="flex-1">Drafts</span>
+    {% if drafts.total %}<span class="text-xs font-bold">{{ drafts.total }}</span>{% endif %}
+  </a>
+  <a href="{% url 'inbox' %}?folder=trash"
+     class="flex items-center gap-3 rounded-lg {% if folder == 'trash' %}bg-secondary-container text-on-secondary-container font-medium{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %} px-3 py-2.5 transition-colors" data-folder="trash">
+    <span class="material-symbols-outlined">delete</span>
+    <span class="flex-1">Trash</span>
+  </a>
+  {% endwith %}
+</div>
+
+<div class="mt-8 space-y-1">
+  <div class="flex items-center justify-between px-3 mb-2">
+    <h3 class="text-[11px] uppercase tracking-wider text-outline">Accounts</h3>
+    <a href="{% url 'accounts_connect' %}" class="text-outline hover:text-primary transition-colors" title="Add account">
+      <span class="material-symbols-outlined text-[18px]">add_circle</span>
+    </a>
+  </div>
+  {% for account in accounts %}
+  <a href="{% url 'inbox' %}?account={{ account.pk }}"
+     class="flex items-center gap-3 rounded-lg {% if filters.account and filters.account.pk == account.pk %}bg-surface-container-high{% else %}text-on-surface-variant hover:bg-surface-container-highest{% endif %} px-3 py-2.5 cursor-pointer transition-colors" data-folder="account">
+    <span class="material-symbols-outlined text-primary">work</span>
+    <div class="flex-1 overflow-hidden">
+      <p class="truncate text-sm font-semibold text-on-surface">{{ account.nickname|default:account.name }}</p>
+      <p class="truncate text-xs text-outline">{{ account.email }}</p>
+    </div>
+  </a>
+  {% empty %}
+  <p class="px-3 text-body-sm text-outline">No connected accounts.</p>
+  {% endfor %}
+</div>
+
+<script type="text/javascript">
+  (function () {
+    var host = document.getElementById("mf-folder-counts");
+    if (!host) return;
+    document.body.addEventListener("inbox:refresh", function () {
+      if (window.htmx) {
+        htmx.ajax("GET", "{% url 'inbox_unread' %}", { target: "#mf-folder-counts", swap: "innerHTML" });
+      }
+    });
+  })();
+</script>

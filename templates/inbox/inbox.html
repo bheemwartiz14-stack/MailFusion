@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% load static %}
+
+{% block title %}Unified Inbox · {{ app_name }}{% endblock %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">Every mailbox, every message — one feed.</p>
+{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary"
+        type="button"
+        data-mf-open-compose="new"
+        title="New message">
+  <i class="bi bi-pencil-square me-1"></i>Compose
+</button>
+<a class="btn btn-outline-secondary"
+   href="{% url 'inbox' %}"
+   title="Refresh"
+   hx-get="{% url 'inbox_unread' %}"
+   hx-target="#mf-folder-counts"
+   hx-swap="innerHTML">
+  <i class="bi bi-arrow-clockwise"></i>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="mf-inbox mf-inbox--list">
+
+  <!-- Folders / sidebar -->
+  <aside class="mf-inbox__folder" id="mf-folder-counts">
+    {% include "inbox/partials/sidebar.html" %}
+  </aside>
+
+  <!-- Email list -->
+  <section class="mf-inbox__list">
+    {% include "inbox/partials/toolbar.html" %}
+    <!-- Bulk action bar (hidden until a row is selected) -->
+    {% include "inbox/partials/bulk_bar.html" %}
+
+    <div class="overflow-y-auto flex-grow-1 mf-email-scroll" data-mf-inbox-scroll>
+      <div id="mf-email-list"
+           hx-get="{% url 'inbox_list' %}?{{ querystring }}"
+           hx-trigger="load"
+           hx-swap="innerHTML">
+        <div class="mf-empty py-5">
+          <i class="bi bi-inbox mf-empty__icon"></i>
+          <h4>Loading your inbox</h4>
+          <p class="mf-muted">Synchronizing across your connected accounts…</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Compose modal (HTMX) -->
+<div id="mf-compose-modal-host"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/inbox.js' %}"></script>
+<script src="{% static 'js/compose.js' %}"></script>
+{% endblock %}

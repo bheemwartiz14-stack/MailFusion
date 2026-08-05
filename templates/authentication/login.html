@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body_class %}mf-body-auth{% endblock %}
+{% block auth_content %}
+<div class="flex min-h-screen bg-background">
+  <div class="flex min-h-screen flex-1 items-center justify-center bg-background px-4 py-12">
+    <div class="w-full max-w-md rounded-2xl border border-outline-variant bg-surface p-8 shadow-lg">
+      <div class="mb-5"><img src="{% static 'images/logo.svg' %}" alt="{{ app_name }}" class="h-12 rounded-xl"></div>
+      <h1 class="text-2xl font-bold text-on-background">Welcome back</h1>
+      <p class="mt-1 text-sm text-on-surface-variant">Sign in to your {{ app_name }} workspace.</p>
+      {% if form.non_field_errors %}
+      <div class="mt-4 flex items-start gap-2 rounded-xl border border-error/20 bg-error-container px-4 py-3 text-sm"
+        role="alert">
+        <span class="material-symbols-outlined mt-0.5 text-error">cancel</span>
+        <div>
+          {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      <form method="post" class="mt-6 space-y-5" novalidate>
+        {% csrf_token %}
+
+        <!-- Username / Email -->
+        <div class="space-y-2">
+          <label for="id_username" class="block text-sm font-medium text-gray-700">
+            Username or Email
+          </label>
+
+          <input type="text" name="username" id="id_username" placeholder="Enter username or email"
+            value="{{ form.username.value|default:'' }}" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm
+      text-gray-900 placeholder:text-gray-400
+      focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+
+          {% if form.username.errors %}
+          <p class="text-sm text-red-600">
+            {{ form.username.errors.0 }}
+          </p>
+          {% endif %}
+        </div>
+
+
+        <!-- Password -->
+        <div class="space-y-2">
+          <label for="current-password" class="block text-sm font-medium text-gray-700">
+            Password
+          </label>
+
+          <input type="password" name="password" id="id_password" autocomplete="current-password"
+            placeholder="Enter password"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+        </div>
+
+
+        <button type="submit"
+          class="mt-4 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
+          Login
+        </button>
+
+      </form>
+
+      <p class="mb-0 mt-4 text-center text-sm text-outline">
+        <a href="{% url 'password_reset' %}" class="font-medium text-primary hover:underline">Forgot your password?</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

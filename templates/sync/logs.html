@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">Every synchronization run across all connected mailboxes.</p>
+{% endblock %}
+
+{% block content %}
+<!-- Toolbar -->
+<div class="mf-toolbar">
+  <form method="get" class="d-flex gap-2 flex-wrap align-items-center">
+    <div class="input-group" style="max-width:280px">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Account name or email&hellip;">
+    </div>
+    <select class="form-select" style="max-width:160px" name="account" onchange="this.form.submit()">
+      <option value="">All accounts</option>
+      {% for acc in accounts %}
+      <option value="{{ acc.pk }}" {% if current_account == acc.pk|stringformat:"s" %}selected{% endif %}>{{ acc.email }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select" style="max-width:170px" name="status" onchange="this.form.submit()">
+      <option value="" {% if not current_status %}selected{% endif %}>All statuses</option>
+      <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>Completed</option>
+      <option value="failed" {% if current_status == 'failed' %}selected{% endif %}>Failed</option>
+      <option value="started" {% if current_status == 'started' %}selected{% endif %}>Started</option>
+    </select>
+    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-funnel me-1"></i>Filter</button>
+    <button type="button" class="btn btn-ghost btn-sm"
+      hx-get="{% url 'sync_logs_partial' %}"
+      hx-target="#syncLogsWrap" hx-swap="innerHTML">
+      <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+    </button>
+  </form>
+  <div class="d-flex gap-2 ms-auto">
+    <span class="mf-badge mf-badge--success">{{ counts.completed|default:0 }} ok</span>
+    <span class="mf-badge mf-badge--danger">{{ counts.failed|default:0 }} failed</span>
+  </div>
+</div>
+
+<div id="syncLogsWrap">
+  {% include "sync/partials/logs_table.html" %}
+</div>
+{% endblock %}

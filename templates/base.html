@@ -1,0 +1,50 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="description" content="Portal - Cloud-based Outlook email aggregation dashboard">
+
+  <title>
+    {% block title %}
+    {% if title %}{{ title }} · {% endif %}{{ app_name }}
+    {% endblock %}
+  </title>
+
+  <script src="{% static 'js/tailwind-ui.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+  {% if auth_page %}
+  {% block auth_content %}
+  {% endblock %}
+  {% else %}
+  <div class="flex h-screen overflow-hidden">
+    <!-- SideNavBar (Customized from Brand Anchors) -->
+    {% include "partials/sidebar.html" %}
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <!-- TopNavBar (Shared Component Context) -->
+      {% include "partials/navbar.html" %}
+      <!-- Scrollable Dashboard Body -->
+      <section class="flex-1 overflow-y-auto p-8 space-y-8">
+        {% block content %} {% endblock %}
+      </section>
+    </main>
+  </div>
+  {% endif %}
+  {% include "partials/modals.html" %}
+  <script src="{% static 'js/ui-components.js' %}"></script>
+  {% block extra_js %}
+  {% endblock %}
+
+</body>
+
+</html>

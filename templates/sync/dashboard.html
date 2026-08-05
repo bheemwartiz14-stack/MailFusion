@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">Live status of the background email synchronization engine.</p>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'accounts_sync_all' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-repeat me-1"></i>Sync all</a>
+<a href="{% url 'accounts_connect' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Connect account</a>
+{% endblock %}
+
+{% block content %}
+<div hx-get="{% url 'sync_dashboard_stats' %}" hx-trigger="every 30s" hx-swap="innerHTML">
+  {% include "sync/partials/dashboard_stats.html" %}
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-xl-7">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <div>
+          <h2 class="mf-card__title">Accounts</h2>
+          <p class="mf-card__subtitle">Sync health per connected mailbox</p>
+        </div>
+      </div>
+      <div class="mf-card__body mf-card__body--flush">
+        <div class="table-responsive">
+          <table class="table mf-table align-middle">
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>OAuth</th>
+                <th>Sync state</th>
+                <th>Emails</th>
+                <th>Unread</th>
+                <th class="text-end">Last sync</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for acc in accounts %}
+              <tr>
+                <td>
+                  <a href="{% url 'account_detail' acc.pk %}" class="cell-strong text-decoration-none">{{ acc.name }}</a>
+                  <div class="small mf-muted">{{ acc.email }}</div>
+                </td>
+                <td>
+                  {% if acc.oauth_status == 'connected' %}
+                  <span class="mf-badge mf-badge--success"><i class="bi bi-shield-check"></i>Connected</span>
+                  {% elif acc.oauth_status == 'expired' %}
+                  <span class="mf-badge mf-badge--warning"><i class="bi bi-shield-exclamation"></i>Expired</span>
+                  {% elif acc.oauth_status == 'revoked' %}
+                  <span class="mf-badge mf-badge--danger"><i class="bi bi-shield-lock"></i>Revoked</span>
+                  {% else %}
+                  <span class="mf-badge mf-badge--neutral"><i class="bi bi-shield"></i>Pending</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if acc.is_sync_paused %}
+                  <span class="mf-badge mf-badge--neutral"><i class="bi bi-pause-circle"></i>Paused</span>
+                  {% elif acc.health.graph_ok %}
+                  <span class="mf-badge mf-badge--success"><i class="bi bi-check-circle"></i>Healthy</span>
+                  {% else %}
+                  <span class="mf-badge mf-badge--danger"><i class="bi bi-exclamation-circle"></i>Error</span>
+                  {% endif %}
+                </td>
+                <td class="small">{{ acc.total_emails_synced }}</td>
+                <td class="small">{{ acc.unread_count }}</td>
+                <td class="small text-end text-nowrap">
+                  {% if acc.last_sync_at %}{{ acc.last_sync_at|timesince }} ago{% else %}Never{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" class="text-center py-4 mf-muted">No accounts connected yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <div>
+          <h2 class="mf-card__title">Recent sync runs</h2>
+          <p class="mf-card__subtitle">Latest attempts across all accounts</p>
+        </div>
+        <a href="{% url 'sync_logs' %}" class="btn btn-sm btn-ghost">View all</a>
+      </div>
+      <div class="mf-card__body mf-card__body--flush">
+        <ul class="list-group list-group-flush">
+          {% for log in recent_logs %}
+          <li class="list-group-item d-flex align-items-center gap-2">
+            {% if log.status == 'completed' %}
+            <span class="mf-badge mf-badge--success"><i class="bi bi-check-circle"></i></span>
+            {% elif log.status == 'failed' %}
+            <span class="mf-badge mf-badge--danger"><i class="bi bi-x-circle"></i></span>
+            {% else %}
+            <span class="mf-badge mf-badge--neutral"><i class="bi bi-arrow-repeat"></i></span>
+            {% endif %}
+            <div class="min-w-0 flex-grow-1">
+              <div class="small text-truncate cell-strong">{{ log.account.email }}</div>
+              <div class="small mf-muted">+{{ log.emails_added }} added, {{ log.emails_updated }} updated</div>
+            </div>
+            <span class="small mf-muted text-nowrap">{{ log.start_time|timesince }} ago</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-center py-4 mf-muted">No syncs have run yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

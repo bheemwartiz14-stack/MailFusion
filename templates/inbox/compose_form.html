@@ -1,0 +1,110 @@
+{% load ui_extras %}
+{% load static %}
+<div class="mf-card mf-composer">
+  <div class="mf-card__header">
+    <h2 class="mf-card__title">
+      {% if mode == "reply" %}Reply
+      {% elif mode == "reply_all" %}Reply All
+      {% elif mode == "forward" %}Forward
+      {% else %}New Message{% endif %}
+    </h2>
+    <span class="small mf-muted" data-mf-autosave-status></span>
+  </div>
+  <div class="mf-card__body">
+    <form id="mf-compose-form" class="d-flex flex-column gap-3" data-mf-compose-form
+          method="post" action="{% url 'compose_submit' %}">
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="{{ mode|default:'new' }}">
+      <input type="hidden" name="draft_id" value="{{ draft.pk|default:'' }}" data-mf-draft-id>
+      <input type="hidden" name="original_id" value="{{ original.pk|default:'' }}">
+      <input type="hidden" name="next" value="{{ next|default:'' }}">
+      <input type="hidden" name="body_html" data-mf-body-html value="{{ body_html|default:'' }}">
+      <input type="hidden" name="body_text" data-mf-body-text value="{{ body_text|default:'' }}">
+
+      <!-- Sending account -->
+      <div class="d-flex flex-column flex-sm-row gap-2 align-items-start">
+        <label class="form-label mt-1 mb-0 text-nowrap" for="mf-compose-account">From</label>
+        <select class="form-select form-select-sm" id="mf-compose-account" name="account" required>
+          {% for account in accounts %}
+          <option value="{{ account.pk }}" {% if account.pk == default_account.pk %}selected{% endif %}>
+            {{ account.name }} &lt;{{ account.email }}&gt;
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Recipients -->
+      <div class="mf-compose-row">
+        <label class="form-label" for="mf-to">To</label>
+        <input class="form-control" type="email" id="mf-to" name="to" value="{{ to|default:'' }}"
+               data-mf-recipient="to" placeholder="name@example.com, other@example.com" autocomplete="off">
+      </div>
+      <div class="mf-compose-row">
+        <label class="form-label" for="mf-cc">Cc</label>
+        <input class="form-control" type="email" id="mf-cc" name="cc" value="{{ cc|default:'' }}"
+               data-mf-recipient="cc" placeholder="carbon copy (optional)">
+      </div>
+      <div class="mf-compose-row" data-mf-bcc-row {% if not bcc %}style="display:none"{% endif %}>
+        <label class="form-label" for="mf-bcc">Bcc</label>
+        <input class="form-control" type="email" id="mf-bcc" name="bcc" value="{{ bcc|default:'' }}"
+               data-mf-recipient="bcc" placeholder="blind carbon copy (optional)">
+      </div>
+
+      <div class="mf-compose-row">
+        <label class="form-label" for="mf-subject">Subject</label>
+        <input class="form-control" type="text" id="mf-subject" name="subject" value="{{ subject|default:'' }}" data-mf-subject placeholder="Subject">
+      </div>
+
+      <!-- Priority -->
+      <div class="mf-compose-row">
+        <label class="form-label" for="mf-importance">Priority</label>
+        <select class="form-select form-select-sm w-auto" id="mf-importance" name="importance">
+          <option value="normal" {% if importance != 'high' and importance != 'low' %}selected{% endif %}>Normal</option>
+          <option value="high" {% if importance == 'high' %}selected{% endif %}>High</option>
+          <option value="low" {% if importance == 'low' %}selected{% endif %}>Low</option>
+        </select>
+      </div>
+
+      <!-- Rich text editor -->
+      <div class="mf-compose-editor">
+        <div class="mf-compose-editor__toolbar" data-mf-editor-toolbar>
+          <button type="button" data-mf-cmd="bold" title="Bold"><i class="bi bi-type-bold"></i></button>
+          <button type="button" data-mf-cmd="italic" title="Italic"><i class="bi bi-type-italic"></i></button>
+          <button type="button" data-mf-cmd="underline" title="Underline"><i class="bi bi-type-underline"></i></button>
+          <span class="vr mx-1"></span>
+          <button type="button" data-mf-cmd="insertUnorderedList" title="Bulleted list"><i class="bi bi-list-ul"></i></button>
+          <button type="button" data-mf-cmd="insertOrderedList" title="Numbered list"><i class="bi bi-list-ol"></i></button>
+          <button type="button" data-mf-cmd="blockquote" title="Quote"><i class="bi bi-quote"></i></button>
+          <button type="button" data-mf-cmd="createLink" title="Insert link"><i class="bi bi-link-45deg"></i></button>
+          <span class="vr mx-1"></span>
+          <button type="button" data-mf-cmd="removeFormat" title="Clear formatting"><i class="bi bi-eraser"></i></button>
+        </div>
+        <div class="mf-compose-editor__body" contenteditable="true" data-mf-editor
+             data-placeholder="Write your message&hellip;">{{ body_html|default:""|safe }}</div>
+      </div>
+
+      <!-- Attachments -->
+      <div class="mf-compose-attachments">
+        <div class="mf-dropzone" data-mf-dropzone>
+          <i class="bi bi-cloud-arrow-up fs-3"></i>
+          <div class="small">Drag &amp; drop files here or <span class="fw-semibold text-primary">browse</span></div>
+          <input type="file" name="files" class="d-none" multiple data-mf-file-input>
+        </div>
+        <div id="mf-attachment-rows" class="d-flex flex-column gap-2 mt-2">
+          {% include "inbox/partials/attachment_rows.html" with draft=draft %}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <button class="btn btn-primary" type="submit" name="submit" value="send">
+          <i class="bi bi-send me-1"></i>Send
+        </button>
+        <button class="btn btn-outline-secondary" type="submit" name="submit" value="draft">
+          <i class="bi bi-save me-1"></i>Save draft
+        </button>
+        <a class="btn btn-ghost ms-auto" href="{{ next|default:'/inbox/' }}" data-mf-discard>Discard</a>
+      </div>
+    </form>
+  </div>
+</div>

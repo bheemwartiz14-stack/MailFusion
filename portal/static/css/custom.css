@@ -1,0 +1,21 @@
+ .material-symbols-outlined {
+     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+ }
+
+ body {
+     font-family: 'Inter', sans-serif;
+ }
+
+ /* Custom scrollbar for clean UI */
+ ::-webkit-scrollbar {
+     width: 6px;
+ }
+
+ ::-webkit-scrollbar-track {
+     background: transparent;
+ }
+
+ ::-webkit-scrollbar-thumb {
+     background: #e6edf4;
+     border-radius: 10px;
+ }

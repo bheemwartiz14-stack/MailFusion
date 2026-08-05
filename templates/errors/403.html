@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block body_class %}mf-body-error{% endblock %}
+{% block auth_content %}
+<div class="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+  <div class="w-full max-w-md text-center">
+    <div class="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-tertiary/10 text-tertiary"><span class="material-symbols-outlined text-5xl">gpp_maybe</span></div>
+    <h1 class="text-5xl font-bold text-primary" style="letter-spacing:-.03em">403</h1>
+    <h2 class="mt-2 text-xl font-semibold text-on-surface">Forbidden</h2>
+    <p class="mx-auto mt-2 mb-6 max-w-sm text-sm text-on-surface-variant">You do not have permission to view this resource. Contact your administrator if you believe this is a mistake.</p>
+    <div class="flex flex-wrap items-center justify-center gap-2">
+      <a href="/" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-container"><span class="material-symbols-outlined">home</span>Back to dashboard</a>
+      <a href="/support-placeholder/" class="inline-flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high"><span class="material-symbols-outlined">support</span>Contact support</a>
+    </div>
+    <div class="mt-6 text-xs text-outline">Request ID: <code class="font-mono">req_8f3KdnQ</code></div>
+  </div>
+</div>
+{% endblock %}

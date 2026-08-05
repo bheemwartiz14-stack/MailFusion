@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">A read-only trail of system actions across your workspace.</p>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'audit_logs_export' %}" class="btn btn-outline-secondary">
+  <i class="bi bi-download me-1"></i>Export CSV
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Toolbar -->
+<div class="mf-toolbar">
+  <form method="get" class="d-flex gap-2 flex-wrap">
+    <div class="input-group" style="max-width:340px">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Search actor, action or target&hellip;">
+    </div>
+    <select class="form-select" style="max-width:180px" name="status" onchange="this.form.submit()">
+      <option value="" {% if not current_status %}selected{% endif %}>All statuses</option>
+      <option value="success" {% if current_status == 'success' %}selected{% endif %}>Success</option>
+      <option value="error" {% if current_status == 'error' %}selected{% endif %}>Error</option>
+    </select>
+    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-funnel me-1"></i>Filter</button>
+  </form>
+  <span class="mf-muted small ms-auto d-none d-sm-inline">{{ page_obj.paginator.count }} entries</span>
+</div>
+
+{% if logs %}
+<div class="mf-card">
+  <div class="mf-card__body mf-card__body--flush">
+    <div class="table-responsive">
+      <table class="table mf-table align-middle" id="mfLogsTable">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Actor</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>IP address</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td class="small text-nowrap">{{ log.timestamp|date:"Y-m-d H:i" }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                {% if log.user %}
+                <span class="mf-user-avatar" style="width:28px;height:28px;font-size:.65rem">{{ log.user.get_username|slice:":2"|upper }}</span>
+                <span class="cell-strong">{{ log.user.get_full_name|default:log.user.get_username }}</span>
+                {% else %}
+                <span class="mf-user-avatar mf-user-avatar--system" style="width:28px;height:28px;font-size:.65rem">S</span>
+                <span class="cell-strong">{{ log.actor|default:"System" }}</span>
+                {% endif %}
+              </div>
+            </td>
+            <td><code class="mf-font-mono">{{ log.action }}</code></td>
+            <td class="small text-truncate" style="max-width:260px">{{ log.target }}</td>
+            <td class="small mf-muted text-nowrap">{{ log.ip|default:"—" }}</td>
+            <td>
+              {% if log.status == 'success' %}
+              <span class="mf-badge mf-badge--success"><i class="bi bi-check-circle-fill"></i>Success</span>
+              {% else %}
+              <span class="mf-badge mf-badge--danger"><i class="bi bi-x-circle-fill"></i>Error</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% include "partials/pagination.html" %}
+{% else %}
+<div class="mf-card">
+  <div class="mf-empty">
+    <div class="mf-empty__icon"><i class="bi bi-journal-text"></i></div>
+    <div class="mf-empty__title">No audit entries found</div>
+    <p class="mf-empty__text">Try a different search term or status filter.</p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tables.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% load static %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">View and manage every notification across your workspace.</p>
+{% endblock %}
+
+{% block page_actions %}
+<form method="post" action="{% url 'notifications_read_all' %}">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-outline-secondary">
+    <i class="bi bi-check2-all me-1"></i>Mark all as read
+  </button>
+</form>
+{% endblock %}
+
+{% block content %}
+<!-- Summary strip -->
+<div class="mf-card mb-4">
+  <div class="mf-card__body">
+    <div class="row g-3">
+      <div class="col-6 col-lg-4">
+        <div class="small mf-muted">Total notifications</div>
+        <div class="fw-bold fs-5">{{ page_obj.paginator.count }}</div>
+      </div>
+      <div class="col-6 col-lg-4">
+        <div class="small mf-muted">Unread</div>
+        <div class="fw-bold fs-5 text-warning">{{ unread_count }}</div>
+      </div>
+      <div class="col-6 col-lg-4">
+        <div class="small mf-muted">Read</div>
+        <div class="fw-bold fs-5 text-success">{{ read_count }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="mf-toolbar">
+  <form method="get" class="d-flex gap-2 flex-wrap">
+    <div class="input-group" style="max-width:340px">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="text" class="form-control" placeholder="Search notifications&hellip;" data-mf-table-search="mfNotifTable">
+    </div>
+    <select class="form-select" style="max-width:180px" name="status" onchange="this.form.submit()">
+      <option value="" {% if not current_status %}selected{% endif %}>All statuses</option>
+      <option value="unread" {% if current_status == 'unread' %}selected{% endif %}>Unread</option>
+      <option value="read" {% if current_status == 'read' %}selected{% endif %}>Read</option>
+    </select>
+  </form>
+  <span class="mf-muted small ms-auto d-none d-sm-inline">{{ page_obj.paginator.count }} notifications</span>
+</div>
+
+{% if notifications %}
+<form method="post" action="{% url 'notifications_bulk' %}">
+  {% csrf_token %}
+  <div class="mf-card">
+    <div class="mf-card__body mf-card__body--flush">
+      <div class="table-responsive">
+        <table class="table mf-table align-middle" data-mf-table id="mfNotifTable">
+          <thead>
+            <tr>
+              <th style="width:40px"><input class="form-check-input" type="checkbox" data-mf-select-all></th>
+              <th>Status</th>
+              <th>Notification</th>
+              <th>Received</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for n in notifications %}
+            <tr data-notification-read="{{ n.is_read|yesno:'read,unread' }}">
+              <td><input class="form-check-input" type="checkbox" name="notification_ids" value="{{ n.pk }}" data-mf-row-check></td>
+              <td>
+                {% if n.is_read %}
+                <span class="mf-badge mf-badge--neutral"><i class="bi bi-check-lg"></i>Read</span>
+                {% else %}
+                <span class="mf-badge mf-badge--primary"><i class="bi bi-dot"></i>Unread</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="mf-stat__icon mf-stat__icon--{{ n.tone }}" style="width:34px;height:34px;font-size:.9rem"><i class="bi {{ n.icon }}"></i></span>
+                  <div class="min-w-0">
+                    <div class="cell-strong text-truncate {% if not n.is_read %}fw-semibold{% endif %}">{{ n.title }}</div>
+                    <div class="small mf-muted text-truncate">{{ n.detail }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="small text-nowrap">{{ n.created_at|timesince }} ago</td>
+              <td>
+                <div class="d-flex justify-content-end gap-1">
+                  <form method="post" action="{% url 'notification_toggle' n.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-ghost btn-icon" title="{% if n.is_read %}Mark as unread{% else %}Mark as read{% endif %}">
+                      <i class="bi {% if n.is_read %}bi-envelope{% else %}bi-envelope-open{% endif %}"></i>
+                    </button>
+                  </form>
+                  <form method="post" action="{% url 'notification_delete' n.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-ghost btn-icon text-danger" title="Delete">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mf-empty d-none" data-mf-empty-state>
+        <div class="mf-empty__icon"><i class="bi bi-bell-slash"></i></div>
+        <div class="mf-empty__title">No notifications match your search</div>
+        <p class="mf-empty__text">Try a different search term or status filter.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk actions bar -->
+  <div class="d-flex align-items-center gap-2 mt-3">
+    <span class="small mf-muted">Selected: <span data-mf-selected-count>0</span></span>
+    <span class="flex-grow-1"></span>
+    <button type="submit" name="bulk_action" value="mark_read" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-check2-all me-1"></i>Mark selected as read
+    </button>
+    <button type="submit" name="bulk_action" value="delete" class="btn btn-outline-danger btn-sm">
+      <i class="bi bi-trash me-1"></i>Delete selected
+    </button>
+  </div>
+
+  {% include "partials/pagination.html" %}
+</form>
+{% else %}
+<div class="mf-card">
+  <div class="mf-empty">
+    <div class="mf-empty__icon"><i class="bi bi-bell-slash"></i></div>
+    <div class="mf-empty__title">No notifications yet</div>
+    <p class="mf-empty__text">Notifications about syncs, logins and security events will appear here.</p>
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">Back to dashboard</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tables.js' %}"></script>
+<script>
+(function () {
+  function countSelected() {
+    var form = document.querySelector('form[action*="notifications/bulk"]');
+    if (!form) return;
+    var count = form.querySelectorAll('input[name="notification_ids"]:checked').length;
+    var el = document.querySelector("[data-mf-selected-count]");
+    if (el) el.textContent = count;
+  }
+  document.querySelectorAll('input[name="notification_ids"]').forEach(function (cb) {
+    cb.addEventListener("change", countSelected);
+  });
+  document.querySelectorAll("[data-mf-select-all]").forEach(function (all) {
+    all.addEventListener("change", countSelected);
+  });
+})();
+</script>
+{% endblock %}

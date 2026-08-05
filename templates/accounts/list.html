@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% load static %}
+
+{% block page_subtitle %}
+<p class="text-sm text-gray-500">
+  Manage your connected Microsoft mailboxes — sync, monitor, and organize all from one place.
+</p>
+{% endblock %}
+
+{% block page_actions %}
+<div class="flex items-center gap-3">
+  <a href="{% url 'accounts_sync_all' %}"
+    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+    <i class="bi bi-arrow-repeat"></i>
+    Sync all
+  </a>
+  <a href="{% url 'accounts_connect' %}"
+    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+    <i class="bi bi-plus-lg"></i>
+    Connect account
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Toast container for HTMX notifications -->
+<div id="accounts-toast" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+<!-- Account health strip -->
+<div class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <p class="text-sm text-gray-500">Total accounts</p>
+      <h3 class="mt-1 text-2xl font-bold">{{ accounts|length }}</h3>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500">Connected (OAuth)</p>
+      <h3 class="mt-1 text-2xl font-bold text-green-600">
+        {% with connected=accounts|filter_attr:"oauth_status:connected" %}{{ connected|length }}{% endwith %}
+      </h3>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500">Needs attention</p>
+      <h3 class="mt-1 text-2xl font-bold text-yellow-500">
+        {% with error=accounts|filter_attr:"oauth_status:error" %}{{ error|length }}{% endwith %}
+      </h3>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500">Total unread</p>
+      <h3 class="mt-1 text-2xl font-bold text-blue-600">{{ accounts|sum_attr:"unread_count" }}</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center">
+  <div class="relative max-w-md flex-1">
+    <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+    <input type="text" id="mfAccountsSearch" data-mf-table-search="mfAccountsTable" placeholder="Search accounts..."
+      class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none">
+  </div>
+  <select id="mfAccountsFilter" data-mf-table-filter="mfAccountsTable" data-mf-filter-key="data-account-status"
+    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none">
+    <option value="">All statuses</option>
+    <option value="active">Active</option>
+    <option value="error">Error</option>
+    <option value="paused">Paused</option>
+  </select>
+  <span class="ml-auto hidden text-sm text-gray-500 sm:block">
+    {{ accounts|length }} account{{ accounts|length|pluralize }}
+  </span>
+</div>
+
+<!-- Table -->
+<div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+  <div class="overflow-x-auto">
+    <table id="mfAccountsTable" data-mf-table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left">
+            <input type="checkbox" data-mf-select-all class="rounded border-gray-300">
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Account</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Last Sync</th>
+          <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">Unread</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">OAuth</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 bg-white">
+        {% for acc in accounts %}
+        <tr class="hover:bg-gray-50 transition" data-account-status="{{ acc.status }}" data-account-search="{{ acc.name }} {{ acc.email }} {{ acc.nickname }}">
+          <td class="px-4 py-4">
+            <input type="checkbox" data-mf-row-check class="rounded border-gray-300">
+          </td>
+          <td class="px-4 py-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white">
+                {{ acc.nickname|first|upper|default:acc.email|first|upper }}
+              </div>
+              <div class="min-w-0">
+                <p class="font-medium text-gray-900 truncate max-w-[280px]">{{ acc.name }}</p>
+                <p class="text-sm text-gray-500 truncate max-w-[280px]">{{ acc.email }}</p>
+                {% if acc.nickname %}
+                <span class="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">{{ acc.nickname }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-4">
+            {% if acc.status == 'active' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+              <i class="bi bi-circle-fill"></i>Active
+            </span>
+            {% elif acc.status == 'error' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+              <i class="bi bi-exclamation-circle-fill"></i>Error
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+              <i class="bi bi-pause-circle"></i>Paused
+            </span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-4 text-sm text-gray-500">
+            {% if acc.last_sync_at %}
+            <span title="{{ acc.last_sync_at|date:'M d, Y H:i' }}">{{ acc.last_sync_at|timesince }} ago</span>
+            {% else %}
+            <span class="text-gray-400">Never</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-4 text-center">
+            {% if acc.unread_count %}
+            <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">{{ acc.unread_count }}</span>
+            {% else %}
+            <span class="text-gray-400">—</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-4">
+            {% if acc.oauth_status == 'connected' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+              <i class="bi bi-shield-check"></i>Connected
+            </span>
+            {% elif acc.oauth_status == 'expired' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
+              <i class="bi bi-shield-exclamation"></i>Expired
+            </span>
+            {% elif acc.oauth_status == 'revoked' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+              <i class="bi bi-shield-lock"></i>Revoked
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+              <i class="bi bi-shield"></i>Pending
+            </span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-4">
+            <div class="flex justify-end gap-1">
+              <div class="dropdown">
+                <button class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="More actions">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-xl py-1">
+                  <li>
+                    <a class="dropdown-item px-3 py-2" href="{% url 'account_detail' acc.pk %}">
+                      <i class="bi bi-info-circle me-2 text-gray-400"></i>Details
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item px-3 py-2" href="#" hx-post="{% url 'accounts_sync' acc.pk %}" hx-target="#accounts-toast" hx-swap="beforeend">
+                      <i class="bi bi-lightning-charge me-2 text-gray-400"></i>Sync now
+                    </a>
+                  </li>
+                  {% if acc.oauth_status != 'connected' %}
+                  <li>
+                    <a class="dropdown-item px-3 py-2" href="{% url 'accounts_reconnect' acc.pk %}">
+                      <i class="bi bi-arrow-repeat me-2 text-gray-400"></i>Reconnect
+                    </a>
+                  </li>
+                  {% endif %}
+                  <li>
+                    <a class="dropdown-item px-3 py-2" href="#" data-bs-toggle="modal" data-bs-target="#renameModal{{ acc.pk }}">
+                      <i class="bi bi-pencil me-2 text-gray-400"></i>Rename
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item px-3 py-2" href="#" hx-post="{% url 'accounts_pause' acc.pk %}" hx-target="#accounts-toast" hx-swap="beforeend">
+                      <i class="bi bi-{% if acc.is_sync_paused %}play-circle{% else %}pause-circle{% endif %} me-2 text-gray-400"></i>{% if acc.is_sync_paused %}Resume{% else %}Pause{% endif %}
+                    </a>
+                  </li>
+                  <li><hr class="dropdown-divider my-1"></li>
+                  <li>
+                    <a class="dropdown-item px-3 py-2 text-red-600" href="{% url 'accounts_disconnect_confirm' acc.pk %}">
+                      <i class="bi bi-trash me-2"></i>Disconnect
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Rename Modal -->
+              <div class="modal fade" id="renameModal{{ acc.pk }}" tabindex="-1" aria-labelledby="renameModalLabel{{ acc.pk }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content border-0 shadow-xl rounded-xl">
+                    <div class="modal-header border-0 pb-0">
+                      <h5 class="modal-title font-semibold" id="renameModalLabel{{ acc.pk }}">Rename Account</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form hx-post="{% url 'accounts_rename' acc.pk %}" hx-target="#accounts-toast" hx-swap="beforeend" hx-on::after-request="if(event.detail.successful) { bootstrap.Modal.getInstance(document.getElementById('renameModal{{ acc.pk }}')).hide(); }">
+                      {% csrf_token %}
+                      <div class="modal-body pb-0">
+                        <div class="mb-3">
+                          <label class="form-label" for="rename-name-{{ acc.pk }}">Display name <span class="text-danger">*</span></label>
+                          <input type="text" class="form-control rounded-lg border-gray-300" id="rename-name-{{ acc.pk }}" name="name" value="{{ acc.name }}" required>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label" for="rename-nickname-{{ acc.pk }}">Nickname</label>
+                          <input type="text" class="form-control rounded-lg border-gray-300" id="rename-nickname-{{ acc.pk }}" name="nickname" value="{{ acc.nickname }}" maxlength="40" placeholder="Short label (max 40 chars)">
+                          <div class="form-text text-sm text-gray-500">Used in compact views and badges.</div>
+                        </div>
+                      </div>
+                      <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-ghost rounded-lg" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-lg">Save changes</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="px-6 py-16 text-center">
+            <div class="mx-auto max-w-sm">
+              <div class="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 mx-auto">
+                <i class="bi bi-envelope-paper text-3xl text-gray-300"></i>
+              </div>
+              <h3 class="mt-4 text-xl font-semibold text-gray-900">No Outlook accounts connected</h3>
+              <p class="mt-2 text-gray-500">Connect your first Microsoft mailbox to start aggregating emails.</p>
+              <a href="{% url 'accounts_connect' %}" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-700 transition">
+                <i class="bi bi-plus-lg"></i>
+                Connect account
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tables.js' %}"></script>
+<script>
+// Toast notification handling
+document.body.addEventListener('htmx:afterRequest', function(e) {
+  if (e.detail.target.id === 'accounts-toast' && e.detail.successful) {
+    const toastContainer = document.getElementById('accounts-toast');
+    const response = e.detail.xhr.responseText;
+
+    // Create toast element
+    const toastEl = document.createElement('div');
+    toastEl.className = 'toast align-items-center text-white bg-primary border-0 shadow-lg';
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
+    toastEl.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${response}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    toastContainer.appendChild(toastEl);
+
+    const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+    toast.show();
+
+    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+  }
+});
+
+// Row hover effects
+document.addEventListener('DOMContentLoaded', function() {
+  const table = document.getElementById('mfAccountsTable');
+  if (table) {
+    table.querySelectorAll('tbody tr[data-account-status]').forEach(row => {
+      row.addEventListener('mouseenter', function() {
+        this.style.transition = 'background-color 0.15s ease';
+      });
+    });
+  }
+});
+</script>
+{% endblock %}

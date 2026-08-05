@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">There was a problem connecting your Microsoft account.</p>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="mf-card text-center py-5">
+      <div class="mf-card__body">
+        <div class="mf-icon mf-icon--danger mb-4">
+          <i class="bi bi-x-circle-fill" style="font-size: 4rem;"></i>
+        </div>
+        <h2 class="mf-card__title">Connection failed</h2>
+        <p class="mf-card__subtitle">We couldn't complete the Microsoft authorization.</p>
+
+        {% if error %}
+        <div class="alert alert-danger mt-4 text-start">
+          <h6 class="alert-heading">Error details</h6>
+          <p class="mb-0 small">{{ error }}</p>
+        </div>
+        {% endif %}
+
+        <div class="mf-card mt-4 text-start">
+          <div class="mf-card__header">
+            <h3 class="mf-card__title h6">Common reasons</h3>
+          </div>
+          <div class="mf-card__body">
+            <ul class="mb-0 small">
+              <li>The authorization was cancelled or denied</li>
+              <li>Session expired — please try again</li>
+              <li>Network or temporary Microsoft service issue</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-2 mt-4">
+          <a href="{% url 'accounts_connect' %}" class="btn btn-primary">
+            <i class="bi bi-arrow-repeat me-1"></i>Try again
+          </a>
+          <a href="{% url 'accounts' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to accounts
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

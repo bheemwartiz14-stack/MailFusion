@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% load static %}
+
+{% block title %}{{ email.subject|default:"(no subject)" }} · {{ app_name }}{% endblock %}
+
+{% block page_actions %}
+<a class="btn btn-primary" href="{% url 'reply_modal' email.pk %}">
+  <i class="bi bi-reply me-1"></i>Reply
+</a>
+<a class="btn btn-outline-secondary" href="{% url 'reply_all_modal' email.pk %}">
+  <i class="bi bi-reply-all me-1"></i>Reply all
+</a>
+<a class="btn btn-outline-secondary" href="{% url 'forward_modal' email.pk %}">
+  <i class="bi bi-forward me-1"></i>Forward
+</a>
+<div class="dropdown">
+  <button class="btn btn-outline-secondary btn-icon" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li>
+      <form method="post" action="{% url 'email_action' %}">
+        {% csrf_token %}
+        <input type="hidden" name="email_ids" value="{{ email.pk }}">
+        <button class="dropdown-item" type="submit" name="action" value="unread"><i class="bi bi-envelope-open me-2"></i>Mark unread</button>
+        <button class="dropdown-item" type="submit" name="action" value="{% if email.is_starred %}unstar{% else %}star{% endif %}"><i class="bi bi-star me-2"></i>{% if email.is_starred %}Remove star{% else %}Star{% endif %}</button>
+        <button class="dropdown-item" type="submit" name="action" value="{% if email.is_flagged %}unflag{% else %}flag{% endif %}"><i class="bi bi-flag me-2"></i>{% if email.is_flagged %}Unflag{% else %}Flag{% endif %}</button>
+        <button class="dropdown-item" type="submit" name="action" value="archive"><i class="bi bi-archive me-2"></i>Archive</button>
+        <button class="dropdown-item" type="submit" name="action" value="trash"><i class="bi bi-trash me-2"></i>Move to trash</button>
+        <li><hr class="dropdown-divider"></li>
+        <li><button class="dropdown-item" type="submit" name="action" value="delete" data-mf-confirm data-mf-confirm-title="Delete permanently?" data-mf-confirm-message="This permanently deletes the message from Microsoft Graph."><i class="bi bi-trash3 me-2"></i>Delete permanently</button></li>
+        <li><a class="dropdown-item" href="{% url 'email_download_eml' email.pk %}"><i class="bi bi-file-earmark-arrow-down me-2"></i>Download .eml</a></li>
+        <li><a class="dropdown-item" href="#" data-mf-print><i class="bi bi-printer me-2"></i>Print</a></li>
+      </form>
+    </li>
+  </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="mf-card">
+      <div class="mf-card__body">
+        <!-- Subject + badges -->
+        <div class="d-flex align-items-start gap-2 mb-3 flex-wrap">
+          <h1 class="mf-preview__subject mb-0" style="font-size:1.2rem">{{ email.subject|default:"(no subject)" }}</h1>
+          {% if email.is_flagged %}<span class="mf-badge mf-badge--danger"><i class="bi bi-flag-fill"></i>Flagged</span>{% endif %}
+          {% if email.is_starred %}<span class="mf-badge mf-badge--warning"><i class="bi bi-star-fill"></i>Starred</span>{% endif %}
+          {% if email.importance == "high" %}<span class="mf-badge mf-badge--danger"><i class="bi bi-exclamation-triangle-fill"></i>High importance</span>{% endif %}
+          <span class="mf-badge mf-badge--neutral">{{ email.outlook_account.nickname|default:email.outlook_account.name }}</span>
+        </div>
+
+        <!-- Sender block -->
+        <div class="d-flex align-items-center gap-3 pb-3 border-bottom mb-3" style="border-bottom:1px solid var(--mf-border)">
+          <span class="mf-avatar mf-avatar--primary" style="width:44px;height:44px;font-size:.95rem">{{ email.from_name|default:email.from_email|initials }}</span>
+          <div class="min-w-0">
+            <div class="fw-semibold">{{ email.from_name|default:"Unknown sender" }}
+              {% if email.from_email %}<span class="mf-muted fw-normal">&lt;{{ email.from_email }}&gt;</span>{% endif %}
+            </div>
+            <div class="small mf-muted">
+              to
+              {% for r in email.recipients.all %}{% if r.recipient_type == 'to' %}{{ r.name|default:r.address }}{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}
+              {% if email.ccRecipients %}<span class="ms-1"><i class="bi bi-people me-1"></i>Cc: {{ email.ccRecipients|truncatechars:80 }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="ms-auto text-end">
+            <div class="small fw-semibold">{{ email.received_at|date:"D, M j, Y H:i" }}</div>
+            <div class="small mf-muted">via {{ email.outlook_account.email }}</div>
+          </div>
+        </div>
+
+        <!-- HTML email body -->
+        <div class="mf-preview__body p-0 mf-email-rendered">
+          {% if safe_body %}
+            {{ safe_body|safe }}
+          {% else %}
+            <pre class="mb-0" style="white-space:pre-wrap;font-family:inherit">{{ email.body_text|default:"(empty message)" }}</pre>
+          {% endif %}
+        </div>
+
+        <!-- Attachments -->
+        {% if attachments %}
+        <div class="pt-3 mt-4" style="border-top:1px solid var(--mf-border)">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="small fw-semibold"><i class="bi bi-paperclip me-1"></i>{{ attachments|length }} attachment{% if attachments|length > 1 %}s{% endif %}</div>
+            <a class="btn btn-sm btn-outline-secondary ms-auto" href="{% url 'attachment_download_all' email.pk %}"><i class="bi bi-file-earmark-zip me-1"></i>Download all</a>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            {% for attachment in attachments %}
+            <div class="mf-card p-3 d-flex align-items-center gap-3" style="min-width:260px">
+              {% with type=attachment|display_type %}
+              <span class="mf-stat__icon mf-stat__icon--{% if type == 'image' %}info{% elif type == 'pdf' %}danger{% elif type == 'word' %}primary{% elif type == 'excel' %}success{% elif type == 'slides' %}warning{% else %}neutral{% endif %}">
+                <i class="bi {% if type == 'image' %}bi-file-earmark-image{% elif type == 'pdf' %}bi-file-earmark-pdf{% elif type == 'word' %}bi-file-earmark-word{% elif type == 'excel' %}bi-file-earmark-excel{% elif type == 'slides' %}bi-file-earmark-ppt{% else %}bi-file-earmark{% endif %}"></i>
+              </span>
+              {% endwith %}
+              <div class="min-w-0 flex-grow-1">
+                <div class="small fw-semibold text-truncate" title="{{ attachment.name }}">{{ attachment.name }}</div>
+                <div class="small mf-muted">{{ attachment.size_bytes|filesizeformat }}</div>
+              </div>
+              {% if not attachment.is_inline %}
+              {% if attachment|is_previewable %}
+              <a class="btn btn-sm btn-outline-secondary btn-icon" title="Preview" href="{% url 'attachment_preview' email.pk attachment.pk %}" target="_blank"><i class="bi bi-eye"></i></a>
+              {% endif %}
+              <a class="btn btn-sm btn-outline-secondary btn-icon" title="Download" href="{% url 'attachment_download' email.pk attachment.pk %}"><i class="bi bi-download"></i></a>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Thread -->
+    {% if thread_count > 1 %}
+    <div class="mf-card mt-3">
+      <div class="mf-card__header">
+        <h2 class="mf-card__title">Conversation <span class="mf-badge mf-badge--neutral ms-1">{{ thread_count }} messages</span></h2>
+        <button class="btn btn-sm btn-ghost" type="button" data-bs-toggle="collapse" data-bs-target="#mfThread">Expand</button>
+      </div>
+      <div class="mf-card__body collapse" id="mfThread">
+        <div hx-get="{% url 'email_thread' email.pk %}" hx-trigger="load">
+          <div class="d-flex justify-content-center py-3"><div class="spinner-border spinner-border-sm text-secondary"></div></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sidebar: details -->
+  <div class="col-lg-4">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <h2 class="mf-card__title">Email details</h2>
+      </div>
+      <div class="mf-card__body small d-flex flex-column gap-2">
+        <div class="d-flex justify-content-between gap-2"><span class="mf-muted">From</span><span class="text-end text-truncate">{{ email.from_name|default:email.from_email|default:"—" }}</span></div>
+        <div class="d-flex justify-content-between gap-2"><span class="mf-muted">From email</span><span class="text-end text-break">{{ email.from_email|default:"—" }}</span></div>
+        <div class="d-flex justify-content-between gap-2"><span class="mf-muted">To</span><span class="text-end text-break">{{ email.toRecipients|default:"—" }}</span></div>
+        {% if email.ccRecipients %}<div class="d-flex justify-content-between gap-2"><span class="mf-muted">Cc</span><span class="text-end text-break">{{ email.ccRecipients }}</span></div>{% endif %}
+        {% if email.reply_to %}<div class="d-flex justify-content-between gap-2"><span class="mf-muted">Reply-To</span><span class="text-end text-break">{{ email.reply_to }}</span></div>{% endif %}
+        <div class="d-flex justify-content-between gap-2"><span class="mf-muted">Mailbox</span><span class="text-end">{{ email.outlook_account.email }}</span></div>
+        <div class="d-flex justify-content-between gap-2"><span class="mf-muted">Received</span><span class="text-end">{{ email.received_at|date:"D, M j, Y H:i" }}</span></div>
+        <div class="d-flex justify-content-between gap-2"><span class="mf-muted">Importance</span><span class="text-end">{{ email.importance }}</span></div>
+        <div class="d-flex justify-content-between gap-2"><span class="mf-muted">Message ID</span><span class="mf-font-mono text-end text-break">{{ email.graph_message_id }}</span></div>
+        {% if email.internet_message_id %}<div class="d-flex justify-content-between gap-2"><span class="mf-muted">Internet ID</span><span class="mf-font-mono text-end text-break">{{ email.internet_message_id }}</span></div>{% endif %}
+        {% if email.conversation_id %}<div class="d-flex justify-content-between gap-2"><span class="mf-muted">Conversation</span><span class="mf-font-mono text-end text-break">{{ email.conversation_id }}</span></div>{% endif %}
+        <hr class="mf-divider my-2">
+        <div>
+          <button class="btn btn-sm btn-outline-secondary w-100" type="button"
+                  hx-get="{% url 'email_headers' email.pk %}" hx-target="#mf-internet-headers" hx-swap="innerHTML">
+            <i class="bi bi-list-columns me-1"></i>View internet headers
+          </button>
+          <div id="mf-internet-headers" class="mt-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/inbox.js' %}"></script>
+{% endblock %}

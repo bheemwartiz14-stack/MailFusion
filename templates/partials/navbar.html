@@ -1,0 +1,115 @@
+<header class="h-16 flex items-center justify-between border-b border-outline-variant bg-surface px-8 z-10">
+  <div class="flex items-center gap-6 flex-1">
+    <div class="relative w-full max-w-md group">
+      <span
+        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
+        search
+      </span>
+
+      <input
+        class="w-full bg-surface-container pl-10 pr-4 py-2 rounded-lg border-none focus:ring-2 focus:ring-primary/20 text-sm placeholder:text-outline transition-all"
+        placeholder="Search mailboxes, logs, or reports..." type="text" />
+    </div>
+  </div>
+
+
+  <div class="flex items-center gap-4">
+
+    <!-- Notification -->
+    <button class="p-2 rounded-full hover:bg-surface-container transition-colors relative">
+      <span class="material-symbols-outlined text-on-surface-variant">
+        notifications
+      </span>
+
+      <span class="absolute top-2 right-2 size-2 bg-error rounded-full ring-2 ring-surface"></span>
+    </button>
+
+
+    <div class="h-8 w-px bg-outline-variant mx-2"></div>
+
+
+    <!-- Profile Dropdown -->
+    <div class="relative group">
+
+      <button class="flex items-center gap-3 pl-2 cursor-pointer">
+
+        <div class="text-right">
+          <p class="text-sm font-bold leading-none">
+            {{ current_user.name }}
+          </p>
+
+          <p class="text-[10px] text-outline mt-1 uppercase font-black">
+            {{ current_user.role }}
+          </p>
+        </div>
+
+
+        <div class="size-9 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+          {{ current_user.name|first|upper }}
+        </div>
+
+
+        <span class="material-symbols-outlined text-outline">
+          expand_more
+        </span>
+
+      </button>
+
+
+      <!-- Dropdown Menu -->
+      <div class="absolute right-0 top-12 w-52 bg-surface border border-outline-variant rounded-xl shadow-lg
+               opacity-0 invisible group-hover:opacity-100 group-hover:visible
+               transition-all duration-200 overflow-hidden z-50">
+
+
+        <!-- Profile -->
+        <a href="{% url 'profile' %}"
+          class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-surface-container transition">
+
+          <span class="material-symbols-outlined text-[20px]">
+            person
+          </span>
+
+          Profile
+        </a>
+
+
+        <!-- Change Password -->
+        <a href="{% url 'change_password' %}"
+          class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-surface-container transition">
+
+          <span class="material-symbols-outlined text-[20px]">
+            lock
+          </span>
+
+          Change Password
+        </a>
+
+
+        <div class="border-t border-outline-variant"></div>
+
+
+        <!-- Logout -->
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+
+          <button type="submit"
+            class="w-full flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/10 transition">
+
+            <span class="material-symbols-outlined text-[20px]">
+              logout
+            </span>
+
+            Logout
+
+          </button>
+
+        </form>
+
+
+      </div>
+
+    </div>
+
+  </div>
+</header>

@@ -1,0 +1,19 @@
+{% load ui_extras %}
+<div class="mf-internet-headers">
+  {% if headers %}
+  <div class="table-responsive">
+    <table class="table table-sm mf-table mf-font-mono mb-0" style="font-size:.72rem">
+      <tbody>
+        {% for header in headers %}
+        <tr>
+          <th class="fw-semibold text-uppercase pe-2" style="white-space:nowrap" scope="row">{{ header.name }}</th>
+          <td class="text-break">{{ header.value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="small mf-muted">No internet headers available for this message.</div>
+  {% endif %}
+</div>

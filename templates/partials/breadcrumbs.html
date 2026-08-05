@@ -1,0 +1,14 @@
+<nav aria-label="breadcrumb" class="mt-1">
+  <ol class="flex flex-wrap items-center gap-1.5 text-sm text-outline">
+    <li>
+      <a href="/" class="flex items-center text-primary hover:underline"><span class="material-symbols-outlined text-[1.1rem]">home</span></a>
+    </li>
+    {% for crumb in breadcrumbs %}
+      {% if crumb.url %}
+      <li class="flex items-center gap-1.5"><span class="text-outline-variant">/</span><a href="{{ crumb.url }}" class="text-primary hover:underline">{{ crumb.label }}</a></li>
+      {% else %}
+      <li class="flex items-center gap-1.5"><span class="text-outline-variant">/</span><span class="text-on-surface-variant">{{ crumb.label }}</span></li>
+      {% endif %}
+    {% endfor %}
+  </ol>
+</nav>

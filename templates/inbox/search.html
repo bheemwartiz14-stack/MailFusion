@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+{% load static %}
+
+{% block title %}Search · {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mf-card mb-3">
+  <div class="mf-card__body">
+    <form method="get" action="{% url 'inbox_search' %}" class="d-flex gap-2" data-mf-search-form>
+      <div class="input-group flex-grow-1">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="search" class="form-control" name="q" value="{{ q }}" placeholder="Search subject, sender, recipient, body, keyword…" autofocus>
+      </div>
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    {% if q and suggestions %}
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      {% for s in suggestions %}
+      <a class="mf-chip" href="{% url 'inbox_search' %}?q={{ s.subject|urlencode }}">
+        <i class="bi bi-clock-history me-1"></i>{{ s.subject|default:"(no subject)" }}
+        <span class="mf-muted small">· {{ s.from_name|default:s.from_email }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if q %}
+<div class="mf-card">
+  <div class="mf-card__body p-0">
+    {% if emails %}
+    <div class="mf-email-list p-1" data-mf-email-list>
+      {% for email in emails %}
+        {% include "inbox/partials/email_row.html" with email=email mode="inbox" %}
+      {% endfor %}
+      {% if has_more %}
+      <div class="mf-inbox-scroll-sentinel"
+           hx-get="{% url 'inbox_list' %}?{{ querystring }}&mode=search&offset={{ next_offset }}"
+           hx-trigger="revealed" hx-swap="outerHTML" hx-target="this">
+        <div class="d-flex justify-content-center py-3"><div class="spinner-border spinner-border-sm text-secondary"></div></div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="d-flex align-items-center justify-content-between px-3 py-2 border-top small mf-muted">
+      <span>{{ emails|length }} of {{ total }} results</span>
+    </div>
+    {% else %}
+    <div class="mf-empty">
+      <i class="bi bi-search mf-empty__icon"></i>
+      <h4>No results</h4>
+      <p class="mf-muted">No messages matched “{{ q }}”.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<div class="mf-empty">
+  <i class="bi bi-search mf-empty__icon"></i>
+  <h4>Search everything</h4>
+  <p class="mf-muted">Search across every connected Outlook account — subject, sender, recipient, body and keywords.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/inbox.js' %}"></script>
+{% endblock %}

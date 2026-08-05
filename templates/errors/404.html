@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block body_class %}mf-body-error{% endblock %}
+{% block auth_content %}
+<div class="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+  <div class="w-full max-w-md text-center">
+    <div class="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant"><span class="material-symbols-outlined text-5xl">explore</span></div>
+    <h1 class="text-5xl font-bold text-primary" style="letter-spacing:-.03em">404</h1>
+    <h2 class="mt-2 text-xl font-semibold text-on-surface">Page not found</h2>
+    <p class="mx-auto mt-2 mb-6 max-w-sm text-sm text-on-surface-variant">The page you are looking for does not exist, may have been moved, or the link is broken.</p>
+    <div class="flex items-center justify-center gap-2">
+      <input type="text" class="w-full max-w-[260px] rounded-xl border border-outline-variant bg-surface px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-container" placeholder="Try searching the docs&hellip;">
+      <button class="inline-flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high" type="button" data-mf-toast="No results for that query"><span class="material-symbols-outlined">search</span></button>
+    </div>
+    <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+      <a href="/" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-container"><span class="material-symbols-outlined">home</span>Back to dashboard</a>
+      <a href="/inbox/" class="inline-flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high"><span class="material-symbols-outlined">inbox</span>Go to inbox</a>
+    </div>
+    <div class="mt-6 text-xs text-outline">Requested path: <code class="font-mono">{{ request.path }}</code></div>
+  </div>
+</div>
+{% endblock %}

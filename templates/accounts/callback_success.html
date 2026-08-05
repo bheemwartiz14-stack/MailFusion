@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">Your Microsoft account has been successfully connected.</p>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="mf-card text-center py-5">
+      <div class="mf-card__body">
+        <div class="mf-icon mf-icon--success mb-4">
+          <i class="bi bi-check-circle-fill" style="font-size: 4rem;"></i>
+        </div>
+        <h2 class="mf-card__title">Account connected</h2>
+        <p class="mf-card__subtitle">Your Outlook account has been successfully connected to Portal.</p>
+
+        <div class="mf-card mt-4 text-start">
+          <div class="mf-card__header">
+            <h3 class="mf-card__title h6">What happens next</h3>
+          </div>
+          <div class="mf-card__body">
+            <ul class="mb-0 small">
+              <li>Emails will begin syncing in the background</li>
+              <li>Your Unified Inbox will update automatically</li>
+              <li>You can manage sync settings from the Accounts page</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-2 mt-4">
+          <a href="{% url 'accounts' %}" class="btn btn-primary">
+            <i class="bi bi-envelope-paper me-1"></i>View accounts
+          </a>
+          <a href="{% url 'inbox' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-inbox me-1"></i>Open inbox
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% load ui_extras %}
+{% if field.is_hidden %}
+  {{ field }}
+{% elif field.field.widget.input_type == "checkbox" %}
+  <div class="mb-3">
+    <label class="flex items-start gap-3 text-sm">
+      {{ field }}
+      <span>{{ field.label }}</span>
+    </label>
+    {% for error in field.errors %}<div class="mt-1 text-sm text-error">{{ error }}</div>{% endfor %}
+  </div>
+{% else %}
+  <div class="mb-3">
+    <label class="mb-1 block text-sm font-medium text-on-surface-variant" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% if field.errors %}
+      {{ field|add_class:"w-full rounded-xl border border-error bg-surface px-3 py-2.5 text-sm" }}
+    {% else %}
+      {{ field }}
+    {% endif %}
+    {% for error in field.errors %}<div class="mt-1 text-sm text-error">{{ error }}</div>{% endfor %}
+    {% if field.help_text %}<div class="mt-1 text-xs text-outline">{{ field.help_text }}</div>{% endif %}
+  </div>
+{% endif %}

@@ -1,0 +1,19 @@
+{% load ui_extras %}
+<div class="hidden items-center justify-between gap-3 border-b border-outline-variant bg-primary-fixed px-4 py-2"
+     data-mf-bulk-bar>
+  <form method="post" action="{% url 'email_action' %}" data-mf-bulk-form class="flex w-full items-center gap-2">
+    {% csrf_token %}
+    <input type="hidden" name="folder" value="{{ folder }}">
+    <span class="text-sm font-semibold whitespace-nowrap text-on-primary-fixed"><span data-mf-selected-count>0</span> selected</span>
+    <div class="flex items-center gap-1 ml-auto">
+      <button class="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+              type="submit" name="action" value="read" data-mf-bulk-submit="read"><span class="material-symbols-outlined text-[18px]">mark_email_read</span>Read</button>
+      <button class="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+              type="submit" name="action" value="unread" data-mf-bulk-submit="unread"><span class="material-symbols-outlined text-[18px]">mark_email_unread</span>Unread</button>
+      <button class="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+              type="submit" name="action" value="archive" data-mf-bulk-submit="archive"><span class="material-symbols-outlined text-[18px]">archive</span>Archive</button>
+      <button class="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-error hover:bg-error-container transition-colors"
+              type="submit" name="action" value="delete" data-mf-bulk-submit="delete"><span class="material-symbols-outlined text-[18px]">delete</span>Delete</button>
+    </div>
+  </form>
+</div>

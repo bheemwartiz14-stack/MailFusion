@@ -1,0 +1,59 @@
+{% if logs %}
+<div class="mf-card">
+  <div class="mf-card__body mf-card__body--flush">
+    <div class="table-responsive">
+      <table class="table mf-table align-middle">
+        <thead>
+          <tr>
+            <th>Start time</th>
+            <th>Account</th>
+            <th>Status</th>
+            <th>Processed</th>
+            <th>Added</th>
+            <th>Updated</th>
+            <th>Attachments</th>
+            <th>Duration</th>
+            <th>Retries</th>
+            <th class="text-end">Worker</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td class="small text-nowrap"><a href="{% url 'sync_log_detail' log.pk %}" class="text-decoration-none">{{ log.start_time|date:"Y-m-d H:i:s" }}</a></td>
+            <td>
+              <div class="cell-strong text-truncate" style="max-width:220px">{{ log.account.email }}</div>
+            </td>
+            <td>
+              {% if log.status == 'completed' %}
+              <span class="mf-badge mf-badge--success"><i class="bi bi-check-circle-fill"></i>Completed</span>
+              {% elif log.status == 'failed' %}
+              <span class="mf-badge mf-badge--danger"><i class="bi bi-x-circle-fill"></i>Failed</span>
+              {% else %}
+              <span class="mf-badge mf-badge--neutral"><i class="bi bi-arrow-repeat"></i>Started</span>
+              {% endif %}
+            </td>
+            <td class="small">{{ log.emails_processed }}</td>
+            <td class="small text-success">{{ log.emails_added }}</td>
+            <td class="small text-primary">{{ log.emails_updated }}</td>
+            <td class="small">{{ log.attachments_downloaded }}</td>
+            <td class="small">{{ log.duration_seconds|floatformat:1 }}s</td>
+            <td class="small">{{ log.retry_count }}</td>
+            <td class="small mf-muted text-end text-truncate" style="max-width:140px">{{ log.worker|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% include "partials/pagination.html" %}
+{% else %}
+<div class="mf-card">
+  <div class="mf-empty">
+    <div class="mf-empty__icon"><i class="bi bi-list-check"></i></div>
+    <div class="mf-empty__title">No sync logs found</div>
+    <p class="mf-empty__text">Logs appear here once background synchronization runs.</p>
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,49 @@
+{% load ui_extras %}
+<div class="group email-list-item {% if not email.is_read %}unread{% endif %} relative cursor-pointer overflow-hidden border-b border-outline-variant/50 p-4 transition-colors hover:bg-surface-container"
+     data-mf-email="{{ email.pk }}"
+     data-mf-email-subject="{{ email.subject|escapejs }}"
+     role="row">
+
+  <input class="absolute left-3 top-3 z-10 h-4 w-4 cursor-pointer rounded opacity-0 transition-opacity group-hover:opacity-100"
+         type="checkbox" value="{{ email.pk }}" data-mf-email-check aria-label="Select message">
+
+  {% if mode == "drafts" %}
+  <a class="block" href="{% url 'compose_draft' email.pk %}" data-mf-email-link>
+  {% else %}
+  <a class="block" href="{% url 'email_detail' email.pk %}" data-mf-email-link>
+  {% endif %}
+    <div class="flex items-start justify-between">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="size-2 shrink-0 rounded-full {% if not email.is_read %}bg-primary-container{% else %}bg-transparent{% endif %}" title="{% if not email.is_read %}Unread{% endif %}"></span>
+        <span class="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold uppercase text-on-primary bg-primary-container">{{ email.from_name|default:email.from_email|initials }}</span>
+        <p class="truncate text-body-md {% if not email.is_read %}font-bold text-on-background{% else %}font-medium text-on-surface-variant{% endif %}">
+          {% if email.is_starred %}<span class="material-symbols-outlined align-middle text-[15px] text-primary" data-weight="fill">star</span>{% endif %}
+          {% if email.is_flagged %}<span class="material-symbols-outlined align-middle text-[15px] text-error" data-weight="fill">flag</span>{% endif %}
+          {{ email.from_name|default:email.from_email|default:"Unknown sender" }}
+        </p>
+      </div>
+      <span class="shrink-0 text-xs text-outline">{{ email.received_at|date:"M j" }}{% if email.received_at|date:"Ymd" == now|date:"Ymd" %} {{ email.received_at|time:"H:i" }}{% endif %}</span>
+    </div>
+
+    <p class="mt-1 line-clamp-1 {% if not email.is_read %}font-semibold text-on-surface{% else %}font-medium text-on-surface-variant{% endif %}">
+      {% if email.importance == "high" %}<span class="material-symbols-outlined align-middle text-[15px] text-error" data-weight="fill">priority_high</span>{% endif %}
+      {{ email.subject|default:"(no subject)" }}
+      {% if mode == "drafts" %}<span class="ml-1 text-[10px] font-bold uppercase text-outline">Draft</span>{% endif %}
+    </p>
+
+    <p class="mt-0.5 line-clamp-2 text-body-sm text-on-surface-variant">
+      {% if mode == "sent" %}
+        To: {{ email.toRecipients|truncatechars:60 }}
+      {% elif mode == "drafts" %}
+        To: {{ email.toRecipients|default:"(no recipients)" }}
+      {% else %}
+        {{ email.preview_text|default:email.body_html|striptags|truncatechars:120 }}
+      {% endif %}
+    </p>
+
+    <div class="mt-2 flex items-center gap-2">
+      <span class="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">{{ email.outlook_account.nickname|default:email.outlook_account.name }}</span>
+      {% if email.has_attachments or email.attachments.exists %}<span class="material-symbols-outlined text-[16px] text-outline">attach_file</span>{% endif %}
+    </div>
+  </a>
+</div>

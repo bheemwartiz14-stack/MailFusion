@@ -1,0 +1,86 @@
+{% load ui_extras %}
+
+<div class="row g-3">
+  <div class="col-xl-7">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <div>
+          <h2 class="mf-card__title">Account health</h2>
+          <p class="mf-card__subtitle">OAuth, Graph connectivity and webhook state per mailbox</p>
+        </div>
+      </div>
+      <div class="mf-card__body mf-card__body--flush">
+        <div class="table-responsive">
+          <table class="table mf-table align-middle">
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>OAuth</th>
+                <th>Graph</th>
+                <th>Webhook</th>
+                <th>Last check</th>
+                <th>Failures</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in health_rows %}
+              <tr>
+                <td>
+                  <div class="cell-strong text-truncate" style="max-width:200px">{{ row.account.email }}</div>
+                </td>
+                <td>
+                  {% if row.oauth_ok %}<span class="mf-badge mf-badge--success"><i class="bi bi-shield-check"></i>OK</span>
+                  {% else %}<span class="mf-badge mf-badge--danger"><i class="bi bi-shield-x"></i>Error</span>{% endif %}
+                </td>
+                <td>
+                  {% if row.graph_ok %}<span class="mf-badge mf-badge--success"><i class="bi bi-cloud-check"></i>OK</span>
+                  {% else %}<span class="mf-badge mf-badge--danger"><i class="bi bi-cloud-slash"></i>Error</span>{% endif %}
+                </td>
+                <td>
+                  {% if row.webhook_ok %}<span class="mf-badge mf-badge--success"><i class="bi bi-bell-check"></i>OK</span>
+                  {% else %}<span class="mf-badge mf-badge--neutral"><i class="bi bi-bell-slash"></i>Off</span>{% endif %}
+                </td>
+                <td class="small">{{ row.last_checked_at|timesince }} ago</td>
+                <td class="small">{{ row.consecutive_failures }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" class="text-center py-4 mf-muted">No health records yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <div>
+          <h2 class="mf-card__title">Webhook subscriptions</h2>
+          <p class="mf-card__subtitle">Microsoft Graph change notifications</p>
+        </div>
+      </div>
+      <div class="mf-card__body mf-card__body--flush">
+        <ul class="list-group list-group-flush">
+          {% for sub in subscriptions %}
+          <li class="list-group-item d-flex align-items-center gap-2">
+            {% if sub.expires_soon or sub.status != 'active' %}
+            <span class="mf-badge mf-badge--warning"><i class="bi bi-bell-exclamation"></i></span>
+            {% else %}
+            <span class="mf-badge mf-badge--success"><i class="bi bi-bell-check"></i></span>
+            {% endif %}
+            <div class="min-w-0 flex-grow-1">
+              <div class="small text-truncate cell-strong">{{ sub.account.email }}</div>
+              <div class="small mf-muted text-truncate">{{ sub.resource }}</div>
+            </div>
+            <span class="small mf-muted text-nowrap">{{ sub.expiration_date_time|date:"M d, H:i" }}</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-center py-4 mf-muted">No subscriptions registered.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

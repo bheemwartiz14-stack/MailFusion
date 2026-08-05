@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+
+{% block page_actions %}
+<a href="{% url 'accounts_sync' account.pk %}" class="btn btn-outline-secondary"><i class="bi bi-lightning-charge me-1"></i>Sync now</a>
+{% if account.is_sync_paused %}
+<form method="post" action="{% url 'accounts_resume' account.pk %}" class="d-inline">{% csrf_token %}
+  <button class="btn btn-outline-secondary"><i class="bi bi-play-fill me-1"></i>Resume</button>
+</form>
+{% else %}
+<form method="post" action="{% url 'accounts_pause' account.pk %}" class="d-inline">{% csrf_token %}
+  <button class="btn btn-outline-secondary"><i class="bi bi-pause-fill me-1"></i>Pause</button>
+</form>
+{% endif %}
+<a href="{% url 'accounts_disconnect_confirm' account.pk %}" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Disconnect</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="mf-card">
+      <div class="mf-card__body">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span class="mf-avatar mf-avatar--lg">{{ account.nickname|first|upper|default:account.email|first|upper }}</span>
+          <div class="min-w-0">
+            <div class="fw-bold text-truncate">{{ account.name }}</div>
+            <div class="small mf-muted text-truncate">{{ account.email }}</div>
+          </div>
+        </div>
+        <dl class="row small mb-0">
+          <dt class="col-sm-5 mf-muted">Nickname</dt>
+          <dd class="col-sm-7">{{ account.nickname|default:"—" }}</dd>
+          <dt class="col-sm-5 mf-muted">Microsoft user ID</dt>
+          <dd class="col-sm-7 text-truncate">{{ account.microsoft_user_id|default:"—" }}</dd>
+          <dt class="col-sm-5 mf-muted">Status</dt>
+          <dd class="col-sm-7">
+            {% if account.is_sync_paused %}<span class="mf-badge mf-badge--neutral">Paused</span>
+            {% elif account.status == 'active' %}<span class="mf-badge mf-badge--success">Active</span>
+            {% elif account.status == 'error' %}<span class="mf-badge mf-badge--danger">Error</span>
+            {% else %}<span class="mf-badge mf-badge--neutral">{{ account.status }}</span>{% endif %}
+          </dd>
+          <dt class="col-sm-5 mf-muted">OAuth</dt>
+          <dd class="col-sm-7">
+            {% if account.oauth_status == 'connected' %}<span class="mf-badge mf-badge--success">Connected</span>
+            {% elif account.oauth_status == 'expired' %}<span class="mf-badge mf-badge--warning">Expired</span>
+            {% elif account.oauth_status == 'revoked' %}<span class="mf-badge mf-badge--danger">Revoked</span>
+            {% else %}<span class="mf-badge mf-badge--neutral">Pending</span>{% endif %}
+          </dd>
+          <dt class="col-sm-5 mf-muted">Connected since</dt>
+          <dd class="col-sm-7">{{ account.created_at|date:"M d, Y" }}</dd>
+          <dt class="col-sm-5 mf-muted">Last sync</dt>
+          <dd class="col-sm-7">{{ account.last_sync_at|date:"Y-m-d H:i"|default:"Never" }}</dd>
+          <dt class="col-sm-5 mf-muted">Last success</dt>
+          <dd class="col-sm-7">{{ account.last_successful_sync_at|date:"Y-m-d H:i"|default:"—" }}</dd>
+          <dt class="col-sm-5 mf-muted">Emails synced</dt>
+          <dd class="col-sm-7">{{ total_emails }}</dd>
+          <dt class="col-sm-5 mf-muted">Unread</dt>
+          <dd class="col-sm-7">{{ unread }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="mf-card">
+      <div class="mf-card__header">
+        <div>
+          <h2 class="mf-card__title">Rename account</h2>
+          <p class="mf-card__subtitle">Update display name and nickname</p>
+        </div>
+      </div>
+      <div class="mf-card__body">
+        <form method="post" action="{% url 'accounts_rename' account.pk %}" class="row g-2">
+          {% csrf_token %}
+          <div class="col-md-6">
+            <label class="form-label small">Display name</label>
+            <input type="text" class="form-control" name="name" value="{{ account.name }}" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small">Nickname</label>
+            <input type="text" class="form-control" name="nickname" value="{{ account.nickname }}">
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-lg me-1"></i>Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="mf-card mt-3">
+      <div class="mf-card__header">
+        <div>
+          <h2 class="mf-card__title">Recent syncs</h2>
+        </div>
+        <a href="{% url 'sync_logs' %}?account={{ account.pk }}" class="btn btn-sm btn-ghost">All logs</a>
+      </div>
+      <div class="mf-card__body mf-card__body--flush">
+        <div class="table-responsive">
+          <table class="table mf-table align-middle">
+            <thead>
+              <tr><th>Start</th><th>Status</th><th>Added</th><th>Updated</th><th>Duration</th><th>Error</th></tr>
+            </thead>
+            <tbody>
+              {% for log in logs %}
+              <tr>
+                <td class="small"><a href="{% url 'sync_log_detail' log.pk %}" class="text-decoration-none">{{ log.start_time|date:"Y-m-d H:i:s" }}</a></td>
+                <td>
+                  {% if log.status == 'completed' %}<span class="mf-badge mf-badge--success">Completed</span>
+                  {% elif log.status == 'failed' %}<span class="mf-badge mf-badge--danger">Failed</span>
+                  {% else %}<span class="mf-badge mf-badge--neutral">Started</span>{% endif %}
+                </td>
+                <td class="small text-success">{{ log.emails_added }}</td>
+                <td class="small text-primary">{{ log.emails_updated }}</td>
+                <td class="small">{{ log.duration_seconds|floatformat:1 }}s</td>
+                <td class="small mf-muted text-truncate" style="max-width:180px">{{ log.error|default:"—" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" class="text-center py-4 mf-muted">No syncs yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="mf-card">
+      <div class="mf-card__header"><div><h2 class="mf-card__title">Webhooks</h2></div></div>
+      <div class="mf-card__body mf-card__body--flush">
+        <ul class="list-group list-group-flush">
+          {% for sub in subscriptions %}
+          <li class="list-group-item small d-flex justify-content-between">
+            <span class="text-truncate">{{ sub.resource }}</span>
+            <span class="mf-muted text-nowrap ms-2">{{ sub.expiration_date_time|date:"M d, H:i" }}</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-center py-3 mf-muted">No subscriptions.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="mf-card">
+      <div class="mf-card__header"><div><h2 class="mf-card__title">Recent emails</h2></div></div>
+      <div class="mf-card__body mf-card__body--flush">
+        <ul class="list-group list-group-flush">
+          {% for email in emails %}
+          <li class="list-group-item small d-flex justify-content-between gap-2">
+            <span class="text-truncate">{{ email.subject|default:"(no subject)" }}</span>
+            <span class="mf-muted text-nowrap">{{ email.received_at|date:"M d" }}</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-center py-3 mf-muted">No emails synced yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body_class %}mf-body-auth{% endblock %}
+{% block auth_content %}
+<div class="flex min-h-screen bg-background">
+  {% include "partials/auth_aside.html" %}
+
+  <div class="flex min-h-screen flex-1 items-center justify-center bg-background px-4 py-12">
+    <div class="w-full max-w-md rounded-2xl border border-outline-variant bg-surface p-8 shadow-lg">
+      <div class="mb-5"><img src="{% static 'images/logo.svg' %}" alt="{{ app_name }}" class="h-12 rounded-xl"></div>
+      <h1 class="text-2xl font-bold text-on-background">You've been signed out</h1>
+      <p class="mt-1 text-sm text-on-surface-variant">Your session has ended. Sign in again to continue.</p>
+
+      <a href="{% url 'login' %}" class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-on-primary hover:bg-primary-container">
+        <span class="material-symbols-outlined">login</span>Sign in
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

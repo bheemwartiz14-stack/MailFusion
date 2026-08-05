@@ -1,0 +1,98 @@
+{% load static %}
+
+<aside class="w-64 flex flex-col border-r border-outline-variant bg-surface overflow-y-auto">
+
+
+  <!-- Logo -->
+  <div class="p-6 flex items-center gap-3">
+
+    <div class="size-8">
+      <img src="{% static 'images/logo.svg' %}" alt="MailFusion logo" class="w-full h-full">
+    </div>
+
+    <h1 class="text-xl font-bold tracking-tight text-on-surface">
+      MailFusion
+    </h1>
+
+  </div>
+
+
+
+  <!-- Menu -->
+
+  <nav class="flex-1 px-4 space-y-2">
+
+
+    {% for item in sidebar_menu %}
+
+
+    {% if item.section %}
+
+
+    <div class="
+                    pt-4
+                    pb-2
+                    px-3
+                    text-xs
+                    font-bold
+                    uppercase
+                    tracking-widest
+                    text-outline
+                ">
+      {{ item.section }}
+    </div>
+
+
+
+    {% else %}
+
+
+
+    <a href="{{ item.url }}" class="
+                        flex
+                        items-center
+                        gap-3
+                        px-3
+                        py-2.5
+                        rounded-lg
+                        transition-colors
+
+                        {% if item.active %}
+
+                            bg-primary-fixed
+                            text-on-primary-fixed
+                            font-semibold
+
+                        {% else %}
+
+                            text-on-surface-variant
+                            hover:bg-surface-container-high
+
+                        {% endif %}
+                    ">
+
+
+      <span class="material-symbols-outlined text-[22px]" {% if item.active %} style="font-variation-settings:'FILL' 1;"
+        {% endif %}>
+        {{ item.icon }}
+      </span>
+
+
+      <span>
+        {{ item.title }}
+      </span>
+
+
+    </a>
+
+
+    {% endif %}
+
+
+    {% endfor %}
+
+
+  </nav>
+
+
+</aside>

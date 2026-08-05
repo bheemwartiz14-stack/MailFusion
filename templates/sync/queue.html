@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load ui_extras %}
+
+{% block page_subtitle %}
+<p class="mf-page-header__subtitle">Celery task queue and attachment download jobs.</p>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="mf-card"><div class="mf-card__body mf-stat">
+      <span class="mf-stat__icon mf-stat__icon--warning"><i class="bi bi-hourglass-split"></i></span>
+      <div class="min-w-0"><div class="mf-stat__value">{{ counts.queued|default:0 }}</div><div class="mf-stat__label">Queued</div></div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="mf-card"><div class="mf-card__body mf-stat">
+      <span class="mf-stat__icon mf-stat__icon--primary"><i class="bi bi-play-circle"></i></span>
+      <div class="min-w-0"><div class="mf-stat__value">{{ counts.running|default:0 }}</div><div class="mf-stat__label">Running</div></div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="mf-card"><div class="mf-card__body mf-stat">
+      <span class="mf-stat__icon mf-stat__icon--success"><i class="bi bi-check-circle"></i></span>
+      <div class="min-w-0"><div class="mf-stat__value">{{ counts.succeeded|default:0 }}</div><div class="mf-stat__label">Succeeded</div></div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="mf-card"><div class="mf-card__body mf-stat">
+      <span class="mf-stat__icon mf-stat__icon--danger"><i class="bi bi-x-octagon"></i></span>
+      <div class="min-w-0"><div class="mf-stat__value">{{ counts.failed|default:0 }}</div><div class="mf-stat__label">Failed</div></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="mf-card">
+  <div class="mf-card__header">
+    <div>
+      <h2 class="mf-card__title">Sync jobs</h2>
+      <p class="mf-card__subtitle">Broker depth: {{ queue_depth }} · Workers: {{ worker.count }} online</p>
+    </div>
+  </div>
+  <div class="mf-card__body mf-card__body--flush">
+    <div class="table-responsive">
+      <table class="table mf-table align-middle">
+        <thead>
+          <tr>
+            <th>Created</th>
+            <th>Type</th>
+            <th>Account</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Attempts</th>
+            <th>Task ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for job in jobs %}
+          <tr>
+            <td class="small text-nowrap">{{ job.created_at|date:"M d H:i:s" }}</td>
+            <td class="small">{{ job.job_type }}</td>
+            <td class="small text-truncate" style="max-width:200px">{{ job.account.email|default:"—" }}</td>
+            <td class="small">{{ job.priority }}</td>
+            <td>
+              {% if job.status == 'succeeded' %}<span class="mf-badge mf-badge--success">{{ job.status }}</span>
+              {% elif job.status == 'failed' %}<span class="mf-badge mf-badge--danger">{{ job.status }}</span>
+              {% elif job.status == 'running' %}<span class="mf-badge mf-badge--primary">{{ job.status }}</span>
+              {% else %}<span class="mf-badge mf-badge--neutral">{{ job.status }}</span>{% endif %}
+            </td>
+            <td class="small">{{ job.attempts }}/{{ job.max_attempts }}</td>
+            <td class="small mf-muted text-truncate" style="max-width:120px">{{ job.task_id|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center py-4 mf-muted">No jobs recorded.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="mf-card mt-4">
+  <div class="mf-card__header">
+    <div>
+      <h2 class="mf-card__title">Attachment download jobs</h2>
+      <p class="mf-card__subtitle">Most recent 50</p>
+    </div>
+  </div>
+  <div class="mf-card__body mf-card__body--flush">
+    <div class="table-responsive">
+      <table class="table mf-table align-middle">
+        <thead>
+          <tr><th>Attachment</th><th>Account</th><th>Status</th><th>Attempts</th><th>Error</th></tr>
+        </thead>
+        <tbody>
+          {% for aj in attachment_jobs %}
+          <tr>
+            <td class="small text-truncate" style="max-width:240px">{{ aj.attachment.name }}</td>
+            <td class="small text-truncate" style="max-width:180px">{{ aj.attachment.email.outlook_account.email }}</td>
+            <td>
+              {% if aj.status == 'downloaded' %}<span class="mf-badge mf-badge--success">{{ aj.status }}</span>
+              {% elif aj.status == 'failed' %}<span class="mf-badge mf-badge--danger">{{ aj.status }}</span>
+              {% elif aj.status == 'downloading' %}<span class="mf-badge mf-badge--primary">{{ aj.status }}</span>
+              {% else %}<span class="mf-badge mf-badge--neutral">{{ aj.status }}</span>{% endif %}
+            </td>
+            <td class="small">{{ aj.attempts }}/{{ aj.max_attempts }}</td>
+            <td class="small mf-muted text-truncate" style="max-width:200px">{{ aj.error|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center py-4 mf-muted">No attachment jobs recorded.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

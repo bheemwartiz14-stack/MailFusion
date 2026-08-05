@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block body_class %}mf-body-error{% endblock %}
+{% block auth_content %}
+<div class="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+  <div class="w-full max-w-md text-center">
+    <div class="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-error/10 text-error"><span class="material-symbols-outlined text-5xl">tune</span></div>
+    <h1 class="text-5xl font-bold text-primary" style="letter-spacing:-.03em">500</h1>
+    <h2 class="mt-2 text-xl font-semibold text-on-surface">Something went wrong</h2>
+    <p class="mx-auto mt-2 mb-6 max-w-sm text-sm text-on-surface-variant">An unexpected error occurred on our servers. Our engineering team has been notified and is working on a fix.</p>
+    <div class="mb-6 flex items-start gap-2 rounded-xl border border-outline-variant bg-surface-container px-4 py-3 text-left text-sm text-on-surface">
+      <span class="material-symbols-outlined mt-0.5 text-on-surface-variant">history</span>
+      <div>You can safely retry in a few minutes. Your data is not at risk.</div>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-2">
+      <button class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-container" type="button" onclick="location.reload()"><span class="material-symbols-outlined">refresh</span>Try again</button>
+      <a href="/" class="inline-flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high"><span class="material-symbols-outlined">home</span>Back to dashboard</a>
+    </div>
+    <div class="mt-6 text-xs text-outline">Error ID: <code class="font-mono">err_4f2aKc91</code> &middot; <a href="#" class="text-primary hover:underline" data-mf-toast="Support ticket created">Report this issue</a></div>
+  </div>
+</div>
+{% endblock %}
