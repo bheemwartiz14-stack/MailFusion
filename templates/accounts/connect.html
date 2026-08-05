@@ -2,137 +2,113 @@
 {% load static %}
 
 {% block page_subtitle %}
-<p class="text-sm text-gray-500">
-  Connect a Microsoft mailbox to MailFusion in three simple steps.
-</p>
+<p class="text-sm text-on-surface-variant">Connect a Microsoft mailbox to MailFusion in three simple steps.</p>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-  <!-- Wizard steps indicator -->
-  <div class="mb-8 flex items-center">
-    <div class="flex-1 flex items-center">
-      <div class="flex items-center">
-        <div class="relative flex items-center">
-          <div class="absolute left-1/2 top-1/2 h-0.5 w-full -translate-x-1/2 -translate-y-1/2 bg-gray-200" style="z-index: 0;"></div>
-          <div class="relative flex items-center" style="z-index: 1;">
-            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-semibold" aria-current="step">
-              1
-            </div>
-            <span class="ml-3 hidden text-sm font-medium text-gray-900 sm:block">Details</span>
-          </div>
+<div class="mx-auto max-w-3xl">
+  <div class="mb-8 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-2xl border border-outline-variant bg-surface px-4 py-3 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">1</div>
+        <div>
+          <p class="text-sm font-semibold text-on-surface">Details</p>
+          <p class="text-sm text-on-surface-variant">Name your mailbox</p>
         </div>
       </div>
     </div>
-    <div class="flex-1 flex items-center">
-      <div class="flex items-center justify-center">
-        <div class="relative flex items-center">
-          <div class="absolute left-1/2 top-1/2 h-0.5 w-full -translate-x-1/2 -translate-y-1/2 bg-gray-200" style="z-index: 0;"></div>
-          <div class="relative flex items-center" style="z-index: 1;">
-            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-400 font-semibold">
-              2
-            </div>
-            <span class="ml-3 hidden text-sm font-medium text-gray-400 sm:block">Connect</span>
-          </div>
+    <div class="rounded-2xl border border-outline-variant bg-surface px-4 py-3 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container text-sm font-semibold text-on-surface-variant">2</div>
+        <div>
+          <p class="text-sm font-semibold text-on-surface-variant">Connect</p>
+          <p class="text-sm text-on-surface-variant">Authorize Microsoft</p>
         </div>
       </div>
     </div>
-    <div class="flex-1 flex items-center justify-end">
-      <div class="flex items-center justify-end">
-        <div class="relative flex items-center">
-          <div class="relative flex items-center" style="z-index: 1;">
-            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-400 font-semibold">
-              3
-            </div>
-            <span class="mr-3 hidden text-sm font-medium text-gray-400 sm:block text-right">Done</span>
-          </div>
+    <div class="rounded-2xl border border-outline-variant bg-surface px-4 py-3 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container text-sm font-semibold text-on-surface-variant">3</div>
+        <div>
+          <p class="text-sm font-semibold text-on-surface-variant">Done</p>
+          <p class="text-sm text-on-surface-variant">Sync begins</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Card -->
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-    <div class="border-b border-gray-200 bg-gray-50 px-6 py-5">
+  <div class="overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm">
+    <div class="border-b border-outline-variant bg-surface-container px-6 py-5">
       <div class="flex items-center gap-3">
-        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
-          <i class="bi bi-envelope-paper text-2xl text-blue-600"></i>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <span class="material-symbols-outlined text-[24px]">mail</span>
         </div>
         <div>
-          <h2 class="text-lg font-semibold text-gray-900">Account details</h2>
-          <p class="text-sm text-gray-500">Give this mailbox a friendly name to identify it across MailFusion.</p>
+          <h2 class="text-lg font-semibold text-on-surface">Account details</h2>
+          <p class="text-sm text-on-surface-variant">Give this mailbox a friendly name to identify it across MailFusion.</p>
         </div>
       </div>
     </div>
 
-    <form method="post" id="mfWizardForm" class="p-6 space-y-6">
+    <form method="post" id="mfWizardForm" class="space-y-6 p-6">
       {% csrf_token %}
 
       <div class="space-y-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700" for="acc-name">
-            Display name <span class="text-red-500">*</span>
-          </label>
-          <input type="text" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition" id="acc-name" name="name" placeholder="e.g. Work Email" required autofocus>
-          <p class="mt-1.5 text-sm text-gray-500">Shown in the sidebar, inbox and account tables.</p>
+          <label class="block text-sm font-medium text-on-surface" for="acc-name">Display name <span class="text-error">*</span></label>
+          <input type="text" class="mt-1 block w-full rounded-lg border border-outline-variant bg-surface px-4 py-2.5 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" id="acc-name" name="name" placeholder="e.g. Work Email" required autofocus>
+          <p class="mt-1.5 text-sm text-on-surface-variant">Shown in the sidebar, inbox and account tables.</p>
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2">
           <div>
-            <label class="block text-sm font-medium text-gray-700" for="acc-nickname">Nickname</label>
-            <input type="text" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition" id="acc-nickname" name="nickname" placeholder="e.g. Work" maxlength="40">
-            <p class="mt-1.5 text-sm text-gray-500">Short label used in compact views and badges.</p>
+            <label class="block text-sm font-medium text-on-surface" for="acc-nickname">Nickname</label>
+            <input type="text" class="mt-1 block w-full rounded-lg border border-outline-variant bg-surface px-4 py-2.5 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" id="acc-nickname" name="nickname" placeholder="e.g. Work" maxlength="40">
+            <p class="mt-1.5 text-sm text-on-surface-variant">Short label used in compact views and badges.</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700" for="acc-description">Description</label>
-            <input type="text" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition" id="acc-description" name="description" placeholder="Optional notes about this mailbox">
+            <label class="block text-sm font-medium text-on-surface" for="acc-description">Description</label>
+            <input type="text" class="mt-1 block w-full rounded-lg border border-outline-variant bg-surface px-4 py-2.5 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" id="acc-description" name="description" placeholder="Optional notes about this mailbox">
           </div>
         </div>
 
-        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <div class="flex items-start">
-            <div class="flex h-5 w-5 items-center justify-center">
-              <input class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500/20" type="checkbox" id="acc-default" name="is_default" checked>
-            </div>
-            <div class="ml-3 text-sm">
-              <label class="font-medium text-gray-900" for="acc-default">Include in Unified Inbox</label>
-              <p class="text-gray-500">Emails from this account will appear in your main inbox view.</p>
+        <div class="rounded-xl border border-outline-variant bg-surface-container p-4">
+          <div class="flex items-start gap-3">
+            <input class="mt-1 h-4 w-4 rounded border-outline-variant text-primary focus:ring-2 focus:ring-primary/20" type="checkbox" id="acc-default" name="is_default" checked>
+            <div class="text-sm">
+              <label class="font-medium text-on-surface" for="acc-default">Include in Unified Inbox</label>
+              <p class="mt-1 text-on-surface-variant">Emails from this account will appear in your main inbox view.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Footer actions -->
-      <div class="border-t border-gray-200 pt-6 flex items-center justify-between">
-        <a href="{% url 'accounts' %}" class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100">
-          <i class="bi bi-x"></i>
-          Cancel
+      <div class="flex items-center justify-between border-t border-outline-variant pt-6">
+        <a href="{% url 'accounts' %}" class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-high">
+          <span class="material-symbols-outlined text-[18px]">close</span>Cancel
         </a>
-        <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-2">
-          Continue
-          <i class="bi bi-arrow-right"></i>
+        <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition hover:bg-primary/90">
+          Continue<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
         </button>
       </div>
     </form>
   </div>
 
-  <!-- Help section -->
-  <div class="mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-    <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-      <i class="bi bi-info-circle text-blue-500"></i>
-      What happens next?
+  <div class="mt-8 rounded-2xl border border-outline-variant bg-surface p-6 shadow-sm">
+    <h3 class="flex items-center gap-2 text-sm font-semibold text-on-surface">
+      <span class="material-symbols-outlined text-[18px] text-primary">info</span>What happens next?
     </h3>
-    <ol class="mt-4 space-y-3 text-sm text-gray-600">
+    <ol class="mt-4 space-y-3 text-sm text-on-surface-variant">
       <li class="flex items-start gap-3">
-        <span class="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs font-semibold">1</span>
-        <div>You'll be redirected to Microsoft to sign in and grant MailFusion access to your mailbox.</div>
+        <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">1</span>
+        <div>You’ll be redirected to Microsoft to sign in and grant MailFusion access to your mailbox.</div>
       </li>
       <li class="flex items-start gap-3">
-        <span class="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">2</span>
-        <div>After approval, you'll return here and the account will be connected automatically.</div>
+        <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-container text-xs font-semibold text-on-surface-variant">2</span>
+        <div>After approval, you’ll return here and the account will be connected automatically.</div>
       </li>
       <li class="flex items-start gap-3">
-        <span class="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">3</span>
+        <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-container text-xs font-semibold text-on-surface-variant">3</span>
         <div>MailFusion will begin syncing your emails in the background.</div>
       </li>
     </ol>

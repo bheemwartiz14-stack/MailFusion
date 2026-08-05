@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
+{% extends "base.html" %}
+
 {% block page_subtitle %}
-<p class="text-sm text-gray-500">
+<p class="text-sm text-on-surface-variant">
     This action cannot be undone.
 </p>
 {% endblock %}
@@ -9,22 +11,22 @@
 {% block content %}
 <div class="mx-auto max-w-3xl">
 
-    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+    <div class="overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm">
 
         <!-- Header -->
-        <div class="border-b border-gray-200 px-6 py-5">
+        <div class="border-b border-outline-variant px-6 py-5">
             <div class="flex items-center gap-4">
 
-                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-error-container text-error">
                     <i class="bi bi-envelope-x text-3xl"></i>
                 </div>
 
                 <div>
-                    <h2 class="text-2xl font-semibold text-gray-900">
+                    <h2 class="text-2xl font-semibold text-on-surface">
                         Disconnect account
                     </h2>
 
-                    <p class="mt-1 text-sm text-gray-500">
+                    <p class="mt-1 text-sm text-on-surface-variant">
                         {{ account.email }}
                     </p>
                 </div>
@@ -36,17 +38,17 @@
         <div class="space-y-6 p-6">
 
             <!-- Warning -->
-            <div class="flex gap-3 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+            <div class="flex gap-3 rounded-xl border border-tertiary/20 bg-tertiary-container/30 p-4">
 
-                <i class="bi bi-exclamation-triangle-fill mt-0.5 text-xl text-yellow-600"></i>
+                <i class="bi bi-exclamation-triangle-fill mt-0.5 text-xl text-tertiary"></i>
 
                 <div>
 
-                    <h3 class="font-semibold text-yellow-900">
+                    <h3 class="font-semibold text-tertiary">
                         This will permanently remove this account from Portal.
                     </h3>
 
-                    <p class="mt-1 text-sm text-yellow-700">
+                    <p class="mt-1 text-sm text-tertiary">
                         Once removed, the account and all associated data cannot be recovered.
                     </p>
 
@@ -57,11 +59,11 @@
             <!-- Consequences -->
             <div>
 
-                <h3 class="mb-3 text-lg font-semibold text-gray-900">
+                <h3 class="mb-3 text-lg font-semibold text-on-surface">
                     What will happen?
                 </h3>
 
-                <ul class="list-disc space-y-2 pl-5 text-sm text-gray-600">
+                <ul class="list-disc space-y-2 pl-5 text-sm text-on-surface-variant">
                     <li>All synced emails for this account will be removed from the Unified Inbox.</li>
                     <li>OAuth access and refresh tokens will be permanently deleted.</li>
                     <li>Sync history and account settings will be lost.</li>
@@ -71,49 +73,49 @@
             </div>
 
             <!-- Account Details -->
-            <div class="rounded-xl border border-gray-200">
+            <div class="rounded-xl border border-outline-variant">
 
-                <div class="border-b border-gray-200 px-5 py-4">
-                    <h3 class="font-semibold text-gray-900">
+                <div class="border-b border-outline-variant px-5 py-4">
+                    <h3 class="font-semibold text-on-surface">
                         Account Details
                     </h3>
                 </div>
 
-                <div class="divide-y divide-gray-200">
+                <div class="divide-y divide-outline-variant">
 
                     <div class="grid grid-cols-3 gap-4 px-5 py-4">
-                        <span class="text-sm font-medium text-gray-500">
+                        <span class="text-sm font-medium text-on-surface-variant">
                             Display Name
                         </span>
 
-                        <span class="col-span-2 text-sm text-gray-900">
+                        <span class="col-span-2 text-sm text-on-surface">
                             {{ account.name }}
                         </span>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4 px-5 py-4">
-                        <span class="text-sm font-medium text-gray-500">
+                        <span class="text-sm font-medium text-on-surface-variant">
                             Email
                         </span>
 
-                        <span class="col-span-2 text-sm text-gray-900">
+                        <span class="col-span-2 text-sm text-on-surface">
                             {{ account.email }}
                         </span>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4 px-5 py-4">
-                        <span class="text-sm font-medium text-gray-500">
+                        <span class="text-sm font-medium text-on-surface-variant">
                             Nickname
                         </span>
 
-                        <span class="col-span-2 text-sm text-gray-900">
+                        <span class="col-span-2 text-sm text-on-surface">
                             {{ account.nickname|default:"—" }}
                         </span>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4 px-5 py-4">
 
-                        <span class="text-sm font-medium text-gray-500">
+                        <span class="text-sm font-medium text-on-surface-variant">
                             Status
                         </span>
 
@@ -121,25 +123,25 @@
 
                             {% if account.oauth_status == 'connected' %}
 
-                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                            <span class="inline-flex rounded-full bg-success-container px-3 py-1 text-xs font-medium text-success">
                                 Connected
                             </span>
 
                             {% elif account.oauth_status == 'expired' %}
 
-                            <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
+                            <span class="inline-flex rounded-full bg-warning-container px-3 py-1 text-xs font-medium text-warning">
                                 Expired
                             </span>
 
                             {% elif account.oauth_status == 'revoked' %}
 
-                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+                            <span class="inline-flex rounded-full bg-error-container px-3 py-1 text-xs font-medium text-error">
                                 Revoked
                             </span>
 
                             {% else %}
 
-                            <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                            <span class="inline-flex rounded-full bg-surface-container px-3 py-1 text-xs font-medium text-on-surface-variant">
                                 Pending
                             </span>
 
@@ -151,11 +153,11 @@
 
                     <div class="grid grid-cols-3 gap-4 px-5 py-4">
 
-                        <span class="text-sm font-medium text-gray-500">
+                        <span class="text-sm font-medium text-on-surface-variant">
                             Connected Since
                         </span>
 
-                        <span class="col-span-2 text-sm text-gray-900">
+                        <span class="col-span-2 text-sm text-on-surface">
                             {{ account.created_at|date:"M d, Y" }}
                         </span>
 
@@ -168,10 +170,10 @@
         </div>
 
         <!-- Footer -->
-        <div class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+        <div class="flex items-center justify-end gap-3 border-t border-outline-variant bg-surface-container px-6 py-4">
 
             <a href="{% url 'accounts' %}"
-                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100">
+                class="inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-high">
 
                 <i class="bi bi-x"></i>
                 Cancel
@@ -183,7 +185,7 @@
 
                 <button
                     type="submit"
-                    class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700">
+                    class="inline-flex items-center gap-2 rounded-lg bg-error px-4 py-2 text-sm font-medium text-on-error transition hover:bg-error-container">
 
                     <i class="bi bi-trash"></i>
                     Disconnect Account
