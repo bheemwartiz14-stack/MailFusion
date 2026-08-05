@@ -9,6 +9,10 @@ services:
     region: oregon
     maxmemoryPolicy: allkeys-lru
 
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all connections
+
 
   # ==========================================================
   # Django Web
@@ -29,10 +33,11 @@ services:
     startCommand: >
       uv run gunicorn core.wsgi:application
       --bind 0.0.0.0:$PORT
+      --workers 2
+      --timeout 120
       --log-level info
       --access-logfile -
       --error-logfile -
-
 
     envVars:
 
@@ -140,6 +145,11 @@ services:
       - key: POSTGRES_PASSWORD
         sync: false
 
+      - key: POSTGRES_PORT
+        value: "5432"
+
+
+      # Redis
 
       - key: REDIS_URL
         fromService:
@@ -208,6 +218,11 @@ services:
       - key: POSTGRES_PASSWORD
         sync: false
 
+      - key: POSTGRES_PORT
+        value: "5432"
+
+
+      # Redis
 
       - key: REDIS_URL
         fromService:
