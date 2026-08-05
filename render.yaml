@@ -36,9 +36,9 @@ services:
       - key: SESSION_INACTIVITY_TIMEOUT
         value: "1800"  # 2 weeks in seconds
       
-      - key:SECURE_SSL_REDIRECT
-        value:true
-
+      - key: SECURE_SSL_REDIRECT
+        value: true
+        
       # PostgreSQL
       - key: POSTGRES_HOST
         sync: false

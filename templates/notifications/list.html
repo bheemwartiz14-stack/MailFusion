@@ -97,7 +97,11 @@
                 <form method="post" action="{% url 'notification_toggle' n.pk %}">
                   {% csrf_token %}
                   <button type="submit" class="rounded-lg p-2 text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface" title="{% if n.is_read %}Mark as unread{% else %}Mark as read{% endif %}">
-                    <span class="material-symbols-outlined">{{ n.is_read ? 'email' : 'email_open' }}</span>
+                    {% if n.is_read %}
+                    <span class="material-symbols-outlined">email</span>
+                    {% else %}
+                    <span class="material-symbols-outlined">email_open</span>
+                    {% endif %}
                   </button>
                 </form>
                 <form method="post" action="{% url 'notification_delete' n.pk %}">

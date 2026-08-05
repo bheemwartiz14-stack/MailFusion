@@ -39,7 +39,11 @@
         <div class="text-sm text-on-surface-variant">{{ kpi.label }}</div>
         <div class="text-2xl font-bold text-on-surface">{{ kpi.value }}</div>
         <div class="text-xs mt-1 {% if kpi.trend_positive %}text-success{% else %}text-error{% endif %} flex items-center gap-1">
-          <span class="material-symbols-outlined text-[14px]">{{ kpi.trend_positive ? 'trending_up' : 'trending_down' }}</span>
+          {% if kpi.trend_positive %}
+          <span class="material-symbols-outlined text-[14px]">trending_up</span>
+          {% else %}
+          <span class="material-symbols-outlined text-[14px]">trending_down</span>
+          {% endif %}
           {{ kpi.trend }}
         </div>
       </div>
