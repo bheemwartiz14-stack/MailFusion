@@ -1,19 +1,19 @@
 {% load ui_extras %}
-<div class="mf-internet-headers">
+<div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
   {% if headers %}
-  <div class="table-responsive">
-    <table class="table table-sm mf-table mf-font-mono mb-0" style="font-size:.72rem">
-      <tbody>
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-xs font-mono text-slate-600">
+      <tbody class="divide-y divide-slate-200">
         {% for header in headers %}
         <tr>
-          <th class="fw-semibold text-uppercase pe-2" style="white-space:nowrap" scope="row">{{ header.name }}</th>
-          <td class="text-break">{{ header.value }}</td>
+          <th class="whitespace-nowrap pr-3 py-2 text-left font-semibold uppercase tracking-wide text-slate-500" scope="row">{{ header.name }}</th>
+          <td class="break-all py-2">{{ header.value }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div class="small mf-muted">No internet headers available for this message.</div>
+  <div class="text-sm text-slate-500">No internet headers available for this message.</div>
   {% endif %}
 </div>

@@ -15,7 +15,7 @@
     {% endblock %}
   </title>
 
-  <script src="{% static 'js/tailwind-ui.js' %}"></script>
+  <script src="{% static 'js/ui-components.js' %}"></script>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <link rel="stylesheet" href="{% static 'css/custom.css' %}">
   <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
@@ -27,13 +27,9 @@
   {% endblock %}
   {% else %}
   <div class="flex h-screen overflow-hidden">
-    <!-- SideNavBar (Customized from Brand Anchors) -->
     {% include "partials/sidebar.html" %}
-    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col overflow-hidden">
-      <!-- TopNavBar (Shared Component Context) -->
       {% include "partials/navbar.html" %}
-      <!-- Scrollable Dashboard Body -->
       <section class="flex-1 overflow-y-auto p-8 space-y-8">
         {% block content %} {% endblock %}
       </section>
@@ -41,7 +37,6 @@
   </div>
   {% endif %}
   {% include "partials/modals.html" %}
-  <script src="{% static 'js/ui-components.js' %}"></script>
   {% block extra_js %}
   {% endblock %}
 

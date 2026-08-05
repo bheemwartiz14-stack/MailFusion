@@ -47,7 +47,7 @@
       <option value="read" {% if current_status == 'read' %}selected{% endif %}>Read</option>
     </select>
   </form>
-  <span class="text-sm text-on-surface-variant ms-auto hidden sm:inline">{{ page_obj.paginator.count }} notifications</span>
+  <span class="ml-auto hidden text-sm text-on-surface-variant sm:inline">{{ page_obj.paginator.count }} notifications</span>
 </div>
 
 {% if notifications %}

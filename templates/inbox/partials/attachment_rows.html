@@ -1,10 +1,10 @@
 {% load ui_extras %}
 {% for attachment in draft.attachments.all %}
-<div class="mf-chip d-flex align-items-center gap-2" data-mf-attachment="{{ attachment.pk }}">
+<div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700" data-mf-attachment="{{ attachment.pk }}">
   <i class="bi bi-file-earmark"></i>
-  <span class="text-truncate" style="max-width:18rem" title="{{ attachment.name }}">{{ attachment.name }}</span>
-  <span class="mf-muted small">{{ attachment.size_bytes|filesizeformat }}</span>
-  <button class="btn btn-sm btn-ghost btn-icon" type="button" title="Remove"
+  <span class="max-w-[18rem] truncate" title="{{ attachment.name }}">{{ attachment.name }}</span>
+  <span class="text-slate-500">{{ attachment.size_bytes|filesizeformat }}</span>
+  <button class="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-800" type="button" title="Remove"
           data-mf-remove-attachment
           hx-post="{% url 'compose_attachment_remove' draft.pk attachment.graph_attachment_id %}"
           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
@@ -14,5 +14,5 @@
   </button>
 </div>
 {% empty %}
-<div class="small mf-muted" data-mf-attachment-empty>No attachments yet.</div>
+<div class="text-sm text-slate-500" data-mf-attachment-empty>No attachments yet.</div>
 {% endfor %}
