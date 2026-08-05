@@ -1,148 +1,105 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: InboxFusion-postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-InboxFusion}
+      POSTGRES_USER: ${POSTGRES_USER:-InboxFusion}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-InboxFusion}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - InboxFusion_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # ==========================================================
-  # Redis
-  # ==========================================================
-  - type: redis
-    name: mailfusion-redis
-    plan: free
-    region: oregon
+  redis:
+    image: redis:7-alpine
+    container_name: InboxFusion-redis
+    restart: unless-stopped
+    
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - InboxFusion_redis:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  worker:
+    image: python:3.14-slim
+    container_name: InboxFusion-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    command: >
+      sh -c "cd /app &&
+             pip install --no-cache-dir -r requirements.txt &&
+             celery -A core worker --loglevel=info --concurrency=4"
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
-  # ==========================================================
-  # Common Environment Variables
-  # ==========================================================
-x-common-env: &common-env
+  beat:
+    image: python:3.14-slim
+    container_name: InboxFusion-beat
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    command: >
+      sh -c "cd /app &&
+             pip install --no-cache-dir -r requirements.txt &&
+             celery -A core beat --loglevel=info"
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
-  - key: PYTHON_VERSION
-    value: "3.13"
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: InboxFusion-pgadmin
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "True"
+    ports:
+      - "8001:80"
+    volumes:
+      - InboxFusion_pgadmin:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
 
-  - key: DJANGO_SETTINGS_MODULE
-    value: "core.settings"
-
-  - key: DEBUG
-    value: "False"
-
-  - key: SECRET_KEY
-    sync: false
-
-
-  # PostgreSQL
-  - key: POSTGRES_HOST
-    sync: false
-
-  - key: POSTGRES_DB
-    sync: false
-
-  - key: POSTGRES_USER
-    sync: false
-
-  - key: POSTGRES_PASSWORD
-    sync: false
-
-  - key: POSTGRES_PORT
-    value: "5432"
-
-
-  # Redis
-  - key: REDIS_URL
-    fromService:
-      type: redis
-      name: mailfusion-redis
-      property: connectionString
-
-  - key: CELERY_BROKER_URL
-    fromService:
-      type: redis
-      name: mailfusion-redis
-      property: connectionString
-
-  - key: CELERY_RESULT_BACKEND
-    fromService:
-      type: redis
-      name: mailfusion-redis
-      property: connectionString
-
-
-  # Microsoft OAuth
-  - key: MICROSOFT_CLIENT_ID
-    sync: false
-
-  - key: MICROSOFT_CLIENT_SECRET
-    sync: false
-
-  - key: MICROSOFT_TENANT_ID
-    value: "common"
-
-  - key: MICROSOFT_REDIRECT_URI
-    sync: false
-
-  - key: MICROSOFT_GRAPH_SCOPES
-    sync: false
-
-
-
-  # ==========================================================
-  # Django Web
-  # ==========================================================
-  - type: web
-    name: mailfusion
-    runtime: python
-    plan: free
-    region: oregon
-
-    buildCommand: |
-      uv sync --frozen
-      uv run python manage.py collectstatic --noinput
-      uv run python manage.py migrate
-
-    startCommand: |
-      uv run gunicorn core.wsgi:application \
-        --bind 0.0.0.0:$PORT \
-        --workers 2 \
-        --timeout 120
-
-    envVars:
-      <<: *common-env
-
-
-  # ==========================================================
-  # Celery Worker
-  # ==========================================================
-  - type: worker
-    name: mailfusion-celery
-    runtime: python
-    plan: free
-    region: oregon
-
-    buildCommand: |
-      uv sync --frozen
-
-    startCommand: |
-      uv run celery -A core worker \
-        --loglevel=info \
-        --concurrency=4
-
-    envVars:
-      <<: *common-env
-
-
-
-  # ==========================================================
-  # Celery Beat
-  # ==========================================================
-  - type: worker
-    name: mailfusion-beat
-    runtime: python
-    plan: free
-    region: oregon
-
-    buildCommand: |
-      uv sync --frozen
-
-    startCommand: |
-      uv run celery -A core beat \
-        --loglevel=info
-
-    envVars:
-      <<: *common-env
+volumes:
+  InboxFusion_postgres:
+  InboxFusion_redis:
+  InboxFusion_pgadmin:
