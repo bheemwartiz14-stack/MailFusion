@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.auth",
     "django.contrib.admin",
-    "django_browser_reload",
     "portal",
 ]
+if DEBUG:
+    INSTALLED_APPS.append("django_browser_reload")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -51,9 +52,14 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    MIDDLEWARE.insert(
+        -1,
+        "django_browser_reload.middleware.BrowserReloadMiddleware",
+    )
 
 ROOT_URLCONF = "core.urls"
 
