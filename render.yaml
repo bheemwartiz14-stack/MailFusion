@@ -29,8 +29,12 @@ services:
       uv run python manage.py migrate
 
     startCommand: |
-      uv run gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
-
+      uv run gunicorn core.wsgi:application \
+    --bind 0.0.0.0:$PORT \
+    --log-level debug \
+    --access-logfile - \
+    --error-logfile -
+    
     envVars:
       - key: PYTHON_VERSION
         value: "3.13"

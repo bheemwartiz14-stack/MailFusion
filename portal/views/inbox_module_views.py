@@ -176,7 +176,6 @@ class InboxView(LoginRequiredMixin, PortalView):
         total = emails.count()
         page = list(emails[0:PAGE_SIZE])
         has_more = total > len(page)
-
         context = self.get_context_data()
         context.update(
             emails=page,
