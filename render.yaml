@@ -76,9 +76,7 @@ services:
       - key: MICROSOFT_GRAPH_SCOPES
         sync: false
 
-      - key: MICROSOFT_GRAPH_BASE_URL
-        sync: false
-
+        
       - key: CELERY_TASK_ALWAYS_EAGER
         value: "1800"  # 2 weeks in seconds
       
