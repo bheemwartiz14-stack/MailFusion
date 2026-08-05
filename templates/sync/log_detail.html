@@ -2,50 +2,178 @@
 {% load ui_extras %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-8">
-    <div class="mf-card">
-      <div class="mf-card__header">
-        <div>
-          <h2 class="mf-card__title">Sync log</h2>
-          <p class="mf-card__subtitle">{{ log.account.email }}</p>
+
+<div class="mx-auto max-w-4xl">
+
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+        <!-- Header -->
+        <div class="flex flex-col gap-4 border-b border-gray-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">
+                    Sync Log
+                </h2>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    {{ log.account.email }}
+                </p>
+            </div>
+
+            {% if log.status == 'completed' %}
+            <a href="{% url 'account_detail' log.account.pk %}"
+               class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+                View Account
+            </a>
+            {% endif %}
+
         </div>
-        {% if log.status == 'completed' %}
-        <a href="{% url 'account_detail' log.account.pk %}" class="btn btn-sm btn-ghost">View account</a>
-        {% endif %}
-      </div>
-      <div class="mf-card__body">
-        <dl class="row mb-2 small">
-          <dt class="col-sm-4 mf-muted">Status</dt>
-          <dd class="col-sm-8">
-            {% if log.status == 'completed' %}<span class="mf-badge mf-badge--success">Completed</span>
-            {% elif log.status == 'failed' %}<span class="mf-badge mf-badge--danger">Failed</span>
-            {% else %}<span class="mf-badge mf-badge--neutral">Started</span>{% endif %}
-          </dd>
-          <dt class="col-sm-4 mf-muted">Start time</dt>
-          <dd class="col-sm-8">{{ log.start_time|date:"Y-m-d H:i:s" }}</dd>
-          <dt class="col-sm-4 mf-muted">End time</dt>
-          <dd class="col-sm-8">{{ log.end_time|date:"Y-m-d H:i:s"|default:"—" }}</dd>
-          <dt class="col-sm-4 mf-muted">Duration</dt>
-          <dd class="col-sm-8">{{ log.duration_seconds|floatformat:2 }}s</dd>
-          <dt class="col-sm-4 mf-muted">Emails processed</dt>
-          <dd class="col-sm-8">{{ log.emails_processed }}</dd>
-          <dt class="col-sm-4 mf-muted">Added / Updated</dt>
-          <dd class="col-sm-8"><span class="text-success">{{ log.emails_added }}</span> / {{ log.emails_updated }}</dd>
-          <dt class="col-sm-4 mf-muted">Attachments downloaded</dt>
-          <dd class="col-sm-8">{{ log.attachments_downloaded }}</dd>
-          <dt class="col-sm-4 mf-muted">Retry count</dt>
-          <dd class="col-sm-8">{{ log.retry_count }}</dd>
-          <dt class="col-sm-4 mf-muted">Worker</dt>
-          <dd class="col-sm-8"><code>{{ log.worker|default:"—" }}</code></dd>
-        </dl>
-        {% if log.error %}
-        <div class="alert alert-danger small mt-2">
-          <i class="bi bi-exclamation-triangle me-1"></i>{{ log.error }}
+
+        <!-- Details -->
+        <div class="px-6 py-6">
+
+            <dl class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
+
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">
+                        Status
+                    </dt>
+
+                    <dd class="mt-2">
+
+                        {% if log.status == 'completed' %}
+                        <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                            Completed
+                        </span>
+
+                        {% elif log.status == 'failed' %}
+                        <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+                            Failed
+                        </span>
+
+                        {% else %}
+                        <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                            Started
+                        </span>
+                        {% endif %}
+
+                    </dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">
+                        Start Time
+                    </dt>
+                    <dd class="mt-2 text-sm text-gray-900">
+                        {{ log.start_time|date:"Y-m-d H:i:s" }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">
+                        End Time
+                    </dt>
+                    <dd class="mt-2 text-sm text-gray-900">
+                        {{ log.end_time|date:"Y-m-d H:i:s"|default:"—" }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">
+                        Duration
+                    </dt>
+                    <dd class="mt-2 text-sm text-gray-900">
+                        {{ log.duration_seconds|floatformat:2 }}s
+                    </dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">
+                        Emails Processed
+                    </dt>
+                    <dd class="mt-2 text-sm text-gray-900">
+                        {{ log.emails_processed }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">
+                        Added / Updated
+                    </dt>
+                    <dd class="mt-2 text-sm">
+                        <span class="font-medium text-green-600">
+                            {{ log.emails_added }}
+                        </span>
+                        <span class="text-gray-500">
+                            /
+                        </span>
+                        <span class="text-blue-600">
+                            {{ log.emails_updated }}
+                        </span>
+                    </dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">
+                        Attachments Downloaded
+                    </dt>
+                    <dd class="mt-2 text-sm text-gray-900">
+                        {{ log.attachments_downloaded }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">
+                        Retry Count
+                    </dt>
+                    <dd class="mt-2 text-sm text-gray-900">
+                        {{ log.retry_count }}
+                    </dd>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Worker
+                    </dt>
+                    <dd class="mt-2">
+                        <code class="rounded bg-gray-100 px-2 py-1 text-sm text-gray-700">
+                            {{ log.worker|default:"—" }}
+                        </code>
+                    </dd>
+                </div>
+
+            </dl>
+
+            {% if log.error %}
+            <div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
+
+                <div class="flex items-start gap-3">
+
+                    <span class="material-symbols-outlined text-red-600">
+                        warning
+                    </span>
+
+                    <div>
+
+                        <h3 class="text-sm font-semibold text-red-700">
+                            Synchronization Error
+                        </h3>
+
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ log.error }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+            {% endif %}
+
         </div>
-        {% endif %}
-      </div>
+
     </div>
-  </div>
+
 </div>
+
 {% endblock %}

@@ -5,57 +5,112 @@
 {% block title %}Unified Inbox · {{ app_name }}{% endblock %}
 
 {% block page_subtitle %}
-<p class="mf-page-header__subtitle">Every mailbox, every message — one feed.</p>
+<p class="text-sm text-gray-500">
+    Every mailbox, every message — one feed.
+</p>
 {% endblock %}
 
 {% block page_actions %}
-<button class="btn btn-primary"
+<div class="flex items-center gap-3">
+
+    <button
         type="button"
         data-mf-open-compose="new"
-        title="New message">
-  <i class="bi bi-pencil-square me-1"></i>Compose
-</button>
-<a class="btn btn-outline-secondary"
-   href="{% url 'inbox' %}"
-   title="Refresh"
-   hx-get="{% url 'inbox_unread' %}"
-   hx-target="#mf-folder-counts"
-   hx-swap="innerHTML">
-  <i class="bi bi-arrow-clockwise"></i>
-</a>
+        class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+
+        <i class="bi bi-pencil-square mr-2"></i>
+        Compose
+
+    </button>
+
+    <a
+        href="{% url 'inbox' %}"
+        hx-get="{% url 'inbox_unread' %}"
+        hx-target="#mf-folder-counts"
+        hx-swap="innerHTML"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 transition hover:bg-gray-50">
+
+        <i class="bi bi-arrow-clockwise"></i>
+
+    </a>
+
+</div>
 {% endblock %}
 
 {% block content %}
-<div class="mf-inbox mf-inbox--list">
 
-  <!-- Folders / sidebar -->
-  <aside class="mf-inbox__folder" id="mf-folder-counts">
-    {% include "inbox/partials/sidebar.html" %}
-  </aside>
+<div class="grid gap-6 xl:grid-cols-12">
 
-  <!-- Email list -->
-  <section class="mf-inbox__list">
-    {% include "inbox/partials/toolbar.html" %}
-    <!-- Bulk action bar (hidden until a row is selected) -->
-    {% include "inbox/partials/bulk_bar.html" %}
+    <!-- Sidebar -->
 
-    <div class="overflow-y-auto flex-grow-1 mf-email-scroll" data-mf-inbox-scroll>
-      <div id="mf-email-list"
-           hx-get="{% url 'inbox_list' %}?{{ querystring }}"
-           hx-trigger="load"
-           hx-swap="innerHTML">
-        <div class="mf-empty py-5">
-          <i class="bi bi-inbox mf-empty__icon"></i>
-          <h4>Loading your inbox</h4>
-          <p class="mf-muted">Synchronizing across your connected accounts…</p>
+    <aside
+        id="mf-folder-counts"
+        class="xl:col-span-3 rounded-xl border border-gray-200 bg-white shadow-sm">
+
+        {% include "inbox/partials/sidebar.html" %}
+
+    </aside>
+
+    <!-- Inbox -->
+
+    <section class="xl:col-span-9 flex min-h-[700px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+
+        <!-- Toolbar -->
+
+        <div class="border-b border-gray-200">
+
+            {% include "inbox/partials/toolbar.html" %}
+
         </div>
-      </div>
-    </div>
-  </section>
+
+        <!-- Bulk Actions -->
+
+        <div class="border-b border-gray-200">
+
+            {% include "inbox/partials/bulk_bar.html" %}
+
+        </div>
+
+        <!-- Email List -->
+
+        <div
+            class="flex-1 overflow-y-auto"
+            data-mf-inbox-scroll>
+
+            <div
+                id="mf-email-list"
+                hx-get="{% url 'inbox_list' %}?{{ querystring }}"
+                hx-trigger="load"
+                hx-swap="innerHTML">
+
+                <div class="flex flex-col items-center justify-center py-24 text-center">
+
+                    <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                        <i class="bi bi-inbox text-4xl"></i>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-gray-900">
+                        Loading your inbox
+                    </h3>
+
+                    <p class="mt-2 text-sm text-gray-500">
+                        Synchronizing across your connected accounts…
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
 </div>
 
-<!-- Compose modal (HTMX) -->
+<!-- Compose Modal -->
+
 <div id="mf-compose-modal-host"></div>
+
 {% endblock %}
 
 {% block extra_js %}

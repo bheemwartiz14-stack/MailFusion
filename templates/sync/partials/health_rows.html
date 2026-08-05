@@ -1,86 +1,182 @@
 {% load ui_extras %}
 
-<div class="row g-3">
-  <div class="col-xl-7">
-    <div class="mf-card">
-      <div class="mf-card__header">
-        <div>
-          <h2 class="mf-card__title">Account health</h2>
-          <p class="mf-card__subtitle">OAuth, Graph connectivity and webhook state per mailbox</p>
-        </div>
-      </div>
-      <div class="mf-card__body mf-card__body--flush">
-        <div class="table-responsive">
-          <table class="table mf-table align-middle">
-            <thead>
-              <tr>
-                <th>Account</th>
-                <th>OAuth</th>
-                <th>Graph</th>
-                <th>Webhook</th>
-                <th>Last check</th>
-                <th>Failures</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in health_rows %}
-              <tr>
-                <td>
-                  <div class="cell-strong text-truncate" style="max-width:200px">{{ row.account.email }}</div>
-                </td>
-                <td>
-                  {% if row.oauth_ok %}<span class="mf-badge mf-badge--success"><i class="bi bi-shield-check"></i>OK</span>
-                  {% else %}<span class="mf-badge mf-badge--danger"><i class="bi bi-shield-x"></i>Error</span>{% endif %}
-                </td>
-                <td>
-                  {% if row.graph_ok %}<span class="mf-badge mf-badge--success"><i class="bi bi-cloud-check"></i>OK</span>
-                  {% else %}<span class="mf-badge mf-badge--danger"><i class="bi bi-cloud-slash"></i>Error</span>{% endif %}
-                </td>
-                <td>
-                  {% if row.webhook_ok %}<span class="mf-badge mf-badge--success"><i class="bi bi-bell-check"></i>OK</span>
-                  {% else %}<span class="mf-badge mf-badge--neutral"><i class="bi bi-bell-slash"></i>Off</span>{% endif %}
-                </td>
-                <td class="small">{{ row.last_checked_at|timesince }} ago</td>
-                <td class="small">{{ row.consecutive_failures }}</td>
-              </tr>
-              {% empty %}
-              <tr><td colspan="6" class="text-center py-4 mf-muted">No health records yet.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="grid gap-6 xl:grid-cols-12">
 
-  <div class="col-xl-5">
-    <div class="mf-card">
-      <div class="mf-card__header">
-        <div>
-          <h2 class="mf-card__title">Webhook subscriptions</h2>
-          <p class="mf-card__subtitle">Microsoft Graph change notifications</p>
-        </div>
-      </div>
-      <div class="mf-card__body mf-card__body--flush">
-        <ul class="list-group list-group-flush">
-          {% for sub in subscriptions %}
-          <li class="list-group-item d-flex align-items-center gap-2">
-            {% if sub.expires_soon or sub.status != 'active' %}
-            <span class="mf-badge mf-badge--warning"><i class="bi bi-bell-exclamation"></i></span>
-            {% else %}
-            <span class="mf-badge mf-badge--success"><i class="bi bi-bell-check"></i></span>
-            {% endif %}
-            <div class="min-w-0 flex-grow-1">
-              <div class="small text-truncate cell-strong">{{ sub.account.email }}</div>
-              <div class="small mf-muted text-truncate">{{ sub.resource }}</div>
+    <!-- Account Health -->
+    <div class="xl:col-span-7">
+
+        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+            <div class="border-b border-gray-200 px-6 py-4">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    Account Health
+                </h2>
+                <p class="mt-1 text-sm text-gray-500">
+                    OAuth, Graph connectivity and webhook state per mailbox
+                </p>
             </div>
-            <span class="small mf-muted text-nowrap">{{ sub.expiration_date_time|date:"M d, H:i" }}</span>
-          </li>
-          {% empty %}
-          <li class="list-group-item text-center py-4 mf-muted">No subscriptions registered.</li>
-          {% endfor %}
-        </ul>
-      </div>
+
+            <div class="overflow-x-auto">
+
+                <table class="min-w-full divide-y divide-gray-200">
+
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Account
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                OAuth
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Graph
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Webhook
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Last Check
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Failures
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100 bg-white">
+
+                        {% for row in health_rows %}
+
+                        <tr class="hover:bg-gray-50">
+
+                            <td class="px-6 py-4">
+                                <div class="max-w-[220px] truncate font-medium text-gray-900">
+                                    {{ row.account.email }}
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {% if row.oauth_ok %}
+                                <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                    OK
+                                </span>
+                                {% else %}
+                                <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+                                    Error
+                                </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {% if row.graph_ok %}
+                                <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                    OK
+                                </span>
+                                {% else %}
+                                <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+                                    Error
+                                </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {% if row.webhook_ok %}
+                                <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                    OK
+                                </span>
+                                {% else %}
+                                <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                                    Off
+                                </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ row.last_checked_at|timesince }} ago
+                            </td>
+
+                            <td class="px-6 py-4 text-sm font-medium text-gray-700">
+                                {{ row.consecutive_failures }}
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                                No health records yet.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
     </div>
-  </div>
+
+    <!-- Webhook Subscriptions -->
+    <div class="xl:col-span-5">
+
+        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+            <div class="border-b border-gray-200 px-6 py-4">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    Webhook Subscriptions
+                </h2>
+                <p class="mt-1 text-sm text-gray-500">
+                    Microsoft Graph change notifications
+                </p>
+            </div>
+
+            <div class="divide-y divide-gray-100">
+
+                {% for sub in subscriptions %}
+
+                <div class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50">
+
+                    {% if sub.expires_soon or sub.status != 'active' %}
+                    <span class="h-3 w-3 rounded-full bg-amber-500"></span>
+                    {% else %}
+                    <span class="h-3 w-3 rounded-full bg-green-500"></span>
+                    {% endif %}
+
+                    <div class="min-w-0 flex-1">
+
+                        <p class="truncate text-sm font-medium text-gray-900">
+                            {{ sub.account.email }}
+                        </p>
+
+                        <p class="truncate text-sm text-gray-500">
+                            {{ sub.resource }}
+                        </p>
+
+                    </div>
+
+                    <span class="whitespace-nowrap text-xs text-gray-500">
+                        {{ sub.expiration_date_time|date:"M d, H:i" }}
+                    </span>
+
+                </div>
+
+                {% empty %}
+
+                <div class="px-6 py-10 text-center text-sm text-gray-500">
+                    No subscriptions registered.
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>

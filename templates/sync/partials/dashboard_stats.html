@@ -1,116 +1,168 @@
-<div class="row g-3 mb-4">
-  <div class="col-6 col-xl-3">
-    <div class="mf-card">
-      <div class="mf-card__body mf-stat">
-        <span class="mf-stat__icon mf-stat__icon--primary"><i class="bi bi-envelope-paper"></i></span>
-        <div class="min-w-0">
-          <div class="mf-stat__value">{{ metrics.total_accounts }}</div>
-          <div class="mf-stat__label">Connected accounts</div>
+<!-- Top Stats -->
+<div class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                <span class="material-symbols-outlined">mail</span>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-900">{{ metrics.total_accounts }}</p>
+                <p class="text-sm text-gray-500">Connected accounts</p>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="mf-card">
-      <div class="mf-card__body mf-stat">
-        <span class="mf-stat__icon mf-stat__icon--success"><i class="bi bi-play-circle"></i></span>
-        <div class="min-w-0">
-          <div class="mf-stat__value">{{ metrics.active_accounts }}</div>
-          <div class="mf-stat__label">Active accounts</div>
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600">
+                <span class="material-symbols-outlined">play_circle</span>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-900">{{ metrics.active_accounts }}</p>
+                <p class="text-sm text-gray-500">Active accounts</p>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="mf-card">
-      <div class="mf-card__body mf-stat">
-        <span class="mf-stat__icon mf-stat__icon--neutral"><i class="bi bi-pause-circle"></i></span>
-        <div class="min-w-0">
-          <div class="mf-stat__value">{{ metrics.paused_accounts }}</div>
-          <div class="mf-stat__label">Paused accounts</div>
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-600">
+                <span class="material-symbols-outlined">pause_circle</span>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-900">{{ metrics.paused_accounts }}</p>
+                <p class="text-sm text-gray-500">Paused accounts</p>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="mf-card">
-      <div class="mf-card__body mf-stat">
-        <span class="mf-stat__icon mf-stat__icon--warning"><i class="bi bi-shield-exclamation"></i></span>
-        <div class="min-w-0">
-          <div class="mf-stat__value">{{ metrics.needs_reauthorization }}</div>
-          <div class="mf-stat__label">Needs reauthorization</div>
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                <span class="material-symbols-outlined">warning</span>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-900">{{ metrics.needs_reauthorization }}</p>
+                <p class="text-sm text-gray-500">Needs reauthorization</p>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+
 </div>
 
-<div class="row g-3 mb-4">
-  <div class="col-6 col-xl-2">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        <div class="fw-bold fs-5">{{ metrics.total_syncs }}</div>
-        <div class="small mf-muted">Total syncs</div>
-      </div>
+<!-- Sync Metrics -->
+<div class="mb-6 grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
+        <div class="text-2xl font-bold text-gray-900">
+            {{ metrics.total_syncs }}
+        </div>
+        <div class="mt-1 text-sm text-gray-500">
+            Total Syncs
+        </div>
     </div>
-  </div>
-  <div class="col-6 col-xl-2">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        <div class="fw-bold fs-5 text-success">{{ metrics.successful_syncs }}</div>
-        <div class="small mf-muted">Successful</div>
-      </div>
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
+        <div class="text-2xl font-bold text-green-600">
+            {{ metrics.successful_syncs }}
+        </div>
+        <div class="mt-1 text-sm text-gray-500">
+            Successful
+        </div>
     </div>
-  </div>
-  <div class="col-6 col-xl-2">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        <div class="fw-bold fs-5 text-danger">{{ metrics.failed_syncs }}</div>
-        <div class="small mf-muted">Failed</div>
-      </div>
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
+        <div class="text-2xl font-bold text-red-600">
+            {{ metrics.failed_syncs }}
+        </div>
+        <div class="mt-1 text-sm text-gray-500">
+            Failed
+        </div>
     </div>
-  </div>
-  <div class="col-6 col-xl-2">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        <div class="fw-bold fs-5 text-primary">{{ metrics.emails_synced_today }}</div>
-        <div class="small mf-muted">Emails today</div>
-      </div>
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
+        <div class="text-2xl font-bold text-blue-600">
+            {{ metrics.emails_synced_today }}
+        </div>
+        <div class="mt-1 text-sm text-gray-500">
+            Emails Today
+        </div>
     </div>
-  </div>
-  <div class="col-6 col-xl-2">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        <div class="fw-bold fs-5 text-warning">{{ metrics.queued_jobs }}</div>
-        <div class="small mf-muted">Queued jobs</div>
-      </div>
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
+        <div class="text-2xl font-bold text-amber-600">
+            {{ metrics.queued_jobs }}
+        </div>
+        <div class="mt-1 text-sm text-gray-500">
+            Queued Jobs
+        </div>
     </div>
-  </div>
-  <div class="col-6 col-xl-2">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        <div class="fw-bold fs-5 text-info">{{ queue_depth }}</div>
-        <div class="small mf-muted">Queue depth</div>
-      </div>
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
+        <div class="text-2xl font-bold text-cyan-600">
+            {{ queue_depth }}
+        </div>
+        <div class="mt-1 text-sm text-gray-500">
+            Queue Depth
+        </div>
     </div>
-  </div>
+
 </div>
 
-<div class="d-flex flex-wrap gap-2 align-items-center mb-4">
-  <span class="mf-muted small">Workers:</span>
-  {% if worker.active %}
-  <span class="mf-badge mf-badge--success"><i class="bi bi-cpu"></i>{{ worker.count }} online</span>
-  {% else %}
-  <span class="mf-badge mf-badge--danger"><i class="bi bi-cpu"></i>Offline</span>
-  {% endif %}
+<!-- Status Bar -->
+<div class="flex flex-wrap items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
 
-  <span class="mf-muted small">Broker:</span>
-  {% if broker %}
-  <span class="mf-badge mf-badge--success"><i class="bi bi-hdd-network"></i>Redis OK</span>
-  {% else %}
-  <span class="mf-badge mf-badge--danger"><i class="bi bi-hdd-network"></i>Unreachable</span>
-  {% endif %}
+    <span class="text-sm font-medium text-gray-500">
+        Workers
+    </span>
 
-  <span class="mf-muted small ms-auto">Last sync: {% if metrics.last_sync %}{{ metrics.last_sync|timesince }} ago{% else %}never{% endif %}</span>
-  <span class="mf-muted small">Next scheduled: {{ metrics.next_scheduled_sync|time:"H:i:s" }} UTC</span>
+    {% if worker.active %}
+    <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+        <span class="material-symbols-outlined mr-1 text-sm">memory</span>
+        {{ worker.count }} Online
+    </span>
+    {% else %}
+    <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+        <span class="material-symbols-outlined mr-1 text-sm">memory</span>
+        Offline
+    </span>
+    {% endif %}
+
+    <span class="ml-2 text-sm font-medium text-gray-500">
+        Broker
+    </span>
+
+    {% if broker %}
+    <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+        Redis OK
+    </span>
+    {% else %}
+    <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+        Unreachable
+    </span>
+    {% endif %}
+
+    <div class="ml-auto flex flex-wrap items-center gap-6 text-sm text-gray-500">
+
+        <span>
+            Last Sync:
+            <span class="font-medium text-gray-700">
+                {% if metrics.last_sync %}
+                    {{ metrics.last_sync|timesince }} ago
+                {% else %}
+                    Never
+                {% endif %}
+            </span>
+        </span>
+
+        <span>
+            Next Scheduled:
+            <span class="font-medium text-gray-700">
+                {{ metrics.next_scheduled_sync|time:"H:i:s" }} UTC
+            </span>
+        </span>
+
+    </div>
+
 </div>

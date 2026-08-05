@@ -22,37 +22,32 @@
 
         <!-- Username / Email -->
         <div class="space-y-2">
-          <label for="id_username" class="block text-sm font-medium text-gray-700">
+          <label for="id_username" class="block text-sm font-medium text-on-surface">
             Username or Email
           </label>
 
           <input type="text" name="username" id="id_username" placeholder="Enter username or email"
-            value="{{ form.username.value|default:'' }}" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm
-      text-gray-900 placeholder:text-gray-400
-      focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+            value="{{ form.username.value|default:'' }}" class="w-full rounded-lg border border-outline-variant bg-surface px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
 
           {% if form.username.errors %}
-          <p class="text-sm text-red-600">
+          <p class="text-sm text-error">
             {{ form.username.errors.0 }}
           </p>
           {% endif %}
         </div>
-
-
         <!-- Password -->
         <div class="space-y-2">
-          <label for="current-password" class="block text-sm font-medium text-gray-700">
+          <label for="current-password" class="block text-sm font-medium text-on-surface">
             Password
           </label>
 
           <input type="password" name="password" id="id_password" autocomplete="current-password"
             placeholder="Enter password"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+            class="w-full rounded-lg border border-outline-variant bg-surface px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
         </div>
 
-
         <button type="submit"
-          class="mt-4 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
+          class="mt-4 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary/90">
           Login
         </button>
 

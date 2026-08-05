@@ -4,8 +4,8 @@
 {% block title %}{{ title }} · {{ app_name }}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-10 col-xl-8">
+<div class="flex justify-center px-2 py-4 sm:px-4 lg:px-6">
+  <div class="w-full max-w-5xl">
     {% include "inbox/compose_form.html" with accounts=accounts default_account=default_account mode=mode draft=draft original=original to=to cc=cc bcc=bcc subject=subject body_html=body_html body_text=body_text importance=importance page_mode="page" %}
   </div>
 </div>

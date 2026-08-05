@@ -1,22 +1,22 @@
 {% load static %}
-<div class="modal fade" id="mfComposeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header py-2 px-3">
-        <h5 class="modal-title">
-          {% if mode == "reply" %}Reply
-          {% elif mode == "reply_all" %}Reply All
-          {% elif mode == "forward" %}Forward
-          {% else %}New Message{% endif %}
-        </h5>
-        <div class="ms-auto d-flex align-items-center gap-2 me-2">
-          <span class="small mf-muted" data-mf-autosave-status></span>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-4" id="mfComposeModal" data-mf-modal role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl">
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <h2 class="text-lg font-semibold text-slate-900">
+        {% if mode == "reply" %}Reply
+        {% elif mode == "reply_all" %}Reply All
+        {% elif mode == "forward" %}Forward
+        {% else %}New Message{% endif %}
+      </h2>
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-slate-500" data-mf-autosave-status></span>
+        <button type="button" class="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700" onclick="window.mfModal.close('mfComposeModal')" aria-label="Close">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
-      <div class="modal-body p-3">
-        {% include "inbox/compose_form.html" with accounts=accounts default_account=default_account mode=mode draft=draft original=original to=to cc=cc bcc=bcc subject=subject body_html=body_html body_text=body_text importance=importance page_mode="modal" %}
-      </div>
+    </div>
+    <div class="p-4 sm:p-6">
+      {% include "inbox/compose_form.html" with accounts=accounts default_account=default_account mode=mode draft=draft original=original to=to cc=cc bcc=bcc subject=subject body_html=body_html body_text=body_text importance=importance page_mode="modal" %}
     </div>
   </div>
 </div>

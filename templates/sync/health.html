@@ -2,67 +2,146 @@
 {% load ui_extras %}
 
 {% block page_subtitle %}
-<p class="mf-page-header__subtitle">Infrastructure and per-account sync health indicators.</p>
+<p class="text-sm text-gray-500">
+    Infrastructure and per-account sync health indicators.
+</p>
 {% endblock %}
 
 {% block page_actions %}
-<button class="btn btn-outline-secondary"
-  hx-get="{% url 'sync_health_partial' %}"
-  hx-target="#healthWrap" hx-swap="innerHTML">
-  <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+<button
+    hx-get="{% url 'sync_health_partial' %}"
+    hx-target="#healthWrap"
+    hx-swap="innerHTML"
+    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+
+    <span class="material-symbols-outlined text-[18px]">
+        refresh
+    </span>
+
+    Refresh
+
 </button>
 {% endblock %}
 
 {% block content %}
-<!-- Infrastructure -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-lg-3">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        {% if broker %}
-        <span class="mf-badge mf-badge--success mb-2"><i class="bi bi-hdd-network"></i></span>
-        {% else %}
-        <span class="mf-badge mf-badge--danger mb-2"><i class="bi bi-hdd-network"></i></span>
-        {% endif %}
-        <div class="fw-bold">Redis / Broker</div>
-        <div class="small mf-muted">{% if broker %}reachable{% else %}unreachable{% endif %}</div>
-      </div>
+
+<!-- Infrastructure Cards -->
+<div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+    <!-- Redis -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="flex flex-col items-center text-center">
+
+            {% if broker %}
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <span class="material-symbols-outlined">dns</span>
+            </div>
+            {% else %}
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <span class="material-symbols-outlined">dns</span>
+            </div>
+            {% endif %}
+
+            <h3 class="font-semibold text-gray-900">
+                Redis / Broker
+            </h3>
+
+            <p class="mt-1 text-sm text-gray-500">
+                {% if broker %}
+                    Reachable
+                {% else %}
+                    Unreachable
+                {% endif %}
+            </p>
+
+        </div>
+
     </div>
-  </div>
-  <div class="col-6 col-lg-3">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        {% if worker.active %}
-        <span class="mf-badge mf-badge--success mb-2"><i class="bi bi-cpu"></i></span>
-        {% else %}
-        <span class="mf-badge mf-badge--danger mb-2"><i class="bi bi-cpu"></i></span>
-        {% endif %}
-        <div class="fw-bold">Celery workers</div>
-        <div class="small mf-muted">{{ worker.count }} online</div>
-      </div>
+
+    <!-- Workers -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="flex flex-col items-center text-center">
+
+            {% if worker.active %}
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <span class="material-symbols-outlined">memory</span>
+            </div>
+            {% else %}
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <span class="material-symbols-outlined">memory</span>
+            </div>
+            {% endif %}
+
+            <h3 class="font-semibold text-gray-900">
+                Celery Workers
+            </h3>
+
+            <p class="mt-1 text-sm text-gray-500">
+                {{ worker.count }} Online
+            </p>
+
+        </div>
+
     </div>
-  </div>
-  <div class="col-6 col-lg-3">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        <span class="mf-badge mf-badge--info mb-2"><i class="bi bi-stack"></i></span>
-        <div class="fw-bold">Queue depth</div>
-        <div class="small mf-muted">{{ queue_depth }} waiting</div>
-      </div>
+
+    <!-- Queue -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="flex flex-col items-center text-center">
+
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <span class="material-symbols-outlined">stacked_bar_chart</span>
+            </div>
+
+            <h3 class="font-semibold text-gray-900">
+                Queue Depth
+            </h3>
+
+            <p class="mt-1 text-sm text-gray-500">
+                {{ queue_depth }} Waiting
+            </p>
+
+        </div>
+
     </div>
-  </div>
-  <div class="col-6 col-lg-3">
-    <div class="mf-card">
-      <div class="mf-card__body text-center py-3">
-        <span class="mf-badge mf-badge--{% if systems_healthy %}success{% else %}warning{% endif %} mb-2"><i class="bi bi-shield-check"></i></span>
-        <div class="fw-bold">Overall</div>
-        <div class="small mf-muted">{% if systems_healthy %}systems healthy{% else %}attention required{% endif %}</div>
-      </div>
+
+    <!-- Overall -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="flex flex-col items-center text-center">
+
+            {% if systems_healthy %}
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <span class="material-symbols-outlined">verified_user</span>
+            </div>
+            {% else %}
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                <span class="material-symbols-outlined">warning</span>
+            </div>
+            {% endif %}
+
+            <h3 class="font-semibold text-gray-900">
+                Overall
+            </h3>
+
+            <p class="mt-1 text-sm text-gray-500">
+                {% if systems_healthy %}
+                    Systems Healthy
+                {% else %}
+                    Attention Required
+                {% endif %}
+            </p>
+
+        </div>
+
     </div>
-  </div>
+
 </div>
 
 <div id="healthWrap">
-  {% include "sync/partials/health_rows.html" %}
+    {% include "sync/partials/health_rows.html" %}
 </div>
+
 {% endblock %}

@@ -1,41 +1,39 @@
 {% extends "base.html" %}
 
 {% block page_subtitle %}
-<p class="mf-page-header__subtitle">Your Microsoft account has been successfully connected.</p>
+<p class="text-sm text-slate-500">Your Microsoft account has been successfully connected.</p>
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-8 col-lg-6">
-    <div class="mf-card text-center py-5">
-      <div class="mf-card__body">
-        <div class="mf-icon mf-icon--success mb-4">
-          <i class="bi bi-check-circle-fill" style="font-size: 4rem;"></i>
+<div class="flex justify-center px-4 py-10 sm:px-6 lg:px-8">
+  <div class="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div class="text-center">
+      <div class="mb-6 flex justify-center">
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-4xl text-emerald-600">
+          <i class="bi bi-check-circle-fill"></i>
         </div>
-        <h2 class="mf-card__title">Account connected</h2>
-        <p class="mf-card__subtitle">Your Outlook account has been successfully connected to Portal.</p>
+      </div>
+      <h2 class="text-2xl font-semibold text-slate-900">Account connected</h2>
+      <p class="mt-2 text-sm text-slate-500">Your Outlook account has been successfully connected to Portal.</p>
 
-        <div class="mf-card mt-4 text-start">
-          <div class="mf-card__header">
-            <h3 class="mf-card__title h6">What happens next</h3>
-          </div>
-          <div class="mf-card__body">
-            <ul class="mb-0 small">
-              <li>Emails will begin syncing in the background</li>
-              <li>Your Unified Inbox will update automatically</li>
-              <li>You can manage sync settings from the Accounts page</li>
-            </ul>
-          </div>
-        </div>
+      <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left">
+        <h3 class="text-sm font-semibold text-slate-900">What happens next</h3>
+        <ul class="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-600">
+          <li>Emails will begin syncing in the background</li>
+          <li>Your Unified Inbox will update automatically</li>
+          <li>You can manage sync settings from the Accounts page</li>
+        </ul>
+      </div>
 
-        <div class="d-flex justify-content-center gap-2 mt-4">
-          <a href="{% url 'accounts' %}" class="btn btn-primary">
-            <i class="bi bi-envelope-paper me-1"></i>View accounts
-          </a>
-          <a href="{% url 'inbox' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-inbox me-1"></i>Open inbox
-          </a>
-        </div>
+      <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+        <a href="{% url 'accounts' %}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
+          <i class="bi bi-envelope-paper"></i>
+          <span>View accounts</span>
+        </a>
+        <a href="{% url 'inbox' %}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+          <i class="bi bi-inbox"></i>
+          <span>Open inbox</span>
+        </a>
       </div>
     </div>
   </div>

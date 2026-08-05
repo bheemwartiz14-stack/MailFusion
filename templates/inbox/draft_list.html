@@ -5,7 +5,7 @@
 {% block title %}Drafts · {{ app_name }}{% endblock %}
 
 {% block page_actions %}
-<a class="btn btn-primary" href="{% url 'compose' %}"><i class="bi bi-pencil-square me-1"></i>Compose</a>
+<a class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800" href="{% url 'compose' %}"><i class="bi bi-pencil-square"></i>Compose</a>
 {% endblock %}
 
 {% block content %}
@@ -21,9 +21,9 @@
         {% include "inbox/partials/email_list.html" with emails=emails mode="drafts" %}
       </div>
     </div>
-    <div class="d-flex align-items-center justify-content-between px-3 py-2 border-top small mf-muted">
+    <div class="flex items-center justify-between border-t border-slate-200 px-3 py-2 text-sm text-slate-500">
       <span>{{ emails|length }} of {{ total }} drafts</span>
-      <a href="{% url 'drafts' %}" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</a>
+      <a href="{% url 'drafts' %}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"><i class="bi bi-arrow-clockwise"></i>Refresh</a>
     </div>
   </section>
 </div>

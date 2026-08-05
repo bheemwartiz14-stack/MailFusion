@@ -5,33 +5,33 @@
 {% block title %}Search · {{ app_name }}{% endblock %}
 
 {% block content %}
-<div class="mf-card mb-3">
-  <div class="mf-card__body">
-    <form method="get" action="{% url 'inbox_search' %}" class="d-flex gap-2" data-mf-search-form>
-      <div class="input-group flex-grow-1">
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input type="search" class="form-control" name="q" value="{{ q }}" placeholder="Search subject, sender, recipient, body, keyword…" autofocus>
-      </div>
-      <button class="btn btn-primary" type="submit">Search</button>
-    </form>
-    {% if q and suggestions %}
-    <div class="d-flex flex-wrap gap-2 mt-3">
-      {% for s in suggestions %}
-      <a class="mf-chip" href="{% url 'inbox_search' %}?q={{ s.subject|urlencode }}">
-        <i class="bi bi-clock-history me-1"></i>{{ s.subject|default:"(no subject)" }}
-        <span class="mf-muted small">· {{ s.from_name|default:s.from_email }}</span>
-      </a>
-      {% endfor %}
+<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+  <form method="get" action="{% url 'inbox_search' %}" class="flex flex-col gap-3 sm:flex-row" data-mf-search-form>
+    <div class="relative flex-1">
+      <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+        <i class="bi bi-search"></i>
+      </span>
+      <input type="search" class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200" name="q" value="{{ q }}" placeholder="Search subject, sender, recipient, body, keyword…" autofocus>
     </div>
-    {% endif %}
+    <button class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800" type="submit">Search</button>
+  </form>
+  {% if q and suggestions %}
+  <div class="mt-4 flex flex-wrap gap-2">
+    {% for s in suggestions %}
+    <a class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-100" href="{% url 'inbox_search' %}?q={{ s.subject|urlencode }}">
+      <i class="bi bi-clock-history"></i>{{ s.subject|default:"(no subject)" }}
+      <span class="text-slate-400">· {{ s.from_name|default:s.from_email }}</span>
+    </a>
+    {% endfor %}
   </div>
+  {% endif %}
 </div>
 
 {% if q %}
-<div class="mf-card">
-  <div class="mf-card__body p-0">
+<div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+  <div class="p-0">
     {% if emails %}
-    <div class="mf-email-list p-1" data-mf-email-list>
+    <div class="p-1" data-mf-email-list>
       {% for email in emails %}
         {% include "inbox/partials/email_row.html" with email=email mode="inbox" %}
       {% endfor %}
@@ -39,27 +39,27 @@
       <div class="mf-inbox-scroll-sentinel"
            hx-get="{% url 'inbox_list' %}?{{ querystring }}&mode=search&offset={{ next_offset }}"
            hx-trigger="revealed" hx-swap="outerHTML" hx-target="this">
-        <div class="d-flex justify-content-center py-3"><div class="spinner-border spinner-border-sm text-secondary"></div></div>
+        <div class="flex justify-center py-3"><div class="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900"></div></div>
       </div>
       {% endif %}
     </div>
-    <div class="d-flex align-items-center justify-content-between px-3 py-2 border-top small mf-muted">
+    <div class="flex items-center justify-between border-t border-slate-200 px-3 py-2 text-sm text-slate-500">
       <span>{{ emails|length }} of {{ total }} results</span>
     </div>
     {% else %}
-    <div class="mf-empty">
-      <i class="bi bi-search mf-empty__icon"></i>
-      <h4>No results</h4>
-      <p class="mf-muted">No messages matched “{{ q }}”.</p>
+    <div class="flex flex-col items-center justify-center px-6 py-16 text-center">
+      <i class="bi bi-search text-4xl text-slate-400"></i>
+      <h4 class="mt-3 text-lg font-semibold text-slate-900">No results</h4>
+      <p class="mt-1 text-sm text-slate-500">No messages matched “{{ q }}”.</p>
     </div>
     {% endif %}
   </div>
 </div>
 {% else %}
-<div class="mf-empty">
-  <i class="bi bi-search mf-empty__icon"></i>
-  <h4>Search everything</h4>
-  <p class="mf-muted">Search across every connected Outlook account — subject, sender, recipient, body and keywords.</p>
+<div class="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+  <i class="bi bi-search text-4xl text-slate-400"></i>
+  <h4 class="mt-3 text-lg font-semibold text-slate-900">Search everything</h4>
+  <p class="mt-1 max-w-xl text-sm text-slate-500">Search across every connected Outlook account — subject, sender, recipient, body and keywords.</p>
 </div>
 {% endif %}
 {% endblock %}

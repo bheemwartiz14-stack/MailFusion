@@ -2,43 +2,122 @@
 {% load ui_extras %}
 
 {% block page_subtitle %}
-<p class="mf-page-header__subtitle">Every synchronization run across all connected mailboxes.</p>
+<p class="text-sm text-gray-500">
+    Every synchronization run across all connected mailboxes.
+</p>
 {% endblock %}
 
 {% block content %}
+
 <!-- Toolbar -->
-<div class="mf-toolbar">
-  <form method="get" class="d-flex gap-2 flex-wrap align-items-center">
-    <div class="input-group" style="max-width:280px">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Account name or email&hellip;">
+<div class="mb-6 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+
+    <form method="get" class="flex flex-1 flex-wrap items-center gap-3">
+
+        <!-- Search -->
+        <div class="relative w-full max-w-sm">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                search
+            </span>
+
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="Account name or email..."
+                class="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+        </div>
+
+        <!-- Account -->
+        <select
+            name="account"
+            onchange="this.form.submit()"
+            class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+
+            <option value="">All accounts</option>
+
+            {% for acc in accounts %}
+            <option value="{{ acc.pk }}"
+                {% if current_account == acc.pk|stringformat:"s" %}selected{% endif %}>
+                {{ acc.email }}
+            </option>
+            {% endfor %}
+
+        </select>
+
+        <!-- Status -->
+        <select
+            name="status"
+            onchange="this.form.submit()"
+            class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+
+            <option value="" {% if not current_status %}selected{% endif %}>
+                All Statuses
+            </option>
+
+            <option value="completed"
+                {% if current_status == "completed" %}selected{% endif %}>
+                Completed
+            </option>
+
+            <option value="failed"
+                {% if current_status == "failed" %}selected{% endif %}>
+                Failed
+            </option>
+
+            <option value="started"
+                {% if current_status == "started" %}selected{% endif %}>
+                Started
+            </option>
+
+        </select>
+
+        <!-- Filter -->
+        <button
+            type="submit"
+            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+
+            <span class="material-symbols-outlined text-[18px]">
+                filter_alt
+            </span>
+
+            Filter
+        </button>
+
+        <!-- Refresh -->
+        <button
+            type="button"
+            hx-get="{% url 'sync_logs_partial' %}"
+            hx-target="#syncLogsWrap"
+            hx-swap="innerHTML"
+            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+
+            <span class="material-symbols-outlined text-[18px]">
+                refresh
+            </span>
+
+            Refresh
+        </button>
+
+    </form>
+
+    <!-- Stats -->
+    <div class="flex items-center gap-3">
+
+        <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+            {{ counts.completed|default:0 }} OK
+        </span>
+
+        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+            {{ counts.failed|default:0 }} Failed
+        </span>
+
     </div>
-    <select class="form-select" style="max-width:160px" name="account" onchange="this.form.submit()">
-      <option value="">All accounts</option>
-      {% for acc in accounts %}
-      <option value="{{ acc.pk }}" {% if current_account == acc.pk|stringformat:"s" %}selected{% endif %}>{{ acc.email }}</option>
-      {% endfor %}
-    </select>
-    <select class="form-select" style="max-width:170px" name="status" onchange="this.form.submit()">
-      <option value="" {% if not current_status %}selected{% endif %}>All statuses</option>
-      <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>Completed</option>
-      <option value="failed" {% if current_status == 'failed' %}selected{% endif %}>Failed</option>
-      <option value="started" {% if current_status == 'started' %}selected{% endif %}>Started</option>
-    </select>
-    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-funnel me-1"></i>Filter</button>
-    <button type="button" class="btn btn-ghost btn-sm"
-      hx-get="{% url 'sync_logs_partial' %}"
-      hx-target="#syncLogsWrap" hx-swap="innerHTML">
-      <i class="bi bi-arrow-clockwise me-1"></i>Refresh
-    </button>
-  </form>
-  <div class="d-flex gap-2 ms-auto">
-    <span class="mf-badge mf-badge--success">{{ counts.completed|default:0 }} ok</span>
-    <span class="mf-badge mf-badge--danger">{{ counts.failed|default:0 }} failed</span>
-  </div>
+
 </div>
 
 <div id="syncLogsWrap">
-  {% include "sync/partials/logs_table.html" %}
+    {% include "sync/partials/logs_table.html" %}
 </div>
+
 {% endblock %}

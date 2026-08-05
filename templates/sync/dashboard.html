@@ -2,116 +2,262 @@
 {% load ui_extras %}
 
 {% block page_subtitle %}
-<p class="mf-page-header__subtitle">Live status of the background email synchronization engine.</p>
+<p class="text-sm text-gray-500">
+    Live status of the background email synchronization engine.
+</p>
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'accounts_sync_all' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-repeat me-1"></i>Sync all</a>
-<a href="{% url 'accounts_connect' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Connect account</a>
+<div class="flex items-center gap-3">
+    <a href="{% url 'accounts_sync_all' %}"
+       class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v6h6M20 20v-6h-6M20 9A8 8 0 006.34 5.34L4 10M4 15a8 8 0 0013.66 3.66L20 14"/>
+        </svg>
+        Sync all
+    </a>
+
+    <a href="{% url 'accounts_connect' %}"
+       class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4v16m8-8H4"/>
+        </svg>
+        Connect account
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}
-<div hx-get="{% url 'sync_dashboard_stats' %}" hx-trigger="every 30s" hx-swap="innerHTML">
-  {% include "sync/partials/dashboard_stats.html" %}
+
+<div hx-get="{% url 'sync_dashboard_stats' %}"
+     hx-trigger="every 30s"
+     hx-swap="innerHTML">
+    {% include "sync/partials/dashboard_stats.html" %}
 </div>
 
-<div class="row g-3 mt-1">
-  <div class="col-xl-7">
-    <div class="mf-card">
-      <div class="mf-card__header">
-        <div>
-          <h2 class="mf-card__title">Accounts</h2>
-          <p class="mf-card__subtitle">Sync health per connected mailbox</p>
-        </div>
-      </div>
-      <div class="mf-card__body mf-card__body--flush">
-        <div class="table-responsive">
-          <table class="table mf-table align-middle">
-            <thead>
-              <tr>
-                <th>Account</th>
-                <th>OAuth</th>
-                <th>Sync state</th>
-                <th>Emails</th>
-                <th>Unread</th>
-                <th class="text-end">Last sync</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for acc in accounts %}
-              <tr>
-                <td>
-                  <a href="{% url 'account_detail' acc.pk %}" class="cell-strong text-decoration-none">{{ acc.name }}</a>
-                  <div class="small mf-muted">{{ acc.email }}</div>
-                </td>
-                <td>
-                  {% if acc.oauth_status == 'connected' %}
-                  <span class="mf-badge mf-badge--success"><i class="bi bi-shield-check"></i>Connected</span>
-                  {% elif acc.oauth_status == 'expired' %}
-                  <span class="mf-badge mf-badge--warning"><i class="bi bi-shield-exclamation"></i>Expired</span>
-                  {% elif acc.oauth_status == 'revoked' %}
-                  <span class="mf-badge mf-badge--danger"><i class="bi bi-shield-lock"></i>Revoked</span>
-                  {% else %}
-                  <span class="mf-badge mf-badge--neutral"><i class="bi bi-shield"></i>Pending</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if acc.is_sync_paused %}
-                  <span class="mf-badge mf-badge--neutral"><i class="bi bi-pause-circle"></i>Paused</span>
-                  {% elif acc.health.graph_ok %}
-                  <span class="mf-badge mf-badge--success"><i class="bi bi-check-circle"></i>Healthy</span>
-                  {% else %}
-                  <span class="mf-badge mf-badge--danger"><i class="bi bi-exclamation-circle"></i>Error</span>
-                  {% endif %}
-                </td>
-                <td class="small">{{ acc.total_emails_synced }}</td>
-                <td class="small">{{ acc.unread_count }}</td>
-                <td class="small text-end text-nowrap">
-                  {% if acc.last_sync_at %}{{ acc.last_sync_at|timesince }} ago{% else %}Never{% endif %}
-                </td>
-              </tr>
-              {% empty %}
-              <tr><td colspan="6" class="text-center py-4 mf-muted">No accounts connected yet.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="mt-6 grid gap-6 xl:grid-cols-12">
 
-  <div class="col-xl-5">
-    <div class="mf-card">
-      <div class="mf-card__header">
-        <div>
-          <h2 class="mf-card__title">Recent sync runs</h2>
-          <p class="mf-card__subtitle">Latest attempts across all accounts</p>
-        </div>
-        <a href="{% url 'sync_logs' %}" class="btn btn-sm btn-ghost">View all</a>
-      </div>
-      <div class="mf-card__body mf-card__body--flush">
-        <ul class="list-group list-group-flush">
-          {% for log in recent_logs %}
-          <li class="list-group-item d-flex align-items-center gap-2">
-            {% if log.status == 'completed' %}
-            <span class="mf-badge mf-badge--success"><i class="bi bi-check-circle"></i></span>
-            {% elif log.status == 'failed' %}
-            <span class="mf-badge mf-badge--danger"><i class="bi bi-x-circle"></i></span>
-            {% else %}
-            <span class="mf-badge mf-badge--neutral"><i class="bi bi-arrow-repeat"></i></span>
-            {% endif %}
-            <div class="min-w-0 flex-grow-1">
-              <div class="small text-truncate cell-strong">{{ log.account.email }}</div>
-              <div class="small mf-muted">+{{ log.emails_added }} added, {{ log.emails_updated }} updated</div>
+    <!-- Accounts -->
+    <div class="xl:col-span-7">
+        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        Accounts
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Sync health per connected mailbox
+                    </p>
+                </div>
             </div>
-            <span class="small mf-muted text-nowrap">{{ log.start_time|timesince }} ago</span>
-          </li>
-          {% empty %}
-          <li class="list-group-item text-center py-4 mf-muted">No syncs have run yet.</li>
-          {% endfor %}
-        </ul>
-      </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Account
+                        </th>
+
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            OAuth
+                        </th>
+
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Sync State
+                        </th>
+
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Emails
+                        </th>
+
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Unread
+                        </th>
+
+                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Last Sync
+                        </th>
+                    </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100 bg-white">
+
+                    {% for acc in accounts %}
+                    <tr class="hover:bg-gray-50">
+
+                        <td class="px-6 py-4">
+                            <a href="{% url 'account_detail' acc.pk %}"
+                               class="font-medium text-gray-900 hover:text-blue-600">
+                                {{ acc.name }}
+                            </a>
+
+                            <p class="mt-1 text-sm text-gray-500">
+                                {{ acc.email }}
+                            </p>
+                        </td>
+
+                        <td class="px-6 py-4">
+
+                            {% if acc.oauth_status == 'connected' %}
+                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                Connected
+                            </span>
+
+                            {% elif acc.oauth_status == 'expired' %}
+                            <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
+                                Expired
+                            </span>
+
+                            {% elif acc.oauth_status == 'revoked' %}
+                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+                                Revoked
+                            </span>
+
+                            {% else %}
+                            <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                                Pending
+                            </span>
+                            {% endif %}
+
+                        </td>
+
+                        <td class="px-6 py-4">
+
+                            {% if acc.is_sync_paused %}
+                            <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                                Paused
+                            </span>
+
+                            {% elif acc.health.graph_ok %}
+                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                Healthy
+                            </span>
+
+                            {% else %}
+                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+                                Error
+                            </span>
+                            {% endif %}
+
+                        </td>
+
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                            {{ acc.total_emails_synced }}
+                        </td>
+
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                            {{ acc.unread_count }}
+                        </td>
+
+                        <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
+                            {% if acc.last_sync_at %}
+                                {{ acc.last_sync_at|timesince }} ago
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="6"
+                            class="px-6 py-10 text-center text-sm text-gray-500">
+                            No accounts connected yet.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
     </div>
-  </div>
+
+    <!-- Recent Sync Runs -->
+    <div class="xl:col-span-5">
+
+        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        Recent Sync Runs
+                    </h2>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Latest attempts across all accounts
+                    </p>
+                </div>
+
+                <a href="{% url 'sync_logs' %}"
+                   class="text-sm font-medium text-blue-600 hover:text-blue-700">
+                    View all
+                </a>
+
+            </div>
+
+            <div>
+
+                {% for log in recent_logs %}
+
+                <div class="flex items-center gap-4 border-b border-gray-100 px-6 py-4 last:border-0">
+
+                    {% if log.status == 'completed' %}
+                    <span class="h-3 w-3 rounded-full bg-green-500"></span>
+
+                    {% elif log.status == 'failed' %}
+                    <span class="h-3 w-3 rounded-full bg-red-500"></span>
+
+                    {% else %}
+                    <span class="h-3 w-3 rounded-full bg-gray-400 animate-pulse"></span>
+                    {% endif %}
+
+                    <div class="min-w-0 flex-1">
+
+                        <p class="truncate text-sm font-medium text-gray-900">
+                            {{ log.account.email }}
+                        </p>
+
+                        <p class="mt-1 text-sm text-gray-500">
+                            +{{ log.emails_added }} added,
+                            {{ log.emails_updated }} updated
+                        </p>
+
+                    </div>
+
+                    <span class="whitespace-nowrap text-xs text-gray-500">
+                        {{ log.start_time|timesince }} ago
+                    </span>
+
+                </div>
+
+                {% empty %}
+
+                <div class="px-6 py-10 text-center text-sm text-gray-500">
+                    No syncs have run yet.
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
 {% endblock %}
