@@ -192,6 +192,7 @@ class InboxView(LoginRequiredMixin, PortalView):
             page_size=PAGE_SIZE,
             now=timezone.now(),
         )
+        print('context', context)
         return render(request, self.template_name, context)
 
 

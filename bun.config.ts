@@ -1,5 +1,5 @@
 // TypeScript configuration for bundling
-import { defineConfig } from """""""""""""
+import { defineConfig } from """""""""""
 import { resolve } from "path"
 import { fileURLToPath } from "url"
 
@@ -19,9 +19,6 @@ export default defineConfig({
       output: {
         entryFileNames: "[name].js",
         format: "es",
-        globals: {
-          alpinejs: "Alpine",
-        },
       },
     },
     target: "es2022",
@@ -35,6 +32,6 @@ export default defineConfig({
     },
     extensions: [".tsx", ".ts", ".js"],
   },
-  external: ["alpinejs"],
+  external: [],
   plugins: [],
 })
