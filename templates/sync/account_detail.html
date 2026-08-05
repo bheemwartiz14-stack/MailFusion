@@ -3,9 +3,7 @@
 
 {% block page_actions %}
 <div class="flex flex-wrap items-center gap-3">
-
-  <a href="{% url 'accounts_sync' account.pk %}"
-    class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+  <a href="{% url 'accounts_sync' account.pk %}" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
     <i class="bi bi-lightning-charge mr-2"></i>
     Sync now
   </a>
@@ -13,8 +11,7 @@
   {% if account.is_sync_paused %}
   <form method="post" action="{% url 'accounts_resume' account.pk %}">
     {% csrf_token %}
-    <button
-      class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+    <button class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
       <i class="bi bi-play-fill mr-2"></i>
       Resume
     </button>
@@ -22,357 +19,216 @@
   {% else %}
   <form method="post" action="{% url 'accounts_pause' account.pk %}">
     {% csrf_token %}
-    <button
-      class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+    <button class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
       <i class="bi bi-pause-fill mr-2"></i>
       Pause
     </button>
   </form>
   {% endif %}
 
-  <a href="{% url 'accounts_disconnect_confirm' account.pk %}"
-    class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
+  <a href="{% url 'accounts_disconnect_confirm' account.pk %}" class="inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">
     <i class="bi bi-trash mr-2"></i>
     Disconnect
   </a>
-
 </div>
 {% endblock %}
 
 {% block content %}
-
 <div class="grid gap-6 lg:grid-cols-3">
-
-  <!-- Account Information -->
-
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
     <div class="p-6">
-
       <div class="mb-6 flex items-center gap-4">
-
-        <div
-          class="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-xl font-bold text-blue-600">
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-900 text-xl font-bold text-white">
           {{ account.nickname|first|upper|default:account.email|first|upper }}
         </div>
 
         <div class="min-w-0">
-          <h2 class="truncate text-lg font-semibold text-gray-900">
-            {{ account.name }}
-          </h2>
-
-          <p class="truncate text-sm text-gray-500">
-            {{ account.email }}
-          </p>
+          <h2 class="truncate text-lg font-semibold text-slate-900">{{ account.name }}</h2>
+          <p class="truncate text-sm text-slate-500">{{ account.email }}</p>
         </div>
-
       </div>
 
       <dl class="space-y-4 text-sm">
-
         <div class="flex justify-between gap-4">
-          <dt class="text-gray-500">Nickname</dt>
-          <dd>{{ account.nickname|default:"—" }}</dd>
+          <dt class="text-slate-500">Nickname</dt>
+          <dd class="text-slate-700">{{ account.nickname|default:"—" }}</dd>
         </div>
 
         <div class="flex justify-between gap-4">
-          <dt class="text-gray-500">Microsoft ID</dt>
-          <dd class="truncate max-w-[180px]">
-            {{ account.microsoft_user_id|default:"—" }}
-          </dd>
+          <dt class="text-slate-500">Microsoft ID</dt>
+          <dd class="max-w-[180px] truncate text-slate-700">{{ account.microsoft_user_id|default:"—" }}</dd>
         </div>
 
         <div class="flex justify-between gap-4">
-          <dt class="text-gray-500">Status</dt>
+          <dt class="text-slate-500">Status</dt>
           <dd>
-
             {% if account.is_sync_paused %}
-            <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-              Paused
-            </span>
-
+            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Paused</span>
             {% elif account.status == "active" %}
-            <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-              Active
-            </span>
-
+            <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Active</span>
             {% elif account.status == "error" %}
-            <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-              Error
-            </span>
-
+            <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">Error</span>
             {% else %}
-            <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium">
-              {{ account.status }}
-            </span>
-
+            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ account.status }}</span>
             {% endif %}
-
           </dd>
         </div>
 
         <div class="flex justify-between gap-4">
-          <dt class="text-gray-500">OAuth</dt>
-
+          <dt class="text-slate-500">OAuth</dt>
           <dd>
-
             {% if account.oauth_status == "connected" %}
-            <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-              Connected
-            </span>
-
+            <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Connected</span>
             {% elif account.oauth_status == "expired" %}
-            <span class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
-              Expired
-            </span>
-
+            <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Expired</span>
             {% elif account.oauth_status == "revoked" %}
-            <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-              Revoked
-            </span>
-
+            <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">Revoked</span>
             {% else %}
-            <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-              Pending
-            </span>
-
+            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Pending</span>
             {% endif %}
-
           </dd>
         </div>
 
         <div class="flex justify-between">
-          <dt class="text-gray-500">Connected</dt>
-          <dd>{{ account.created_at|date:"M d, Y" }}</dd>
+          <dt class="text-slate-500">Connected</dt>
+          <dd class="text-slate-700">{{ account.created_at|date:"M d, Y" }}</dd>
         </div>
 
         <div class="flex justify-between">
-          <dt class="text-gray-500">Last Sync</dt>
-          <dd>{{ account.last_sync_at|date:"Y-m-d H:i"|default:"Never" }}</dd>
+          <dt class="text-slate-500">Last Sync</dt>
+          <dd class="text-slate-700">{{ account.last_sync_at|date:"Y-m-d H:i"|default:"Never" }}</dd>
         </div>
 
         <div class="flex justify-between">
-          <dt class="text-gray-500">Last Success</dt>
-          <dd>{{ account.last_successful_sync_at|date:"Y-m-d H:i"|default:"—" }}</dd>
+          <dt class="text-slate-500">Last Success</dt>
+          <dd class="text-slate-700">{{ account.last_successful_sync_at|date:"Y-m-d H:i"|default:"—" }}</dd>
         </div>
 
         <div class="flex justify-between">
-          <dt class="text-gray-500">Emails Synced</dt>
-          <dd>{{ total_emails }}</dd>
+          <dt class="text-slate-500">Emails Synced</dt>
+          <dd class="text-slate-700">{{ total_emails }}</dd>
         </div>
 
         <div class="flex justify-between">
-          <dt class="text-gray-500">Unread</dt>
-          <dd>{{ unread }}</dd>
+          <dt class="text-slate-500">Unread</dt>
+          <dd class="text-slate-700">{{ unread }}</dd>
         </div>
-
       </dl>
-
     </div>
-
   </div>
 
-  <!-- Right Content -->
-
   <div class="space-y-6 lg:col-span-2">
-
-    <!-- Rename -->
-
-    <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-
-      <div class="border-b border-gray-200 p-6">
-        <h2 class="text-lg font-semibold">Rename Account</h2>
-        <p class="mt-1 text-sm text-gray-500">
-          Update display name and nickname.
-        </p>
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-200 p-6">
+        <h2 class="text-lg font-semibold text-slate-900">Rename Account</h2>
+        <p class="mt-1 text-sm text-slate-500">Update display name and nickname.</p>
       </div>
 
       <div class="p-6">
-
         <form method="post" action="{% url 'accounts_rename' account.pk %}" class="grid gap-4 md:grid-cols-12">
-
           {% csrf_token %}
 
           <div class="md:col-span-5">
-            <label class="mb-2 block text-sm font-medium">
-              Display Name
-            </label>
-
-            <input type="text" name="name" value="{{ account.name }}" required
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            <label class="mb-2 block text-sm font-medium text-slate-700">Display Name</label>
+            <input type="text" name="name" value="{{ account.name }}" required class="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200">
           </div>
 
           <div class="md:col-span-4">
-            <label class="mb-2 block text-sm font-medium">
-              Nickname
-            </label>
-
-            <input type="text" name="nickname" value="{{ account.nickname }}"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            <label class="mb-2 block text-sm font-medium text-slate-700">Nickname</label>
+            <input type="text" name="nickname" value="{{ account.nickname }}" class="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200">
           </div>
 
           <div class="flex items-end md:col-span-3">
-            <button class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
-              Save
-            </button>
+            <button class="w-full rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-slate-800">Save</button>
           </div>
-
         </form>
-
       </div>
-
     </div>
 
-    <!-- Recent Syncs -->
-
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-
-      <div class="flex items-center justify-between border-b border-gray-200 p-6">
-
-        <h2 class="text-lg font-semibold">
-          Recent Syncs
-        </h2>
-
-        <a href="{% url 'sync_logs' %}?account={{ account.pk }}"
-          class="text-sm font-medium text-blue-600 hover:text-blue-700">
-          All Logs
-        </a>
-
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-200 p-6">
+        <h2 class="text-lg font-semibold text-slate-900">Recent Syncs</h2>
+        <a href="{% url 'sync_logs' %}?account={{ account.pk }}" class="text-sm font-semibold text-slate-700 transition hover:text-slate-900">All Logs</a>
       </div>
 
       <div class="overflow-x-auto">
-
-        <table class="min-w-full divide-y divide-gray-200">
-
-          <thead class="bg-gray-50">
-
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50">
             <tr>
-
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase">Start</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase">Added</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase">Updated</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase">Duration</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase">Error</th>
-
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Start</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Added</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Updated</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Duration</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Error</th>
             </tr>
-
           </thead>
 
-          <tbody class="divide-y divide-gray-100">
-
+          <tbody class="divide-y divide-slate-100">
             {% for log in logs %}
-
             <tr>
-
               <td class="px-6 py-4">
-                <a href="{% url 'sync_log_detail' log.pk %}" class="text-blue-600 hover:underline">
-                  {{ log.start_time|date:"Y-m-d H:i:s" }}
-                </a>
+                <a href="{% url 'sync_log_detail' log.pk %}" class="font-medium text-slate-700 transition hover:text-slate-900 hover:underline">{{ log.start_time|date:"Y-m-d H:i:s" }}</a>
               </td>
-
               <td>
                 {% if log.status == "completed" %}
-                <span class="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">Completed</span>
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Completed</span>
                 {% elif log.status == "failed" %}
-                <span class="rounded-full bg-red-100 px-3 py-1 text-xs text-red-700">Failed</span>
+                <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">Failed</span>
                 {% else %}
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">Started</span>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Started</span>
                 {% endif %}
               </td>
-
-              <td class="text-green-600">{{ log.emails_added }}</td>
-              <td class="text-blue-600">{{ log.emails_updated }}</td>
-              <td>{{ log.duration_seconds|floatformat:1 }}s</td>
-              <td class="max-w-xs truncate">{{ log.error|default:"—" }}</td>
-
+              <td class="text-emerald-700">{{ log.emails_added }}</td>
+              <td class="text-slate-700">{{ log.emails_updated }}</td>
+              <td class="text-slate-700">{{ log.duration_seconds|floatformat:1 }}s</td>
+              <td class="max-w-xs truncate text-slate-700">{{ log.error|default:"—" }}</td>
             </tr>
-
             {% empty %}
-
             <tr>
-              <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                No syncs yet.
-              </td>
+              <td colspan="6" class="px-6 py-10 text-center text-slate-500">No syncs yet.</td>
             </tr>
-
             {% endfor %}
-
           </tbody>
-
         </table>
-
       </div>
-
     </div>
-
   </div>
-
 </div>
 
 <div class="mt-6 grid gap-6 lg:grid-cols-2">
-
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-
-    <div class="border-b border-gray-200 p-6">
-      <h2 class="text-lg font-semibold">Webhooks</h2>
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-200 p-6">
+      <h2 class="text-lg font-semibold text-slate-900">Webhooks</h2>
     </div>
 
-    <ul class="divide-y divide-gray-100">
-
+    <ul class="divide-y divide-slate-100">
       {% for sub in subscriptions %}
-
       <li class="flex items-center justify-between px-6 py-4 text-sm">
-        <span class="truncate">{{ sub.resource }}</span>
-        <span class="text-gray-500">
-          {{ sub.expiration_date_time|date:"M d, H:i" }}
-        </span>
+        <span class="truncate text-slate-700">{{ sub.resource }}</span>
+        <span class="text-slate-500">{{ sub.expiration_date_time|date:"M d, H:i" }}</span>
       </li>
-
       {% empty %}
-
-      <li class="px-6 py-8 text-center text-gray-500">
-        No subscriptions.
-      </li>
-
+      <li class="px-6 py-8 text-center text-slate-500">No subscriptions.</li>
       {% endfor %}
-
     </ul>
-
   </div>
 
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-
-    <div class="border-b border-gray-200 p-6">
-      <h2 class="text-lg font-semibold">Recent Emails</h2>
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-200 p-6">
+      <h2 class="text-lg font-semibold text-slate-900">Recent Emails</h2>
     </div>
 
-    <ul class="divide-y divide-gray-100">
-
+    <ul class="divide-y divide-slate-100">
       {% for email in emails %}
-
       <li class="flex items-center justify-between gap-4 px-6 py-4 text-sm">
-        <span class="truncate">
-          {{ email.subject|default:"(no subject)" }}
-        </span>
-
-        <span class="text-gray-500 whitespace-nowrap">
-          {{ email.received_at|date:"M d" }}
-        </span>
+        <span class="truncate text-slate-700">{{ email.subject|default:"(no subject)" }}</span>
+        <span class="whitespace-nowrap text-slate-500">{{ email.received_at|date:"M d" }}</span>
       </li>
-
       {% empty %}
-
-      <li class="px-6 py-8 text-center text-gray-500">
-        No emails synced yet.
-      </li>
-
+      <li class="px-6 py-8 text-center text-slate-500">No emails synced yet.</li>
       {% endfor %}
-
     </ul>
-
   </div>
-
 </div>
-
 {% endblock %}

@@ -1,31 +1,29 @@
-<div class="flex h-14 items-center justify-between border-b border-outline-variant px-4 bg-surface">
+<div class="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
   <div class="flex items-center gap-3">
     <div class="flex h-6 items-center gap-1">
-      <input class="h-4 w-4 rounded cursor-pointer" type="checkbox" id="mfSelectAll" data-mf-select-all
-             aria-label="Select all on this page">
+      <input class="h-4 w-4 cursor-pointer rounded border-slate-300 text-slate-700" type="checkbox" id="mfSelectAll" data-mf-select-all aria-label="Select all on this page">
       <label class="hidden" for="mfSelectAll">All</label>
     </div>
-    <h2 class="text-lg font-semibold tracking-tight text-on-background">
+    <h2 class="text-lg font-semibold tracking-tight text-slate-900">
       {% if folder == "sent" %}Sent{% elif folder == "drafts" %}Drafts{% elif folder == "search" %}Search{% else %}Inbox{% endif %}
     </h2>
-    {% if total %}<span class="text-xs font-medium text-outline">{{ total }}</span>{% endif %}
+    {% if total %}<span class="text-xs font-medium text-slate-500">{{ total }}</span>{% endif %}
   </div>
 
-  <div class="flex items-center gap-1">
-    <button class="flex size-8 items-center justify-center rounded-lg hover:bg-surface-container-highest transition-colors"
-            type="button" title="Bulk actions" data-bs-toggle="dropdown" data-mf-bulk-dropdown>
-      <span class="material-symbols-outlined text-[20px] text-on-surface-variant">checklist</span>
+  <div class="relative flex items-center gap-1">
+    <button class="flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-slate-100" type="button" title="Bulk actions" data-mf-bulk-dropdown>
+      <span class="material-symbols-outlined text-[20px] text-slate-500">checklist</span>
     </button>
-    <ul class="dropdown-menu dropdown-menu-end shadow-lg border border-outline-variant rounded-xl p-1">
-      <li><h6 class="dropdown-header text-xs uppercase tracking-wider text-outline">Selected: <span data-mf-selected-count>0</span></h6></li>
-      <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item rounded-lg hover:bg-surface-container-highest" href="#" data-mf-bulk-action="read"><span class="material-symbols-outlined me-2 text-[18px] align-middle">mark_email_read</span>Mark read</a></li>
-      <li><a class="dropdown-item rounded-lg hover:bg-surface-container-highest" href="#" data-mf-bulk-action="unread"><span class="material-symbols-outlined me-2 text-[18px] align-middle">mark_email_unread</span>Mark unread</a></li>
-      <li><a class="dropdown-item rounded-lg hover:bg-surface-container-highest" href="#" data-mf-bulk-action="star"><span class="material-symbols-outlined me-2 text-[18px] align-middle">star</span>Star</a></li>
-      <li><a class="dropdown-item rounded-lg hover:bg-surface-container-highest" href="#" data-mf-bulk-action="flag"><span class="material-symbols-outlined me-2 text-[18px] align-middle">flag</span>Flag</a></li>
-      <li><a class="dropdown-item rounded-lg hover:bg-surface-container-highest" href="#" data-mf-bulk-action="archive"><span class="material-symbols-outlined me-2 text-[18px] align-middle">archive</span>Archive</a></li>
-      <li><a class="dropdown-item rounded-lg hover:bg-surface-container-highest" href="#" data-mf-bulk-action="trash"><span class="material-symbols-outlined me-2 text-[18px] align-middle">delete</span>Move to trash</a></li>
-      <li><a class="dropdown-item rounded-lg hover:bg-error-container text-error" href="#" data-mf-bulk-action="delete"><span class="material-symbols-outlined me-2 text-[18px] align-middle">delete_forever</span>Delete permanently</a></li>
-    </ul>
+    <div class="absolute right-0 top-12 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl" data-mf-bulk-menu>
+      <div class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Selected: <span data-mf-selected-count>0</span></div>
+      <div class="my-1 h-px bg-slate-200"></div>
+      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50" href="#" data-mf-bulk-action="read"><span class="material-symbols-outlined text-[18px]">mark_email_read</span>Mark read</a>
+      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50" href="#" data-mf-bulk-action="unread"><span class="material-symbols-outlined text-[18px]">mark_email_unread</span>Mark unread</a>
+      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50" href="#" data-mf-bulk-action="star"><span class="material-symbols-outlined text-[18px]">star</span>Star</a>
+      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50" href="#" data-mf-bulk-action="flag"><span class="material-symbols-outlined text-[18px]">flag</span>Flag</a>
+      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50" href="#" data-mf-bulk-action="archive"><span class="material-symbols-outlined text-[18px]">archive</span>Archive</a>
+      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50" href="#" data-mf-bulk-action="trash"><span class="material-symbols-outlined text-[18px]">delete</span>Move to trash</a>
+      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-700 transition hover:bg-rose-50" href="#" data-mf-bulk-action="delete"><span class="material-symbols-outlined text-[18px]">delete_forever</span>Delete permanently</a>
+    </div>
   </div>
 </div>
