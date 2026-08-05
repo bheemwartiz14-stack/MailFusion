@@ -14,6 +14,7 @@ services:
         description: Allow all connections
 
 
+
   # ==========================================================
   # Django Web
   # ==========================================================
@@ -30,6 +31,7 @@ services:
       uv run python manage.py collectstatic --noinput
       uv run python manage.py migrate
 
+
     startCommand: >
       uv run gunicorn core.wsgi:application
       --bind 0.0.0.0:$PORT
@@ -39,7 +41,12 @@ services:
       --access-logfile -
       --error-logfile -
 
+
     envVars:
+
+      # ======================================================
+      # Django
+      # ======================================================
 
       - key: PYTHON_VERSION
         value: "3.13"
@@ -55,6 +62,148 @@ services:
 
       - key: ALLOWED_HOSTS
         value: ".onrender.com"
+
+      - key: SECURE_SSL_REDIRECT
+        value: "true"
+
+
+
+      # ======================================================
+      # PostgreSQL
+      # ======================================================
+
+      - key: POSTGRES_HOST
+        sync: false
+
+      - key: POSTGRES_DB
+        sync: false
+
+      - key: POSTGRES_USER
+        sync: false
+
+      - key: POSTGRES_PASSWORD
+        sync: false
+
+      - key: POSTGRES_PORT
+        value: "5432"
+
+
+
+      # ======================================================
+      # Redis / Celery
+      # ======================================================
+
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: mailfusion-redis
+          property: connectionString
+
+
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: mailfusion-redis
+          property: connectionString
+
+
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: mailfusion-redis
+          property: connectionString
+
+
+
+      # ======================================================
+      # Microsoft Graph OAuth
+      # ======================================================
+
+      - key: MICROSOFT_CLIENT_ID
+        sync: false
+
+      - key: MICROSOFT_CLIENT_SECRET
+        sync: false
+
+      - key: MICROSOFT_TENANT_ID
+        value: "common"
+
+      - key: MICROSOFT_REDIRECT_URI
+        sync: false
+
+      - key: MICROSOFT_GRAPH_SCOPES
+        value: "offline_access User.Read Mail.Read Mail.ReadBasic"
+
+
+
+      # ======================================================
+      # Mail Sync Settings
+      # ======================================================
+
+      - key: SYNC_INTERVAL_SECONDS
+        value: "1800"
+
+      - key: TOKEN_REFRESH_INTERVAL_MINUTES
+        value: "10"
+
+      - key: WEBHOOK_RENEW_INTERVAL_MINUTES
+        value: "15"
+
+      - key: LOG_CLEANUP_INTERVAL_HOURS
+        value: "24"
+
+      - key: HEALTH_CHECK_INTERVAL_MINUTES
+        value: "5"
+
+      - key: SYNC_LOG_RETENTION_DAYS
+        value: "30"
+
+      - key: SYNC_MAX_ATTACHMENT_BYTES
+        value: "26214400"
+
+
+
+
+
+  # ==========================================================
+  # Celery Worker
+  # ==========================================================
+  - type: worker
+    name: mailfusion-celery
+
+    runtime: python
+    plan: free
+    region: oregon
+
+    autoDeploy: true
+
+
+    buildCommand: |
+      uv sync --frozen
+
+
+    startCommand: >
+      uv run celery
+      -A core worker
+      --loglevel=info
+      --concurrency=4
+
+
+
+    envVars:
+
+      - key: PYTHON_VERSION
+        value: "3.13"
+
+      - key: DJANGO_SETTINGS_MODULE
+        value: "core.settings"
+
+      - key: DEBUG
+        value: "False"
+
+      - key: SECRET_KEY
+        sync: false
+
 
 
       # PostgreSQL
@@ -75,79 +224,6 @@ services:
         value: "5432"
 
 
-      # Redis
-
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: mailfusion-redis
-          property: connectionString
-
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: redis
-          name: mailfusion-redis
-          property: connectionString
-
-      - key: CELERY_RESULT_BACKEND
-        fromService:
-          type: redis
-          name: mailfusion-redis
-          property: connectionString
-
-
-
-  # ==========================================================
-  # Celery Worker
-  # ==========================================================
-  - type: worker
-    name: mailfusion-celery
-    runtime: python
-    plan: free
-    region: oregon
-
-    autoDeploy: true
-
-    buildCommand: |
-      uv sync --frozen
-
-    startCommand: >
-      uv run celery
-      -A core worker
-      --loglevel=info
-      --concurrency=4
-
-
-    envVars:
-
-      - key: PYTHON_VERSION
-        value: "3.13"
-
-      - key: DJANGO_SETTINGS_MODULE
-        value: "core.settings"
-
-      - key: DEBUG
-        value: "False"
-
-      - key: SECRET_KEY
-        sync: false
-
-
-      - key: POSTGRES_HOST
-        sync: false
-
-      - key: POSTGRES_DB
-        sync: false
-
-      - key: POSTGRES_USER
-        sync: false
-
-      - key: POSTGRES_PASSWORD
-        sync: false
-
-      - key: POSTGRES_PORT
-        value: "5432"
-
 
       # Redis
 
@@ -157,17 +233,40 @@ services:
           name: mailfusion-redis
           property: connectionString
 
+
       - key: CELERY_BROKER_URL
         fromService:
           type: redis
           name: mailfusion-redis
           property: connectionString
 
+
       - key: CELERY_RESULT_BACKEND
         fromService:
           type: redis
           name: mailfusion-redis
           property: connectionString
+
+
+
+      # Microsoft OAuth
+
+      - key: MICROSOFT_CLIENT_ID
+        sync: false
+
+      - key: MICROSOFT_CLIENT_SECRET
+        sync: false
+
+      - key: MICROSOFT_TENANT_ID
+        value: "common"
+
+      - key: MICROSOFT_REDIRECT_URI
+        sync: false
+
+      - key: MICROSOFT_GRAPH_SCOPES
+        value: "offline_access User.Read Mail.Read Mail.ReadBasic"
+
+
 
 
 
@@ -176,19 +275,23 @@ services:
   # ==========================================================
   - type: worker
     name: mailfusion-beat
+
     runtime: python
     plan: free
     region: oregon
 
     autoDeploy: true
 
+
     buildCommand: |
       uv sync --frozen
+
 
     startCommand: >
       uv run celery
       -A core beat
       --loglevel=info
+
 
 
     envVars:
@@ -206,6 +309,9 @@ services:
         sync: false
 
 
+
+      # PostgreSQL
+
       - key: POSTGRES_HOST
         sync: false
 
@@ -222,6 +328,7 @@ services:
         value: "5432"
 
 
+
       # Redis
 
       - key: REDIS_URL
@@ -230,14 +337,35 @@ services:
           name: mailfusion-redis
           property: connectionString
 
+
       - key: CELERY_BROKER_URL
         fromService:
           type: redis
           name: mailfusion-redis
           property: connectionString
 
+
       - key: CELERY_RESULT_BACKEND
         fromService:
           type: redis
           name: mailfusion-redis
           property: connectionString
+
+
+
+      # Microsoft OAuth
+
+      - key: MICROSOFT_CLIENT_ID
+        sync: false
+
+      - key: MICROSOFT_CLIENT_SECRET
+        sync: false
+
+      - key: MICROSOFT_TENANT_ID
+        value: "common"
+
+      - key: MICROSOFT_REDIRECT_URI
+        sync: false
+
+      - key: MICROSOFT_GRAPH_SCOPES
+        value: "offline_access User.Read Mail.Read Mail.ReadBasic"
