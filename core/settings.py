@@ -19,21 +19,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def env_bool(name, default=False):
-    return os.environ.get(name, str(default)).lower() in ("1", "true", "yes", "on")
+    return os.getenv(name, str(default)).lower() in ("1", "true", "yes", "on")
 
 
 def env_int(name, default):
     try:
-        return int(os.environ.get(name, default))
+        return int(os.getenv(name, default))
     except (TypeError, ValueError):
         return int(default)
 
 
-SECRET_KEY = os.environ.get(
+SECRET_KEY = os.getenv(
     "SECRET_KEY", "django-insecure-mailfusion-ui-only-demo-key"
 )
 DEBUG = env_bool("DEBUG", True)
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
@@ -121,7 +121,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # --- Security (Django built-in middleware) ---
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_REFERRER_POLICY = os.environ.get("SECURE_REFERRER_POLICY", "same-origin")
+SECURE_REFERRER_POLICY = os.getenv("SECURE_REFERRER_POLICY", "same-origin")
 X_FRAME_OPTIONS = "DENY"
 SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", False)
 SECURE_HSTS_SECONDS = env_int("SECURE_HSTS_SECONDS", 0)
@@ -129,26 +129,26 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", True
 SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", True)
 SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", False)
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = os.environ.get("SESSION_COOKIE_SAMESITE", "Lax")
+SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
 CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", False)
 CSRF_COOKIE_HTTPONLY = True
 
 # --- Email (used by the built-in password reset flow) ---
-EMAIL_BACKEND = os.environ.get(
+EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
 EMAIL_PORT = env_int("EMAIL_PORT", 587)
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Portal <no-reply@example.com>")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Portal <no-reply@example.com>")
 
-MICROSOFT_CLIENT_ID = os.environ.get("MICROSOFT_CLIENT_ID", "")
-MICROSOFT_CLIENT_SECRET = os.environ.get("MICROSOFT_CLIENT_SECRET", "")
-MICROSOFT_TENANT_ID = os.environ.get("MICROSOFT_TENANT_ID", "common")
-MICROSOFT_REDIRECT_URI = os.environ.get("MICROSOFT_REDIRECT_URI", "http://localhost:8000/accounts/callback/")
-SCOPES = os.environ.get( "MICROSOFT_GRAPH_SCOPES", "offline_access User.Read Mail.Read Mail.ReadBasic Mail.ReadWrite").split(",")
+MICROSOFT_CLIENT_ID = os.getenv("MICROSOFT_CLIENT_ID", "")
+MICROSOFT_CLIENT_SECRET = os.getenv("MICROSOFT_CLIENT_SECRET", "")
+MICROSOFT_TENANT_ID = os.getenv("MICROSOFT_TENANT_ID", "common")
+MICROSOFT_REDIRECT_URI = os.getenv("MICROSOFT_REDIRECT_URI", "http://localhost:8000/accounts/callback/")
+SCOPES = os.getenv( "MICROSOFT_GRAPH_SCOPES", "offline_access User.Read Mail.Read Mail.ReadBasic Mail.ReadWrite").split(",")
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
@@ -171,9 +171,9 @@ STORAGES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Redis (caching + task coordination) ---
-REDIS_URL = os.environ.get(
+REDIS_URL = os.getenv(
     "REDIS_URL",
-    f"redis://{os.environ.get('REDIS_HOST', '127.0.0.1')}:{env_int('REDIS_PORT', 6379)}/0",
+    f"redis://{os.getenv('REDIS_HOST', '127.0.0.1')}:{env_int('REDIS_PORT', 6379)}/0",
 )
 
 CACHES = {
@@ -198,21 +198,21 @@ TASKS = {
 # Intervals expressed in seconds; override via env for systemd/cron cadence.
 TASK_SYNC_INTERVAL_SECONDS = env_int("SYNC_INTERVAL_SECONDS", 300)
 TASK_TOKEN_REFRESH_SECONDS = float(
-    os.environ.get("TOKEN_REFRESH_INTERVAL_MINUTES", 10)
+    os.getenv("TOKEN_REFRESH_INTERVAL_MINUTES", 10)
 ) * 60
 TASK_WEBHOOK_RENEW_SECONDS = float(
-    os.environ.get("WEBHOOK_RENEW_INTERVAL_MINUTES", 15)
+    os.getenv("WEBHOOK_RENEW_INTERVAL_MINUTES", 15)
 ) * 60
 TASK_LOG_CLEANUP_SECONDS = float(
-    os.environ.get("LOG_CLEANUP_INTERVAL_HOURS", 24)
+    os.getenv("LOG_CLEANUP_INTERVAL_HOURS", 24)
 ) * 3600
 TASK_HEALTH_CHECK_SECONDS = float(
-    os.environ.get("HEALTH_CHECK_INTERVAL_MINUTES", 5)
+    os.getenv("HEALTH_CHECK_INTERVAL_MINUTES", 5)
 ) * 60
 
 # --- Synchronization tuning ---
 SYNC_WEBHOOK_EXPIRATION_DAYS = env_int("SYNC_WEBHOOK_EXPIRATION_DAYS", 3)
-SYNC_WEBHOOK_BASE_URL = os.environ.get("SYNC_WEBHOOK_BASE_URL", "")
+SYNC_WEBHOOK_BASE_URL = os.getenv("SYNC_WEBHOOK_BASE_URL", "")
 SYNC_LOG_RETENTION_DAYS = env_int("SYNC_LOG_RETENTION_DAYS", 30)
 SYNC_MAX_ATTACHMENT_BYTES = env_int("SYNC_MAX_ATTACHMENT_BYTES", 25 * 1024 * 1024)
 
