@@ -8,13 +8,15 @@ Cloud-based **Outlook Email Aggregation** dashboard. This repository contains th
 
 ## Quick Start
 
+Dependencies are managed with [uv](https://docs.astral.sh/uv/):
+
 ```bash
-pip install -r requirements.txt        # Django 5.2+ (Django 6 compatible)
-docker compose up -d postgres redis    # start PostgreSQL + Redis (see .env)
-python manage.py migrate               # apply auth/admin/session + portal tables
-python manage.py createsuperuser       # your login account
-python manage.py scheduled_tasks --once  # run recurring background jobs now
-python manage.py runserver             # http://127.0.0.1:8000/
+uv sync                           # create .venv and install deps from uv.lock
+uv run docker compose up -d postgres redis   # start PostgreSQL + Redis (see .env)
+uv run python manage.py migrate   # apply auth/admin/session + portal tables
+uv run python manage.py createsuperuser       # your login account
+uv run python manage.py scheduled_tasks --once  # run recurring background jobs now
+uv run python manage.py runserver  # http://127.0.0.1:8000/
 ```
 
 Then sign in at `/login/` with the superuser you created. App pages (dashboard, accounts, inbox) require authentication; Django Admin at `/admin/` manages Users, Groups, Permissions and the sync cluster tables.
@@ -81,17 +83,17 @@ The recurring set is orchestrated by `manage.py scheduled_tasks`, which replaces
 ### Management commands
 
 ```bash
-python manage.py scheduled_tasks       # run all recurring background jobs (cron/timer)
-python manage.py sync --all            # run a sync now (or --account <pk>)
-python manage.py renew_webhooks        # renew expiring subscriptions
-python manage.py cleanup_logs          # prune old sync logs
-python manage.py health_check          # redis/db/job summary
+uv run python manage.py scheduled_tasks       # run all recurring background jobs (cron/timer)
+uv run python manage.py sync --all            # run a sync now (or --account <pk>)
+uv run python manage.py renew_webhooks        # renew expiring subscriptions
+uv run python manage.py cleanup_logs          # prune old sync logs
+uv run python manage.py health_check          # redis/db/job summary
 ```
 
 ### Tests
 
 ```bash
-python manage.py test portal
+uv run python manage.py test portal
 ```
 
 Covers the delta engine (create/idempotent/removal), paused and tokenless accounts, webhook renewal, health updates, account actions and the monitoring views. The Graph HTTP layer is mocked; repositories run against the test database.
@@ -108,7 +110,7 @@ The repo ships a `render.yaml` blueprint (`blueprint` / "New + → Blueprint" in
    - **Cron** service `mailfusion-scheduler` — runs `manage.py scheduled_tasks` every minute (replaces Celery Beat). Each job self-throttles by its cadence in Redis, so concurrent cron triggers are safe.
    - **Redis** `mailfusion-redis` and **Postgres** `mailfusion-db` (free tiers).
 3. Fill in env vars marked manual: `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, and `MICROSOFT_REDIRECT_URI` (point it at `https://<your-app>.onrender.com/accounts/callback/`). `SECRET_KEY`/`DEBUG` are auto-configured.
-4. Once deployed, run `python manage.py createsuperuser` from the Render shell (or via `scheduled_tasks`'s `--once`) to create your admin login.
+4. Once deployed, run `uv run python manage.py createsuperuser` from the Render shell (or via `scheduled_tasks`'s `--once`) to create your admin login.
 
 > Free-tier web services sleep; the first request may be slow to wake. Health check points at `/login/`.
 
