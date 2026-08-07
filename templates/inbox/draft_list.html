@@ -5,25 +5,25 @@
 {% block title %}Drafts · {{ app_name }}{% endblock %}
 
 {% block page_actions %}
-<a class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800" href="{% url 'compose' %}"><i class="bi bi-pencil-square"></i>Compose</a>
+<a class="btn-primary" href="{% url 'compose' %}"><span class="material-symbols-outlined">edit</span>Compose</a>
 {% endblock %}
 
 {% block content %}
-<div class="mf-inbox mf-inbox--list">
-  <aside class="mf-inbox__folder" id="mf-folder-counts">
+<div class="animate-fade-up grid gap-6 xl:grid-cols-12">
+  <aside class="h-fit rounded-2xl border border-outline-variant bg-surface p-4 shadow-sm xl:col-span-3">
     {% include "inbox/partials/sidebar.html" %}
   </aside>
-  <section class="mf-inbox__list">
-    {% include "inbox/partials/toolbar.html" %}
-    {% include "inbox/partials/filters.html" %}
-    <div class="overflow-y-auto flex-grow-1 mf-email-scroll" data-mf-inbox-scroll>
+  <section class="flex min-h-[600px] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm xl:col-span-9">
+    <div class="border-b border-outline-variant">{% include "inbox/partials/toolbar.html" %}</div>
+    <div class="border-b border-outline-variant">{% include "inbox/partials/filters.html" %}</div>
+    <div class="flex-1 overflow-y-auto" data-mf-inbox-scroll>
       <div id="mf-email-list">
         {% include "inbox/partials/email_list.html" with emails=emails mode="drafts" %}
       </div>
     </div>
-    <div class="flex items-center justify-between border-t border-slate-200 px-3 py-2 text-sm text-slate-500">
+    <div class="flex items-center justify-between border-t border-outline-variant px-3 py-2 text-sm text-on-surface-variant">
       <span>{{ emails|length }} of {{ total }} drafts</span>
-      <a href="{% url 'drafts' %}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"><i class="bi bi-arrow-clockwise"></i>Refresh</a>
+      <a href="{% url 'drafts' %}" class="btn-secondary"><span class="material-symbols-outlined text-[1rem]">refresh</span>Refresh</a>
     </div>
   </section>
 </div>

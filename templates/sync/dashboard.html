@@ -1,263 +1,55 @@
 {% extends "base.html" %}
+{% load static %}
 {% load ui_extras %}
 
+{% block page_title %}
+  System Monitor
+{% endblock %}
+
 {% block page_subtitle %}
-<p class="text-sm text-gray-500">
-    Live status of the background email synchronization engine.
-</p>
+  <p class="prose-muted">Monitor synchronization, services, queues, audit activity, and overall platform health in one place.</p>
 {% endblock %}
 
 {% block page_actions %}
-<div class="flex items-center gap-3">
-    <a href="{% url 'accounts_sync_all' %}"
-       class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 4v6h6M20 20v-6h-6M20 9A8 8 0 006.34 5.34L4 10M4 15a8 8 0 0013.66 3.66L20 14"/>
-        </svg>
-        Sync all
-    </a>
+  <div class="flex flex-wrap items-center gap-2">
+    <!-- Search -->
+    <div class="relative">
+      <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant"></i>
+      <input type="search" data-sys-search placeholder="Search…" aria-label="Search monitor" class="input input-with-icon !py-2 text-sm sm:!w-52" />
+    </div>
 
-    <a href="{% url 'accounts_connect' %}"
-       class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 4v16m8-8H4"/>
-        </svg>
-        Connect account
+    <!-- Auto refresh toggle -->
+    <button type="button" data-sys-auto class="btn-secondary" aria-pressed="true" title="Toggle auto refresh">
+      <i data-lucide="radio" class="size-4 text-success"></i>
+      <span class="hidden sm:inline">Auto</span>
+    </button>
+
+    <!-- Refresh -->
+    <button type="button" class="btn-secondary" data-refresh-monitor title="Refresh now" aria-label="Refresh now">
+      <i data-lucide="refresh-cw" class="size-4"></i>
+      <span class="hidden sm:inline">Refresh</span>
+    </button>
+
+    <!-- Export logs -->
+    <a href="{% url 'sync_logs' %}" class="btn-secondary" title="Export logs">
+      <i data-lucide="download" class="size-4"></i>
+      <span class="hidden sm:inline">Export</span>
     </a>
-</div>
+  </div>
 {% endblock %}
 
 {% block content %}
+  <div
+    id="system-monitor"
+    data-sys-poll="30"
+    hx-get="{% url 'sync_dashboard_stats' %}"
+    hx-trigger="every 30s"
+    hx-swap="innerHTML">
+    {% include "sync/partials/system/system_monitor.html" %}
+  </div>
+{% endblock %}
 
-<div hx-get="{% url 'sync_dashboard_stats' %}"
-     hx-trigger="every 30s"
-     hx-swap="innerHTML">
-    {% include "sync/partials/dashboard_stats.html" %}
-</div>
-
-<div class="mt-6 grid gap-6 xl:grid-cols-12">
-
-    <!-- Accounts -->
-    <div class="xl:col-span-7">
-        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-
-            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900">
-                        Accounts
-                    </h2>
-                    <p class="mt-1 text-sm text-gray-500">
-                        Sync health per connected mailbox
-                    </p>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-
-                    <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Account
-                        </th>
-
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            OAuth
-                        </th>
-
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Sync State
-                        </th>
-
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Emails
-                        </th>
-
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Unread
-                        </th>
-
-                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Last Sync
-                        </th>
-                    </tr>
-                    </thead>
-
-                    <tbody class="divide-y divide-gray-100 bg-white">
-
-                    {% for acc in accounts %}
-                    <tr class="hover:bg-gray-50">
-
-                        <td class="px-6 py-4">
-                            <a href="{% url 'account_detail' acc.pk %}"
-                               class="font-medium text-gray-900 hover:text-blue-600">
-                                {{ acc.name }}
-                            </a>
-
-                            <p class="mt-1 text-sm text-gray-500">
-                                {{ acc.email }}
-                            </p>
-                        </td>
-
-                        <td class="px-6 py-4">
-
-                            {% if acc.oauth_status == 'connected' %}
-                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                Connected
-                            </span>
-
-                            {% elif acc.oauth_status == 'expired' %}
-                            <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
-                                Expired
-                            </span>
-
-                            {% elif acc.oauth_status == 'revoked' %}
-                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-                                Revoked
-                            </span>
-
-                            {% else %}
-                            <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-                                Pending
-                            </span>
-                            {% endif %}
-
-                        </td>
-
-                        <td class="px-6 py-4">
-
-                            {% if acc.is_sync_paused %}
-                            <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-                                Paused
-                            </span>
-
-                            {% elif acc.health.graph_ok %}
-                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                Healthy
-                            </span>
-
-                            {% else %}
-                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-                                Error
-                            </span>
-                            {% endif %}
-
-                        </td>
-
-                        <td class="px-6 py-4 text-sm text-gray-700">
-                            {{ acc.total_emails_synced }}
-                        </td>
-
-                        <td class="px-6 py-4 text-sm text-gray-700">
-                            {{ acc.unread_count }}
-                        </td>
-
-                        <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
-                            {% if acc.last_sync_at %}
-                                {{ acc.last_sync_at|timesince }} ago
-                            {% else %}
-                                Never
-                            {% endif %}
-                        </td>
-
-                    </tr>
-
-                    {% empty %}
-
-                    <tr>
-                        <td colspan="6"
-                            class="px-6 py-10 text-center text-sm text-gray-500">
-                            No accounts connected yet.
-                        </td>
-                    </tr>
-
-                    {% endfor %}
-
-                    </tbody>
-
-                </table>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Recent Sync Runs -->
-    <div class="xl:col-span-5">
-
-        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-
-            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900">
-                        Recent Sync Runs
-                    </h2>
-
-                    <p class="mt-1 text-sm text-gray-500">
-                        Latest attempts across all accounts
-                    </p>
-                </div>
-
-                <a href="{% url 'sync_logs' %}"
-                   class="text-sm font-medium text-blue-600 hover:text-blue-700">
-                    View all
-                </a>
-
-            </div>
-
-            <div>
-
-                {% for log in recent_logs %}
-
-                <div class="flex items-center gap-4 border-b border-gray-100 px-6 py-4 last:border-0">
-
-                    {% if log.status == 'completed' %}
-                    <span class="h-3 w-3 rounded-full bg-green-500"></span>
-
-                    {% elif log.status == 'failed' %}
-                    <span class="h-3 w-3 rounded-full bg-red-500"></span>
-
-                    {% else %}
-                    <span class="h-3 w-3 rounded-full bg-gray-400 animate-pulse"></span>
-                    {% endif %}
-
-                    <div class="min-w-0 flex-1">
-
-                        <p class="truncate text-sm font-medium text-gray-900">
-                            {{ log.account.email }}
-                        </p>
-
-                        <p class="mt-1 text-sm text-gray-500">
-                            +{{ log.emails_added }} added,
-                            {{ log.emails_updated }} updated
-                        </p>
-
-                    </div>
-
-                    <span class="whitespace-nowrap text-xs text-gray-500">
-                        {{ log.start_time|timesince }} ago
-                    </span>
-
-                </div>
-
-                {% empty %}
-
-                <div class="px-6 py-10 text-center text-sm text-gray-500">
-                    No syncs have run yet.
-                </div>
-
-                {% endfor %}
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
+{% block extra_js %}
+<script src="{% static 'js/vendor/chart.umd.min.js' %}"></script>
+<script src="{% static 'js/system_monitor.js' %}"></script>
 {% endblock %}

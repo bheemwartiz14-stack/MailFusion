@@ -1,0 +1,40 @@
+{% load ui_extras %}
+
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+    <div>
+      <h2 class="card-title">Alerts</h2>
+      <p class="prose-muted mt-0.5">{{ alerts|length }} active</p>
+    </div>
+    <button class="link-primary text-sm" data-alerts-clear>Dismiss all</button>
+  </div>
+
+  <div class="space-y-3 p-5">
+    {% for alert in alerts %}
+    <div class="rounded-xl border px-4 py-3
+      {% if alert.severity == 'critical' %}border-danger/30 bg-danger/5
+      {% elif alert.severity == 'warning' %}border-warning/30 bg-warning/5
+      {% else %}border-success/30 bg-success/5{% endif %}">
+      <div class="flex items-start gap-3">
+        <i data-lucide="{{ alert.icon }}" class="mt-0.5 size-4 shrink-0
+          {% if alert.severity == 'critical' %}text-danger
+          {% elif alert.severity == 'warning' %}text-warning
+          {% else %}text-success{% endif %}"></i>
+        <div class="min-w-0 flex-1">
+          <p class="flex items-center gap-2 text-sm font-semibold text-on-surface dark:text-zinc-200">
+            {{ alert.title }}
+            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide
+              {% if alert.severity == 'critical' %}bg-danger/10 text-danger
+              {% elif alert.severity == 'warning' %}bg-warning/10 text-warning
+              {% else %}bg-success/10 text-success{% endif %}">{{ alert.severity }}</span>
+          </p>
+          <p class="mt-0.5 text-xs text-on-surface-variant">{{ alert.description }}</p>
+        </div>
+        <button class="btn-secondary btn-sm shrink-0" data-alert-action title="{{ alert.action }}">{{ alert.action }}</button>
+      </div>
+    </div>
+    {% empty %}
+    <p class="py-6 text-center text-sm text-on-surface-variant">No active alerts.</p>
+    {% endfor %}
+  </div>
+</div>

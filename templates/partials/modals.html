@@ -1,65 +1,65 @@
-<!-- Shared modal dialogs for the whole app (Tailwind + mfModal.js) -->
+<!-- Shared modal dialogs for the whole app (data-mf-modal hooks) -->
 
 <!-- Confirm dialog (driven by data-mf-confirm attributes) -->
-<div class="fixed inset-0 z-50 hidden items-center justify-center" id="mfConfirmModal" data-mf-modal role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="absolute inset-0 bg-black/40" data-mf-modal-backdrop></div>
-  <div class="relative w-full max-w-sm mx-4 rounded-2xl bg-surface shadow-xl p-6">
+<div class="fixed inset-0 z-50 hidden items-center justify-center p-4" id="mfConfirmModal" data-mf-modal role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="absolute inset-0 bg-on-surface/50 backdrop-blur-sm" data-mf-modal-backdrop></div>
+  <div class="relative w-full max-w-sm rounded-3xl border border-outline-variant bg-surface p-6 shadow-2xl">
     <div class="flex flex-col items-center text-center">
-      <span class="mb-3 grid size-12 place-items-center rounded-full bg-error-container text-error">
+      <span class="mb-4 grid size-12 place-items-center rounded-full bg-danger/10 text-danger">
         <span class="material-symbols-outlined text-[1.4rem]">warning</span>
       </span>
-      <h5 class="text-lg font-semibold text-on-background" id="mfConfirmTitle">Are you sure?</h5>
-      <p class="mt-1 mb-0 text-sm text-on-surface-variant" id="mfConfirmMessage">This action cannot be undone.</p>
+      <h5 class="card-title text-lg" id="mfConfirmTitle">Are you sure?</h5>
+      <p class="mt-1.5 text-sm text-on-surface-variant" id="mfConfirmMessage">This action cannot be undone.</p>
     </div>
-    <div class="mt-5 flex items-center justify-center gap-3">
-      <button type="button" class="rounded-lg border border-outline-variant px-4 py-2 text-sm font-semibold hover:bg-surface-container-high" onclick="window.mfModal.close('mfConfirmModal')">Cancel</button>
-      <button type="button" class="rounded-lg bg-error px-4 py-2 text-sm font-semibold text-on-error hover:bg-error-container" id="mfConfirmBtn">
-        <span class="material-symbols-outlined mr-1 align-middle text-[1rem]">delete</span>Confirm
+    <div class="mt-6 flex items-center justify-center gap-3">
+      <button type="button" class="btn-secondary" onclick="window.mfModal.close('mfConfirmModal')">Cancel</button>
+      <button type="button" class="btn-danger" id="mfConfirmBtn">
+        <span class="material-symbols-outlined text-[1rem]">delete</span>Confirm
       </button>
     </div>
   </div>
 </div>
 
 <!-- Delete account dialog -->
-<div class="fixed inset-0 z-50 hidden items-center justify-center" id="mfDeleteAccountModal" data-mf-modal role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="absolute inset-0 bg-black/40" data-mf-modal-backdrop></div>
-  <div class="relative w-full max-w-md mx-4 rounded-2xl bg-surface shadow-xl">
+<div class="fixed inset-0 z-50 hidden items-center justify-center p-4" id="mfDeleteAccountModal" data-mf-modal role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="absolute inset-0 bg-on-surface/50 backdrop-blur-sm" data-mf-modal-backdrop></div>
+  <div class="relative w-full max-w-md rounded-3xl bg-surface shadow-2xl">
     <div class="flex items-center justify-between border-b border-outline-variant px-6 py-4">
-      <h5 class="text-lg font-semibold text-on-background"><span class="material-symbols-outlined mr-2 align-middle text-error">mail_off</span>Remove Outlook account</h5>
-      <button type="button" class="flex size-8 items-center justify-center rounded-full hover:bg-surface-container-high" onclick="window.mfModal.close('mfDeleteAccountModal')" aria-label="Close">
+      <h5 class="card-title"><span class="material-symbols-outlined mr-2 align-middle text-danger">mail_off</span>Remove Outlook account</h5>
+      <button type="button" class="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container" onclick="window.mfModal.close('mfDeleteAccountModal')" aria-label="Close">
         <span class="material-symbols-outlined text-[1.25rem]">close</span>
       </button>
     </div>
-    <div class="px-6 py-4">
-      <p class="text-sm text-on-surface-variant">You are about to remove <strong id="mfDeleteAccountName">this account</strong>.</p>
-      <p class="mt-1 mb-3 text-sm text-outline">Its emails will be removed from Portal and synchronization will stop. Your mailbox on Microsoft will not be affected.</p>
-      <label class="flex items-start gap-3 text-sm">
-        <input class="mt-0.5 size-4 rounded cursor-pointer" type="checkbox" id="mfDeleteAccountConfirm">
-        <span>I understand this account and its emails will be removed.</span>
+    <div class="px-6 py-5">
+      <p class="text-sm text-on-surface-variant">You are about to remove <strong class="font-semibold text-on-surface" id="mfDeleteAccountName">this account</strong>.</p>
+      <p class="mt-1.5 mb-4 text-sm text-on-surface-variant/80">Its emails will be removed from Portal and synchronization will stop. Your mailbox on Microsoft will not be affected.</p>
+      <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-outline-variant bg-surface-container/40 p-3 text-sm">
+        <input class="mt-0.5 size-4 cursor-pointer rounded border-outline-variant text-primary focus:ring-primary/30" type="checkbox" id="mfDeleteAccountConfirm">
+        <span class="text-on-surface">I understand this account and its emails will be removed.</span>
       </label>
     </div>
     <div class="flex items-center justify-end gap-3 border-t border-outline-variant px-6 py-4">
-      <button type="button" class="rounded-lg border border-outline-variant px-4 py-2 text-sm font-semibold hover:bg-surface-container-high" onclick="window.mfModal.close('mfDeleteAccountModal')">Cancel</button>
-      <button type="button" class="rounded-lg bg-error px-4 py-2 text-sm font-semibold text-on-error hover:bg-error-container" disabled data-mf-require-check="mfDeleteAccountConfirm">
-        <span class="material-symbols-outlined mr-1 align-middle text-[1rem]">delete</span>Remove account
+      <button type="button" class="btn-secondary" onclick="window.mfModal.close('mfDeleteAccountModal')">Cancel</button>
+      <button type="button" class="btn-danger" disabled data-mf-require-check="mfDeleteAccountConfirm">
+        <span class="material-symbols-outlined text-[1rem]">delete</span>Remove account
       </button>
     </div>
   </div>
 </div>
 
 <!-- Logout / global notice modal -->
-<div class="fixed inset-0 z-50 hidden items-center justify-center" id="mfNoticeModal" data-mf-modal role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="absolute inset-0 bg-black/40" data-mf-modal-backdrop></div>
-  <div class="relative w-full max-w-sm mx-4 rounded-2xl bg-surface shadow-xl">
+<div class="fixed inset-0 z-50 hidden items-center justify-center p-4" id="mfNoticeModal" data-mf-modal role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="absolute inset-0 bg-on-surface/50 backdrop-blur-sm" data-mf-modal-backdrop></div>
+  <div class="relative w-full max-w-sm rounded-3xl bg-surface shadow-2xl">
     <div class="flex items-center justify-between border-b border-outline-variant px-6 py-4">
-      <h5 class="text-lg font-semibold text-on-background">Notice</h5>
-      <button type="button" class="flex size-8 items-center justify-center rounded-full hover:bg-surface-container-high" onclick="window.mfModal.close('mfNoticeModal')" aria-label="Close">
+      <h5 class="card-title">Notice</h5>
+      <button type="button" class="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container" onclick="window.mfModal.close('mfNoticeModal')" aria-label="Close">
         <span class="material-symbols-outlined text-[1.25rem]">close</span>
       </button>
     </div>
-    <div class="px-6 py-4 text-sm text-on-surface-variant" id="mfNoticeBody"></div>
+    <div class="px-6 py-5 text-sm text-on-surface-variant" id="mfNoticeBody"></div>
     <div class="flex items-center justify-end border-t border-outline-variant px-6 py-4">
-      <button type="button" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-container" onclick="window.mfModal.close('mfNoticeModal')">Got it</button>
+      <button type="button" class="btn-primary" onclick="window.mfModal.close('mfNoticeModal')">Got it</button>
     </div>
   </div>
 </div>

@@ -227,11 +227,11 @@ class AccountActionTests(TestCase):
 
     def test_sync_views_render(self):
         for path in [
-            "/sync/",
-            "/sync/logs/",
-            "/sync/health/",
-            "/sync/queue/",
-            "/sync/oauth/",
+            "/system-monitor/",
+            "/system-monitor/logs/",
+            "/system-monitor/health/",
+            "/system-monitor/queue/",
+            "/system-monitor/oauth/",
         ]:
             response = self.client.get(path)
             self.assertEqual(response.status_code, 200, path)

@@ -1,19 +1,19 @@
 {% if messages %}
-<div class="mb-4 space-y-2">
+<div class="space-y-2">
   {% for message in messages %}
-  <div role="alert" class="flex items-start gap-3 rounded-xl border px-4 py-3
-    {% if message.tags == 'success' %}bg-surface-container border-outline-variant
-    {% elif message.tags == 'error' %}bg-error-container border-error/20
-    {% elif message.tags == 'warning' %}bg-surface-container border-outline-variant
-    {% else %}bg-surface-container border-outline-variant{% endif %}">
-    <span class="material-symbols-outlined mt-0.5
-      {% if message.tags == 'success' %}text-primary
-      {% elif message.tags == 'error' %}text-error
-      {% elif message.tags == 'warning' %}text-tertiary
-      {% else %}text-on-surface-variant{% endif %}">
+  <div role="alert" class="alert
+    {% if message.tags == 'success' %}alert-success
+    {% elif message.tags == 'error' %}alert-danger
+    {% elif message.tags == 'warning' %}alert-warning
+    {% else %}alert-info{% endif %}">
+    <span class="material-symbols-outlined mt-0.5 text-[1.2rem]">
       {% if message.tags == 'success' %}check_circle{% elif message.tags == 'error' %}cancel{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}
     </span>
     <div class="flex-1 text-sm">{{ message }}</div>
+    <button type="button" onclick="this.closest('[role=alert]').remove()" aria-label="Dismiss"
+      class="shrink-0 opacity-60 transition hover:opacity-100">
+      <span class="material-symbols-outlined text-[1.1rem]">close</span>
+    </button>
   </div>
   {% endfor %}
 </div>

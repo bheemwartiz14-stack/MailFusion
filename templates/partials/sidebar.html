@@ -1,98 +1,67 @@
 {% load static %}
 
-<aside class="w-64 flex flex-col border-r border-outline-variant bg-surface overflow-y-auto">
+<aside id="app-sidebar"
+  class="group flex w-[260px] shrink-0 flex-col border-r border-outline-variant bg-surface transition-all duration-300 ease-in-out max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:-translate-x-full max-lg:shadow-2xl max-lg:data-[open=true]:translate-x-0">
 
-
-  <!-- Logo -->
-  <div class="p-6 flex items-center gap-3">
-
-    <div class="size-8">
-      <img src="{% static 'images/logo.svg' %}" alt="MailFusion logo" class="w-full h-full">
-    </div>
-
-    <h1 class="text-xl font-bold tracking-tight text-on-surface">
-      MailFusion
-    </h1>
-
+  <div class="flex h-16 items-center justify-between border-b border-outline-variant px-5">
+    <a href="/" class="flex items-center gap-3">
+      <div class="size-9 overflow-hidden rounded-xl shadow-sm ring-1 ring-outline-variant">
+        <img src="{% static 'images/logo.svg' %}" alt="MailFusion logo" class="h-full w-full object-cover">
+      </div>
+      <div class="leading-tight">
+        <h1 class="text-base font-extrabold tracking-tight text-on-surface">MailFusion</h1>
+        <p class="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Dashboard</p>
+      </div>
+    </a>
+    <button type="button" data-mf-close-sidebar aria-label="Close menu"
+      class="flex size-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden">
+      <span class="material-symbols-outlined text-xl">close</span>
+    </button>
   </div>
 
-
-
-  <!-- Menu -->
-
-  <nav class="flex-1 px-4 space-y-2">
-
-
+  <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
     {% for item in sidebar_menu %}
 
-
     {% if item.section %}
-
-
-    <div class="
-                    pt-4
-                    pb-2
-                    px-3
-                    text-xs
-                    font-bold
-                    uppercase
-                    tracking-widest
-                    text-outline
-                ">
-      {{ item.section }}
-    </div>
-
-
-
+      <div class="px-3 pb-1.5 pt-5 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant/70">
+        {{ item.section }}
+      </div>
     {% else %}
+      <a href="{{ item.url }}"
+        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out
+          {% if item.active %}
+            bg-primary-soft text-on-primary-fixed ring-1 ring-primary/10
+          {% else %}
+            text-on-surface-variant hover:bg-surface-container hover:text-on-surface
+          {% endif %}">
 
+        <span class="material-symbols-outlined text-[1.25rem] {% if item.active %}fill-primary text-primary{% endif %}"
+          {% if item.active %}style="font-variation-settings:'FILL' 1;"{% endif %}>
+          {{ item.icon }}
+        </span>
 
+        <span class="flex-1 truncate {% if item.active %}font-semibold{% endif %}">{{ item.title }}</span>
 
-    <a href="{{ item.url }}" class="
-                        flex
-                        items-center
-                        gap-3
-                        px-3
-                        py-2.5
-                        rounded-lg
-                        transition-colors
-
-                        {% if item.active %}
-
-                            bg-primary-fixed
-                            text-on-primary-fixed
-                            font-semibold
-
-                        {% else %}
-
-                            text-on-surface-variant
-                            hover:bg-surface-container-high
-
-                        {% endif %}
-                    ">
-
-
-      <span class="material-symbols-outlined text-[22px]" {% if item.active %} style="font-variation-settings:'FILL' 1;"
-        {% endif %}>
-        {{ item.icon }}
-      </span>
-
-
-      <span>
-        {{ item.title }}
-      </span>
-
-
-    </a>
-
-
+        {% if item.active %}
+          <span class="size-1.5 rounded-full bg-primary"></span>
+        {% endif %}
+      </a>
     {% endif %}
 
-
     {% endfor %}
-
-
   </nav>
 
-
+  <div class="border-t border-outline-variant p-3">
+    <div class="flex items-center gap-3 rounded-xl bg-surface-container/60 px-3 py-2.5">
+      <div class="avatar-md avatar-primary">{{ current_user.name|first|upper }}</div>
+      <div class="min-w-0 flex-1 leading-tight">
+        <p class="truncate text-sm font-semibold text-on-surface">{{ current_user.name }}</p>
+        <p class="truncate text-xs text-on-surface-variant">{{ current_user.role }}</p>
+      </div>
+      <span class="size-2 rounded-full bg-success ring-2 ring-surface"></span>
+    </div>
+  </div>
 </aside>
+
+<div id="sidebar-backdrop" data-close-sidebar
+     class="fixed inset-0 z-40 hidden bg-on-surface/40 backdrop-blur-sm lg:hidden"></div>

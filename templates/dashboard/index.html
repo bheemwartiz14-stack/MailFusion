@@ -1,77 +1,151 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-  <div>
-    <h2 class="text-3xl font-black tracking-tight text-on-surface">Dashboard Overview</h2>
-    <p class="text-on-surface-variant mt-1">Real-time synchronization and deliverability health for
-      all active mail nodes.</p>
-  </div>
-  <div class="flex items-center gap-3">
-    <div class="flex items-center bg-surface border border-outline-variant rounded-lg px-3 py-2 shadow-sm">
-      <span class="material-symbols-outlined text-primary mr-2 text-[20px]">calendar_today</span>
-      <span class="text-sm font-semibold">Oct 1 - Oct 30, 2023</span>
-      <span class="material-symbols-outlined text-outline ml-3 text-[20px]">expand_more</span>
+<div class="animate-fade-up">
+  <div class="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+    <div>
+      <h2 class="page-title">Dashboard Overview</h2>
+      <p class="prose-muted mt-2">Real-time synchronization and deliverability health for all active mail nodes.</p>
     </div>
-    <button
-      class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg hover:bg-primary/90 transition-all flex items-center gap-2">
-      <span class="material-symbols-outlined text-[18px]">download</span>
-      Export Report
-    </button>
-  </div>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-  <!-- Card 1 -->
-  <div class="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-    <div class="flex justify-between items-start mb-4">
-      <div class="p-2 bg-primary/10 text-primary rounded-lg">
-        <span class="material-symbols-outlined">group</span>
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="btn-secondary !cursor-default">
+        <span class="material-symbols-outlined text-[1.1rem] text-primary">calendar_today</span>
+        <span class="text-sm font-semibold">Oct 1 - Oct 30, 2023</span>
+        <span class="material-symbols-outlined text-[1.1rem] text-on-surface-variant">expand_more</span>
       </div>
-      <span
-        class="text-xs font-bold text-success flex items-center text-green-600 bg-green-50 px-2 py-1 rounded-full">
-        <span class="material-symbols-outlined text-[14px] mr-1">trending_up</span> +2
-      </span>
+      <button class="btn-primary">
+        <span class="material-symbols-outlined text-[1.05rem]">download</span>Export Report
+      </button>
     </div>
-    <p class="text-on-surface-variant text-sm font-medium">Connected Accounts</p>
-    <h3 class="text-3xl font-black mt-1">12</h3>
   </div>
-  <!-- Card 2 -->
-  <div class="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-    <div class="flex justify-between items-start mb-4">
-      <div class="p-2 bg-secondary-container text-secondary rounded-lg">
-        <span class="material-symbols-outlined">alternate_email</span>
+
+  <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    {% for stat in stats %}
+    <div class="stat-card">
+      <div class="flex items-start justify-between">
+        <div class="flex size-11 items-center justify-center rounded-xl
+          {% if stat.tone == 'success' %}bg-success/10 text-success
+          {% elif stat.tone == 'info' %}bg-info/10 text-info
+          {% elif stat.tone == 'warning' %}bg-warning/10 text-warning
+          {% else %}bg-primary/10 text-primary{% endif %}">
+          <span class="material-symbols-outlined">group</span>
+        </div>
+        <span class="badge-success"><span class="material-symbols-outlined text-[0.9rem]">trending_up</span>{{ stat.trend }}</span>
       </div>
-      <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center">
-        <span class="material-symbols-outlined text-[14px] mr-1">trending_up</span> +15%
-      </span>
+      <div class="mt-4">
+        <p class="stat-label">{{ stat.label }}</p>
+        <h3 class="stat-value">{{ stat.value }}</h3>
+      </div>
     </div>
-    <p class="text-on-surface-variant text-sm font-medium">Total Emails</p>
-    <h3 class="text-3xl font-black mt-1">2.4k</h3>
+    {% endfor %}
   </div>
-  <!-- Card 3 -->
-  <div class="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-    <div class="flex justify-between items-start mb-4">
-      <div class="p-2 bg-tertiary-fixed text-tertiary rounded-lg">
-        <span class="material-symbols-outlined">mark_email_unread</span>
+
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <!-- Quick stats / health -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">System health</h2>
+        <span class="badge-success"><span class="material-symbols-outlined text-xs">monitor_heart</span>Operational</span>
       </div>
-      <span class="text-xs font-bold text-error bg-error-container/30 px-2 py-1 rounded-full flex items-center">
-        <span class="material-symbols-outlined text-[14px] mr-1">trending_down</span> -5%
-      </span>
-    </div>
-    <p class="text-on-surface-variant text-sm font-medium">Unread Emails</p>
-    <h3 class="text-3xl font-black mt-1">142</h3>
-  </div>
-  <!-- Card 4 -->
-  <div class="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-    <div class="flex justify-between items-start mb-4">
-      <div class="p-2 bg-green-100 text-green-700 rounded-lg">
-        <span class="material-symbols-outlined">sync_saved_locally</span>
+      <div class="card-body">
+        <div class="space-y-4">
+          <div>
+            <div class="mb-1.5 flex items-center justify-between text-sm">
+              <span class="text-on-surface-variant">Sync health</span>
+              <span class="font-semibold text-on-surface">98%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" style="width:98%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="mb-1.5 flex items-center justify-between text-sm">
+              <span class="text-on-surface-variant">Broker connectivity</span>
+              <span class="font-semibold text-on-surface">96%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" style="width:96%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="mb-1.5 flex items-center justify-between text-sm">
+              <span class="text-on-surface-variant">Storage capacity</span>
+              <span class="font-semibold text-on-surface">82%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" style="width:82%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="mb-1.5 flex items-center justify-between text-sm">
+              <span class="text-on-surface-variant">Queue depth</span>
+              <span class="font-semibold text-on-surface">64%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" style="width:64%"></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <span class="text-xs font-bold text-error bg-error-container/30 px-2 py-1 rounded-full flex items-center">
-        <span class="material-symbols-outlined text-[14px] mr-1">warning</span> -0.5%
-      </span>
     </div>
-    <p class="text-on-surface-variant text-sm font-medium">Sync Health</p>
-    <h3 class="text-3xl font-black mt-1">98%</h3>
+
+    <!-- Quick actions -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Quick actions</h2>
+      </div>
+      <div class="card-body">
+        <div class="grid grid-cols-2 gap-3">
+          <a href="{% url 'accounts' %}" class="flex flex-col items-center gap-2 rounded-2xl border border-outline-variant bg-surface p-5 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft hover:shadow-md">
+            <span class="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary material-symbols-outlined">account_tree</span>
+            <span class="text-sm font-medium text-on-surface">Accounts</span>
+          </a>
+          <a href="{% url 'inbox' %}" class="flex flex-col items-center gap-2 rounded-2xl border border-outline-variant bg-surface p-5 text-center transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft hover:shadow-md">
+            <span class="flex size-11 items-center justify-center rounded-xl bg-tertiary/10 text-tertiary material-symbols-outlined">mail</span>
+            <span class="text-sm font-medium text-on-surface">Unified Inbox</span>
+          </a>
+          <a href="{% url 'accounts_connect' %}" class="flex flex-col items-center gap-2 rounded-2xl border border-outline-variant bg-surface p-5 text-center transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft hover:shadow-md">
+            <span class="flex size-11 items-center justify-center rounded-xl bg-success/10 text-success material-symbols-outlined">add</span>
+            <span class="text-sm font-medium text-on-surface">Connect account</span>
+          </a>
+          <a href="{% url 'sync_dashboard' %}" class="flex flex-col items-center gap-2 rounded-2xl border border-outline-variant bg-surface p-5 text-center transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft hover:shadow-md">
+            <span class="flex size-11 items-center justify-center rounded-xl bg-warning/10 text-warning material-symbols-outlined">sync_alt</span>
+            <span class="text-sm font-medium text-on-surface">Run sync</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity feed -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Live activity</h2>
+      </div>
+      <div class="card-body">
+        <ol class="relative flex flex-col gap-5 border-l border-outline-variant pl-6">
+          <li class="relative">
+            <span class="absolute -left-[1.9rem] flex size-5 items-center justify-center rounded-full border border-outline-variant bg-surface">
+              <span class="material-symbols-outlined text-[0.8rem] text-success">check_circle</span>
+            </span>
+            <p class="text-sm text-on-surface"><span class="font-semibold">System</span> <span class="text-on-surface-variant">completed</span> <span class="font-medium text-on-surface-variant">nightly full sync</span></p>
+            <p class="mt-0.5 text-xs text-on-surface-variant/70">8 hrs ago</p>
+          </li>
+          <li class="relative">
+            <span class="absolute -left-[1.9rem] flex size-5 items-center justify-center rounded-full border border-outline-variant bg-surface">
+              <span class="material-symbols-outlined text-[0.8rem] text-primary">autorenew</span>
+            </span>
+            <p class="text-sm text-on-surface"><span class="font-semibold">System</span> <span class="text-on-surface-variant">refreshed</span> <span class="font-medium text-on-surface-variant">OAuth token</span></p>
+            <p class="mt-0.5 text-xs text-on-surface-variant/70">2 hrs ago</p>
+          </li>
+          <li class="relative">
+            <span class="absolute -left-[1.9rem] flex size-5 items-center justify-center rounded-full border border-outline-variant bg-surface">
+              <span class="material-symbols-outlined text-[0.8rem] text-danger">warning</span>
+            </span>
+            <p class="text-sm text-on-surface"><span class="font-semibold">System</span> <span class="text-on-surface-variant">flagged</span> <span class="font-medium text-on-surface-variant">1 sync job</span></p>
+            <p class="mt-0.5 text-xs text-on-surface-variant/70">18 min ago</p>
+          </li>
+        </ol>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

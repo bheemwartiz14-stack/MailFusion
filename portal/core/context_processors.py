@@ -34,8 +34,6 @@ def sidebar_menu(request):
             {
                 "section": "Configuration",
             },
-
-
             {
                 "title": "Audit Logs",
                 "url": "/audit-logs/",
@@ -44,24 +42,10 @@ def sidebar_menu(request):
             },
 
             {
-                "title": "Sync Dashboard",
-                "url": "/sync/",
+                "title": "System Monitor",
+                "url": "/system-monitor/",
                 "icon": "monitoring",
-                "active": request.path == "/sync/",
-            },
-
-            {
-                "title": "Sync Logs",
-                "url": "/sync/logs/",
-                "icon": "sync_alt",
-                "active": request.path.startswith("/sync/logs"),
-            },
-
-            {
-                "title": "Health & Queue",
-                "url": "/sync/health/",
-                "icon": "health_and_safety",
-                "active": request.path.startswith("/sync/health"),
+                "active": request.path == "/system-monitor/",
             },
         ]
     }

@@ -1,0 +1,25 @@
+{% load ui_extras %}
+
+<div class="mf-kpi group relative overflow-hidden rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900" data-tone="{{ kpi.tone }}">
+  <div class="flex items-start justify-between">
+    <span class="mf-kpi-icon grid size-11 shrink-0 place-items-center rounded-xl transition-transform duration-300 group-hover:scale-110">
+      <i data-lucide="{{ kpi.icon }}" class="size-5"></i>
+    </span>
+    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold {% if kpi.trend_positive %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">
+      <i data-lucide="{% if kpi.trend_positive %}trending-up{% else %}trending-down{% endif %}" class="size-3.5"></i>
+      {{ kpi.trend }}
+    </span>
+  </div>
+
+  <div class="mt-4 flex items-end justify-between gap-3">
+    <div>
+      <p class="text-sm font-medium text-on-surface-variant dark:text-zinc-400">{{ kpi.label }}</p>
+      <p class="mt-1 text-3xl font-extrabold tracking-tight text-on-background dark:text-zinc-100">{{ kpi.value }}</p>
+    </div>
+    <div class="mf-kpi-spark flex h-10 items-end gap-1" aria-hidden="true">
+      {% for h in kpi.spark %}
+      <span class="w-1.5 rounded-sm" style="height: {{ h|floatformat:0 }}%"></span>
+      {% endfor %}
+    </div>
+  </div>
+</div>

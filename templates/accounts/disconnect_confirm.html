@@ -1,201 +1,99 @@
-
 {% extends "base.html" %}
 
 {% block page_subtitle %}
-<p class="text-sm text-on-surface-variant">
-    This action cannot be undone.
-</p>
+<p class="prose-muted">This action cannot be undone.</p>
 {% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-3xl">
-
-    <div class="overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm">
-
-        <!-- Header -->
-        <div class="border-b border-outline-variant px-6 py-5">
-            <div class="flex items-center gap-4">
-
-                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-error-container text-error">
-                    <i class="bi bi-envelope-x text-3xl"></i>
-                </div>
-
-                <div>
-                    <h2 class="text-2xl font-semibold text-on-surface">
-                        Disconnect account
-                    </h2>
-
-                    <p class="mt-1 text-sm text-on-surface-variant">
-                        {{ account.email }}
-                    </p>
-                </div>
-
-            </div>
+<div class="animate-fade-up mx-auto max-w-3xl">
+  <div class="card overflow-hidden">
+    <div class="border-b border-outline-variant px-6 py-5">
+      <div class="flex items-center gap-4">
+        <div class="flex size-16 items-center justify-center rounded-full bg-danger/10 text-danger">
+          <span class="material-symbols-outlined text-3xl">mail_off</span>
         </div>
-
-        <!-- Body -->
-        <div class="space-y-6 p-6">
-
-            <!-- Warning -->
-            <div class="flex gap-3 rounded-xl border border-tertiary/20 bg-tertiary-container/30 p-4">
-
-                <i class="bi bi-exclamation-triangle-fill mt-0.5 text-xl text-tertiary"></i>
-
-                <div>
-
-                    <h3 class="font-semibold text-tertiary">
-                        This will permanently remove this account from Portal.
-                    </h3>
-
-                    <p class="mt-1 text-sm text-tertiary">
-                        Once removed, the account and all associated data cannot be recovered.
-                    </p>
-
-                </div>
-
-            </div>
-
-            <!-- Consequences -->
-            <div>
-
-                <h3 class="mb-3 text-lg font-semibold text-on-surface">
-                    What will happen?
-                </h3>
-
-                <ul class="list-disc space-y-2 pl-5 text-sm text-on-surface-variant">
-                    <li>All synced emails for this account will be removed from the Unified Inbox.</li>
-                    <li>OAuth access and refresh tokens will be permanently deleted.</li>
-                    <li>Sync history and account settings will be lost.</li>
-                    <li>This action cannot be undone.</li>
-                </ul>
-
-            </div>
-
-            <!-- Account Details -->
-            <div class="rounded-xl border border-outline-variant">
-
-                <div class="border-b border-outline-variant px-5 py-4">
-                    <h3 class="font-semibold text-on-surface">
-                        Account Details
-                    </h3>
-                </div>
-
-                <div class="divide-y divide-outline-variant">
-
-                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
-                        <span class="text-sm font-medium text-on-surface-variant">
-                            Display Name
-                        </span>
-
-                        <span class="col-span-2 text-sm text-on-surface">
-                            {{ account.name }}
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
-                        <span class="text-sm font-medium text-on-surface-variant">
-                            Email
-                        </span>
-
-                        <span class="col-span-2 text-sm text-on-surface">
-                            {{ account.email }}
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
-                        <span class="text-sm font-medium text-on-surface-variant">
-                            Nickname
-                        </span>
-
-                        <span class="col-span-2 text-sm text-on-surface">
-                            {{ account.nickname|default:"—" }}
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
-
-                        <span class="text-sm font-medium text-on-surface-variant">
-                            Status
-                        </span>
-
-                        <div class="col-span-2">
-
-                            {% if account.oauth_status == 'connected' %}
-
-                            <span class="inline-flex rounded-full bg-success-container px-3 py-1 text-xs font-medium text-success">
-                                Connected
-                            </span>
-
-                            {% elif account.oauth_status == 'expired' %}
-
-                            <span class="inline-flex rounded-full bg-warning-container px-3 py-1 text-xs font-medium text-warning">
-                                Expired
-                            </span>
-
-                            {% elif account.oauth_status == 'revoked' %}
-
-                            <span class="inline-flex rounded-full bg-error-container px-3 py-1 text-xs font-medium text-error">
-                                Revoked
-                            </span>
-
-                            {% else %}
-
-                            <span class="inline-flex rounded-full bg-surface-container px-3 py-1 text-xs font-medium text-on-surface-variant">
-                                Pending
-                            </span>
-
-                            {% endif %}
-
-                        </div>
-
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4 px-5 py-4">
-
-                        <span class="text-sm font-medium text-on-surface-variant">
-                            Connected Since
-                        </span>
-
-                        <span class="col-span-2 text-sm text-on-surface">
-                            {{ account.created_at|date:"M d, Y" }}
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+        <div>
+          <h2 class="text-2xl font-bold tracking-tight text-on-surface">Disconnect account</h2>
+          <p class="prose-muted mt-1">{{ account.email }}</p>
         </div>
-
-        <!-- Footer -->
-        <div class="flex items-center justify-end gap-3 border-t border-outline-variant bg-surface-container px-6 py-4">
-
-            <a href="{% url 'accounts' %}"
-                class="inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-high">
-
-                <i class="bi bi-x"></i>
-                Cancel
-
-            </a>
-
-            <form method="post" action="{% url 'accounts_disconnect' account.pk %}">
-                {% csrf_token %}
-
-                <button
-                    type="submit"
-                    class="inline-flex items-center gap-2 rounded-lg bg-error px-4 py-2 text-sm font-medium text-on-error transition hover:bg-error-container">
-
-                    <i class="bi bi-trash"></i>
-                    Disconnect Account
-
-                </button>
-
-            </form>
-
-        </div>
-
+      </div>
     </div>
 
+    <div class="space-y-6 p-6">
+      <div class="alert-warning !mb-0">
+        <span class="material-symbols-outlined mt-0.5 text-[1.2rem]">warning</span>
+        <div>
+          <h3 class="font-semibold">This will permanently remove this account from Portal.</h3>
+          <p class="mt-1">Once removed, the account and all associated data cannot be recovered.</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="mb-3 text-lg font-semibold text-on-surface">What will happen?</h3>
+        <ul class="space-y-2 pl-5 text-sm text-on-surface-variant" style="list-style:disc">
+          <li>All synced emails for this account will be removed from the Unified Inbox.</li>
+          <li>OAuth access and refresh tokens will be permanently deleted.</li>
+          <li>Sync history and account settings will be lost.</li>
+          <li>This action cannot be undone.</li>
+        </ul>
+      </div>
+
+      <div class="rounded-2xl border border-outline-variant">
+        <div class="border-b border-outline-variant px-5 py-4">
+          <h3 class="font-semibold text-on-surface">Account Details</h3>
+        </div>
+
+        <div class="divide-y divide-outline-variant">
+          <div class="grid grid-cols-3 gap-4 px-5 py-4">
+            <span class="text-sm font-medium text-on-surface-variant">Display Name</span>
+            <span class="col-span-2 text-sm text-on-surface">{{ account.name }}</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4 px-5 py-4">
+            <span class="text-sm font-medium text-on-surface-variant">Email</span>
+            <span class="col-span-2 text-sm text-on-surface">{{ account.email }}</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4 px-5 py-4">
+            <span class="text-sm font-medium text-on-surface-variant">Nickname</span>
+            <span class="col-span-2 text-sm text-on-surface">{{ account.nickname|default:"—" }}</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4 px-5 py-4">
+            <span class="text-sm font-medium text-on-surface-variant">Status</span>
+            <div class="col-span-2">
+              {% if account.oauth_status == 'connected' %}
+              <span class="badge-success">Connected</span>
+              {% elif account.oauth_status == 'expired' %}
+              <span class="badge-warning">Expired</span>
+              {% elif account.oauth_status == 'revoked' %}
+              <span class="badge-danger">Revoked</span>
+              {% else %}
+              <span class="badge-neutral">Pending</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4 px-5 py-4">
+            <span class="text-sm font-medium text-on-surface-variant">Connected Since</span>
+            <span class="col-span-2 text-sm text-on-surface">{{ account.created_at|date:"M d, Y" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-end gap-3 border-t border-outline-variant bg-surface-container/50 px-6 py-4">
+      <a href="{% url 'accounts' %}" class="btn-secondary">
+        <span class="material-symbols-outlined text-[1.05rem]">close</span>Cancel
+      </a>
+
+      <form method="post" action="{% url 'accounts_disconnect' account.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-danger">
+          <span class="material-symbols-outlined text-[1.05rem]">delete</span>Disconnect Account
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}

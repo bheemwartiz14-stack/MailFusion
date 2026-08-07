@@ -1,172 +1,61 @@
 services:
 
-  # ==========================================================
-  # Redis
-  # ==========================================================
-  - type: redis
-    name: mailfusion-redis
-    plan: free
-    region: oregon
-    maxmemoryPolicy: allkeys-lru
-
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: Allow all connections
-
-
-
-  # ==========================================================
-  # Django Application
-  # ==========================================================
+  # Django Web
   - type: web
-    name: mailfusion
-
-    runtime: python
+    name: mailfusion-web
+    runtime: docker
     plan: free
-    region: oregon
-
-    autoDeploy: true
-
-
-    buildCommand: |
-      uv sync --frozen
-      uv run python manage.py collectstatic --noinput
-      uv run python manage.py migrate
-
-
-
-    startCommand: >
-      uv run gunicorn
-      core.wsgi:application
-      --bind 0.0.0.0:$PORT
-      --workers 2
-      --timeout 120
-      --log-level info
-      --access-logfile -
-      --error-logfile -
-
-
-
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mailfusion-db
+          property: connectionString
 
-
-      # ======================================================
-      # Django
-      # ======================================================
-
-      - key: PYTHON_VERSION
-        value: "3.13"
-
-      - key: DJANGO_SETTINGS_MODULE
-        value: "core.settings"
-
-      - key: DEBUG
-        value: "False"
+      - key: REDIS_URL
+        fromService:
+          name: mailfusion-redis
+          type: redis
+          property: connectionString
 
       - key: SECRET_KEY
         generateValue: true
 
-      - key: ALLOWED_HOSTS
-        value: ".onrender.com"
-
-      - key: SECURE_SSL_REDIRECT
-        value: "true"
-
-      - key: SESSION_COOKIE_AGE
-        value: "1209600"
-
-      - key: SESSION_INACTIVITY_TIMEOUT
-        value: "1800"
+      - key: DEBUG
+        value: false
 
 
 
-      # ======================================================
-      # PostgreSQL
-      # ======================================================
+  # Celery Worker
+  - type: worker
+    name: mailfusion-worker
 
-      - key: POSTGRES_DB
-        sync: false
+    runtime: docker
 
-      - key: POSTGRES_USER
-        sync: false
-
-      - key: POSTGRES_PASSWORD
-        sync: false
-
-      - key: POSTGRES_HOST
-        sync: false
-
-      - key: POSTGRES_PORT
-        value: "5432"
+    dockerCommand: >
+      celery
+      -A mailfusion
+      worker
+      --loglevel=info
 
 
+    envVars:
 
-      # ======================================================
-      # Redis
-      # ======================================================
-
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: mailfusion-redis
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mailfusion-db
           property: connectionString
 
 
-
-      # ======================================================
-      # Microsoft Graph OAuth
-      # ======================================================
-
-      - key: MICROSOFT_CLIENT_ID
-        sync: false
-
-      - key: MICROSOFT_CLIENT_SECRET
-        sync: false
-
-      - key: MICROSOFT_TENANT_ID
-        value: "common"
-
-      - key: MICROSOFT_REDIRECT_URI
-        sync: false
-
-      - key: MICROSOFT_GRAPH_SCOPES
-        value: "offline_access User.Read Mail.Read Mail.ReadBasic Mail.ReadWrite"
-
-
-
-      # ======================================================
-      # Mail Synchronization
-      # ======================================================
-
-      - key: SYNC_INTERVAL_SECONDS
-        value: "300"
-
-      - key: TOKEN_REFRESH_INTERVAL_MINUTES
-        value: "10"
-
-      - key: WEBHOOK_RENEW_INTERVAL_MINUTES
-        value: "15"
-
-      - key: LOG_CLEANUP_INTERVAL_HOURS
-        value: "24"
-
-      - key: HEALTH_CHECK_INTERVAL_MINUTES
-        value: "5"
-
-      - key: SYNC_LOG_RETENTION_DAYS
-        value: "30"
-
-      - key: SYNC_MAX_ATTACHMENT_BYTES
-        value: "26214400"
-
-
-
-      # ======================================================
-      # Email
-      # ======================================================
-
-      - key: EMAIL_BACKEND
-        value: "django.core.mail.backends.console.EmailBackend"
-
-      - key: DEFAULT_FROM_EMAIL
-        value: "Portal <no-reply@example.com>"
+      - key: REDIS_URL
+        fromService:
+          name: mailfusion-redis
+          type: redis
+          property: connectionString
+  # Redis
+  - type: redis
+    name: mailfusion-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+databases:
+  - name: mailfusion-db
+    plan: free

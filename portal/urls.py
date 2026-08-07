@@ -9,10 +9,14 @@ from portal.views.inbox_module_views import (
     ComposeAttachmentRemoveView, ComposeAttachmentUploadView, ComposeAutosaveView,
     ComposeModalView, ComposeSubmitView, ComposeView, DraftsView, EmailActionView,
     EmailDetailView, EmailDownloadEmlView, EmailHeadersPartialView, EmailListView,
-    EmailThreadPartialView, InboxView, SearchView, SentItemsView, UnreadCountPartialView,
+    EmailPreviewPartialView,     EmailThreadPartialView, InboxView, SearchView, SentItemsView, UnreadCountPartialView,
 )
 from portal.views.notification_views import NotificationActionView, NotificationBulkActionView, NotificationsView
-from portal.views.sync_views import AccountDetailView, HealthPartialView, HealthStatusView, OAuthStatusView, QueueStatusView, SyncDashboardPartialView, SyncDashboardView, SyncLogDetailView, SyncLogsPartialView, SyncLogsView
+from portal.views.system_monitor_views import (
+    AccountDetailView, HealthPartialView, OAuthStatusView, QueueStatusView,
+    SyncLogDetailView, SyncLogsPartialView, SyncLogsView, SystemHealthView,
+    SystemMonitorPartialView, SystemMonitorView,
+)
 
 
 
@@ -53,6 +57,7 @@ urlpatterns = [
     path("inbox/unread/", UnreadCountPartialView.as_view(), name="inbox_unread"),
     path("inbox/actions/", EmailActionView.as_view(), name="email_action"),
     path("inbox/emails/<uuid:email_id>/", EmailDetailView.as_view(), name="email_detail"),
+    path("inbox/emails/<uuid:email_id>/preview/", EmailPreviewPartialView.as_view(), name="email_preview"),
     path("inbox/emails/<uuid:email_id>/download-eml/", EmailDownloadEmlView.as_view(), name="email_download_eml"),
     path("inbox/emails/<uuid:email_id>/thread/", EmailThreadPartialView.as_view(), name="email_thread"),
     path("inbox/emails/<uuid:email_id>/headers/", EmailHeadersPartialView.as_view(), name="email_headers"),
@@ -80,16 +85,16 @@ urlpatterns = [
     # audit logs
     path("audit-logs/", AuditLogsView.as_view(), name="audit_logs"),
     path("audit-logs/export/", AuditLogExportView.as_view(), name="audit_logs_export"),
-    # synchronization monitoring
-    path("sync/", SyncDashboardView.as_view(), name="sync_dashboard"),
-    path("sync/dashboard/stats/", SyncDashboardPartialView.as_view(), name="sync_dashboard_stats"),
-    path("sync/logs/", SyncLogsView.as_view(), name="sync_logs"),
-    path("sync/logs/partial/", SyncLogsPartialView.as_view(), name="sync_logs_partial"),
-    path("sync/logs/<uuid:pk>/", SyncLogDetailView.as_view(), name="sync_log_detail"),
-    path("sync/health/", HealthStatusView.as_view(), name="sync_health"),
-    path("sync/health/partial/", HealthPartialView.as_view(), name="sync_health_partial"),
-    path("sync/queue/", QueueStatusView.as_view(), name="sync_queue"),
-    path("sync/oauth/", OAuthStatusView.as_view(), name="sync_oauth"),
+    # system monitor (renamed from /sync/)
+    path("system-monitor/", SystemMonitorView.as_view(), name="sync_dashboard"),
+    path("system-monitor/dashboard/stats/", SystemMonitorPartialView.as_view(), name="sync_dashboard_stats"),
+    path("system-monitor/logs/", SyncLogsView.as_view(), name="sync_logs"),
+    path("system-monitor/logs/partial/", SyncLogsPartialView.as_view(), name="sync_logs_partial"),
+    path("system-monitor/logs/<uuid:pk>/", SyncLogDetailView.as_view(), name="sync_log_detail"),
+    path("system-monitor/health/", SystemHealthView.as_view(), name="sync_health"),
+    path("system-monitor/health/partial/", HealthPartialView.as_view(), name="sync_health_partial"),
+    path("system-monitor/queue/", QueueStatusView.as_view(), name="sync_queue"),
+    path("system-monitor/oauth/", OAuthStatusView.as_view(), name="sync_oauth"),
     # errors (development preview)
     path("403/", error_403, name="preview_403"),
     path("404/", error_404, name="preview_404"),

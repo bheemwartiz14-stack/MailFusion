@@ -2,45 +2,57 @@
 {% load ui_extras %}
 
 {% block page_subtitle %}
-<p class="mt-1 text-sm text-on-surface-variant">Manage your personal information and preferences.</p>
+<p class="prose-muted mt-1">Manage your personal information and preferences.</p>
 {% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'change_password' %}" class="inline-flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high"><span class="material-symbols-outlined">key</span>Change password</a>
-<button type="submit" form="profile-form" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-container"><span class="material-symbols-outlined">check</span>Save changes</button>
+<a href="{% url 'change_password' %}" class="btn-secondary">
+  <span class="material-symbols-outlined text-[1.1rem]">key</span>Change password
+</a>
+<button type="submit" form="profile-form" class="btn-primary">
+  <span class="material-symbols-outlined text-[1.05rem]">check</span>Save changes
+</button>
 {% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-  <div class="lg:col-span-1">
-    <div class="rounded-xl border border-outline-variant bg-surface">
-      <div class="p-5 text-center">
-        <span class="mx-auto flex size-20 items-center justify-center rounded-full bg-primary-container text-xl font-bold text-on-primary-container">{{ current_user.initials }}</span>
-        <h3 class="mt-3 mb-0 text-lg font-semibold text-on-surface">{{ current_user.name }}</h3>
-        <p class="mb-2 text-sm text-outline">{{ current_user.email }}</p>
-        <span class="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary"><span class="material-symbols-outlined align-middle text-xs">verified</span>{{ current_user.role }}</span>
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+  <div class="space-y-6">
+    <div class="card">
+      <div class="p-6 text-center">
+        <span class="avatar-lg avatar-primary mx-auto">{{ current_user.initials }}</span>
+        <h3 class="mt-4 text-lg font-bold tracking-tight text-on-background">{{ current_user.name }}</h3>
+        <p class="prose-muted">{{ current_user.email }}</p>
+        <span class="badge-primary mt-3"><span class="material-symbols-outlined text-xs">verified</span>{{ current_user.role }}</span>
       </div>
     </div>
 
-    <div class="mt-4 rounded-xl border border-outline-variant bg-surface">
-      <div class="border-b border-outline-variant px-5 py-4"><h2 class="text-lg font-semibold text-on-surface">Account summary</h2></div>
-      <div class="p-5">
-        <ul class="mb-0 flex list-none flex-col gap-3 text-sm">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Account summary</h2>
+      </div>
+      <div class="card-body">
+        <ul class="flex flex-col gap-3.5 text-sm">
           <li class="flex items-center justify-between gap-4">
-            <span class="text-outline">Username</span>
+            <span class="text-on-surface-variant">Username</span>
             <span class="font-semibold text-on-surface">{{ user.username }}</span>
           </li>
           <li class="flex items-center justify-between gap-4">
-            <span class="text-outline">Member since</span>
+            <span class="text-on-surface-variant">Member since</span>
             <span class="font-semibold text-on-surface">{{ user.date_joined|date:"M Y" }}</span>
           </li>
           <li class="flex items-center justify-between gap-4">
-            <span class="text-outline">Last sign in</span>
+            <span class="text-on-surface-variant">Last sign in</span>
             <span class="font-semibold text-on-surface">{{ user.last_login|date:"M j, Y H:i" }}</span>
           </li>
           <li class="flex items-center justify-between gap-4">
-            <span class="text-outline">Active</span>
-            <span class="font-semibold text-on-surface">{% if user.is_active %}Yes{% else %}No{% endif %}</span>
+            <span class="text-on-surface-variant">Active</span>
+            <span class="font-semibold text-on-surface">
+              {% if user.is_active %}
+              <span class="badge-success">Active</span>
+              {% else %}
+              <span class="badge-neutral">Inactive</span>
+              {% endif %}
+            </span>
           </li>
         </ul>
       </div>
@@ -48,16 +60,16 @@
   </div>
 
   <div class="lg:col-span-2">
-    <div class="rounded-xl border border-outline-variant bg-surface">
-      <div class="border-b border-outline-variant px-5 py-4">
-        <h2 class="text-lg font-semibold text-on-surface">Personal information</h2>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Personal information</h2>
       </div>
-      <div class="p-5 md:p-6">
+      <div class="card-body">
         {% include "partials/messages.html" %}
 
         {% if form.non_field_errors %}
-        <div class="mb-4 flex items-start gap-2 rounded-xl border border-error/20 bg-error-container px-4 py-3 text-sm" role="alert">
-          <span class="material-symbols-outlined mt-0.5 text-error">cancel</span>
+        <div class="alert-danger" role="alert">
+          <span class="material-symbols-outlined mt-0.5 text-[1.2rem]">cancel</span>
           <div>
             {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
           </div>
@@ -71,9 +83,9 @@
             {% include "partials/form_field.html" with field=form.last_name %}
             {% include "partials/form_field.html" with field=form.email %}
             <div>
-              <label class="mb-1 block text-sm font-medium text-on-surface-variant" for="id_role">Role</label>
-              <input type="text" class="w-full rounded-xl border border-outline-variant bg-surface px-3 py-2.5 text-sm" value="{{ current_user.role }}" disabled>
-              <div class="mt-1 text-xs text-outline">Managed by your administrator.</div>
+              <label class="label" for="id_role">Role</label>
+              <input type="text" class="input bg-surface-container/60" value="{{ current_user.role }}" disabled>
+              <div class="help-text">Managed by your administrator.</div>
             </div>
           </div>
         </form>

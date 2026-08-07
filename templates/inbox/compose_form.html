@@ -1,14 +1,14 @@
 {% load ui_extras %}
 {% load static %}
-<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
-    <h2 class="text-lg font-semibold text-slate-900">
+<div class="card p-6">
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant pb-4">
+    <h2 class="text-lg font-semibold text-on-surface">
       {% if mode == "reply" %}Reply
       {% elif mode == "reply_all" %}Reply All
       {% elif mode == "forward" %}Forward
       {% else %}New Message{% endif %}
     </h2>
-    <span class="text-sm text-slate-500" data-mf-autosave-status></span>
+    <span class="text-sm text-on-surface-variant" data-mf-autosave-status></span>
   </div>
   <form id="mf-compose-form" class="flex flex-col gap-4" data-mf-compose-form method="post" action="{% url 'compose_submit' %}">
     {% csrf_token %}
@@ -19,9 +19,9 @@
     <input type="hidden" name="body_html" data-mf-body-html value="{{ body_html|default:'' }}">
     <input type="hidden" name="body_text" data-mf-body-text value="{{ body_text|default:'' }}">
 
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-start">
-      <label class="mt-2 text-sm font-medium text-slate-700 sm:min-w-[64px]" for="mf-compose-account">From</label>
-      <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200" id="mf-compose-account" name="account" required>
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <label class="mt-0 text-sm font-medium text-on-surface-variant sm:min-w-[64px]" for="mf-compose-account">From</label>
+      <select class="input" id="mf-compose-account" name="account" required>
         {% for account in accounts %}
         <option value="{{ account.pk }}" {% if account.pk == default_account.pk %}selected{% endif %}>
           {{ account.name }} &lt;{{ account.email }}&gt;
@@ -31,52 +31,52 @@
     </div>
 
     <div class="flex flex-col gap-2">
-      <label class="text-sm font-medium text-slate-700" for="mf-to">To</label>
-      <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="email" id="mf-to" name="to" value="{{ to|default:'' }}" data-mf-recipient="to" placeholder="name@example.com, other@example.com" autocomplete="off">
+      <label class="label" for="mf-to">To</label>
+      <input class="input" type="email" id="mf-to" name="to" value="{{ to|default:'' }}" data-mf-recipient="to" placeholder="name@example.com, other@example.com" autocomplete="off">
     </div>
     <div class="flex flex-col gap-2">
-      <label class="text-sm font-medium text-slate-700" for="mf-cc">Cc</label>
-      <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="email" id="mf-cc" name="cc" value="{{ cc|default:'' }}" data-mf-recipient="cc" placeholder="carbon copy (optional)">
+      <label class="label" for="mf-cc">Cc</label>
+      <input class="input" type="email" id="mf-cc" name="cc" value="{{ cc|default:'' }}" data-mf-recipient="cc" placeholder="carbon copy (optional)">
     </div>
     <div class="flex flex-col gap-2" data-mf-bcc-row {% if not bcc %}style="display:none"{% endif %}>
-      <label class="text-sm font-medium text-slate-700" for="mf-bcc">Bcc</label>
-      <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="email" id="mf-bcc" name="bcc" value="{{ bcc|default:'' }}" data-mf-recipient="bcc" placeholder="blind carbon copy (optional)">
+      <label class="label" for="mf-bcc">Bcc</label>
+      <input class="input" type="email" id="mf-bcc" name="bcc" value="{{ bcc|default:'' }}" data-mf-recipient="bcc" placeholder="blind carbon copy (optional)">
     </div>
 
     <div class="flex flex-col gap-2">
-      <label class="text-sm font-medium text-slate-700" for="mf-subject">Subject</label>
-      <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="text" id="mf-subject" name="subject" value="{{ subject|default:'' }}" data-mf-subject placeholder="Subject">
+      <label class="label" for="mf-subject">Subject</label>
+      <input class="input" type="text" id="mf-subject" name="subject" value="{{ subject|default:'' }}" data-mf-subject placeholder="Subject">
     </div>
 
     <div class="flex flex-col gap-2">
-      <label class="text-sm font-medium text-slate-700" for="mf-importance">Priority</label>
-      <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-40" id="mf-importance" name="importance">
+      <label class="label" for="mf-importance">Priority</label>
+      <select class="input sm:w-40" id="mf-importance" name="importance">
         <option value="normal" {% if importance != 'high' and importance != 'low' %}selected{% endif %}>Normal</option>
         <option value="high" {% if importance == 'high' %}selected{% endif %}>High</option>
         <option value="low" {% if importance == 'low' %}selected{% endif %}>Low</option>
       </select>
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200">
-      <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2" data-mf-editor-toolbar>
-        <button type="button" class="rounded p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900" data-mf-cmd="bold" title="Bold"><i class="bi bi-type-bold"></i></button>
-        <button type="button" class="rounded p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900" data-mf-cmd="italic" title="Italic"><i class="bi bi-type-italic"></i></button>
-        <button type="button" class="rounded p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900" data-mf-cmd="underline" title="Underline"><i class="bi bi-type-underline"></i></button>
-        <span class="mx-1 h-4 w-px bg-slate-300"></span>
-        <button type="button" class="rounded p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900" data-mf-cmd="insertUnorderedList" title="Bulleted list"><i class="bi bi-list-ul"></i></button>
-        <button type="button" class="rounded p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900" data-mf-cmd="insertOrderedList" title="Numbered list"><i class="bi bi-list-ol"></i></button>
-        <button type="button" class="rounded p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900" data-mf-cmd="blockquote" title="Quote"><i class="bi bi-quote"></i></button>
-        <button type="button" class="rounded p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900" data-mf-cmd="createLink" title="Insert link"><i class="bi bi-link-45deg"></i></button>
-        <span class="mx-1 h-4 w-px bg-slate-300"></span>
-        <button type="button" class="rounded p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900" data-mf-cmd="removeFormat" title="Clear formatting"><i class="bi bi-eraser"></i></button>
+    <div class="overflow-hidden rounded-xl border border-outline-variant">
+      <div class="flex flex-wrap items-center gap-1 border-b border-outline-variant bg-surface-container px-3 py-2" data-mf-editor-toolbar>
+        <button type="button" class="size-8 rounded-md text-on-surface-variant transition hover:bg-white hover:text-on-surface" data-mf-cmd="bold" title="Bold"><span class="material-symbols-outlined text-[1.1rem]">format_bold</span></button>
+        <button type="button" class="size-8 rounded-md text-on-surface-variant transition hover:bg-white hover:text-on-surface" data-mf-cmd="italic" title="Italic"><span class="material-symbols-outlined text-[1.1rem]">format_italic</span></button>
+        <button type="button" class="size-8 rounded-md text-on-surface-variant transition hover:bg-white hover:text-on-surface" data-mf-cmd="underline" title="Underline"><span class="material-symbols-outlined text-[1.1rem]">format_underlined</span></button>
+        <span class="mx-1 h-4 w-px bg-outline-variant"></span>
+        <button type="button" class="size-8 rounded-md text-on-surface-variant transition hover:bg-white hover:text-on-surface" data-mf-cmd="insertUnorderedList" title="Bulleted list"><span class="material-symbols-outlined text-[1.1rem]">format_list_bulleted</span></button>
+        <button type="button" class="size-8 rounded-md text-on-surface-variant transition hover:bg-white hover:text-on-surface" data-mf-cmd="insertOrderedList" title="Numbered list"><span class="material-symbols-outlined text-[1.1rem]">format_list_numbered</span></button>
+        <button type="button" class="size-8 rounded-md text-on-surface-variant transition hover:bg-white hover:text-on-surface" data-mf-cmd="blockquote" title="Quote"><span class="material-symbols-outlined text-[1.1rem]">format_quote</span></button>
+        <button type="button" class="size-8 rounded-md text-on-surface-variant transition hover:bg-white hover:text-on-surface" data-mf-cmd="createLink" title="Insert link"><span class="material-symbols-outlined text-[1.1rem]">insert_link</span></button>
+        <span class="mx-1 h-4 w-px bg-outline-variant"></span>
+        <button type="button" class="size-8 rounded-md text-on-surface-variant transition hover:bg-white hover:text-on-surface" data-mf-cmd="removeFormat" title="Clear formatting"><span class="material-symbols-outlined text-[1.1rem]">format_clear</span></button>
       </div>
-      <div class="min-h-[220px] bg-white p-4 text-sm text-slate-700 outline-none" contenteditable="true" data-mf-editor data-placeholder="Write your message…">{{ body_html|default:""|safe }}</div>
+      <div class="min-h-[220px] bg-surface p-4 text-sm text-on-surface outline-none" contenteditable="true" data-mf-editor data-placeholder="Write your message…">{{ body_html|default:""|safe }}</div>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-      <div class="rounded-lg border border-dashed border-slate-300 bg-white p-4 text-center text-sm text-slate-500" data-mf-dropzone>
-        <i class="bi bi-cloud-arrow-up text-2xl text-slate-400"></i>
-        <div class="mt-2">Drag &amp; drop files here or <span class="font-semibold text-slate-900">browse</span></div>
+    <div class="rounded-xl border border-outline-variant bg-surface-container p-4">
+      <div class="rounded-lg border border-dashed border-outline-variant bg-surface p-4 text-center text-sm text-on-surface-variant" data-mf-dropzone>
+        <span class="material-symbols-outlined text-2xl text-outline-variant">cloud_upload</span>
+        <div class="mt-2">Drag &amp; drop files here or <span class="font-semibold text-on-surface">browse</span></div>
         <input type="file" name="files" class="hidden" multiple data-mf-file-input>
       </div>
       <div id="mf-attachment-rows" class="mt-3 flex flex-col gap-2">
@@ -85,15 +85,15 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
-      <button class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800" type="submit" name="submit" value="send">
-        <i class="bi bi-send"></i>
+      <button class="btn-primary" type="submit" name="submit" value="send">
+        <span class="material-symbols-outlined">send</span>
         <span>Send</span>
       </button>
-      <button class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50" type="submit" name="submit" value="draft">
-        <i class="bi bi-save"></i>
+      <button class="btn-secondary" type="submit" name="submit" value="draft">
+        <span class="material-symbols-outlined">save</span>
         <span>Save draft</span>
       </button>
-      <a class="ml-auto inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50" href="{{ next|default:'/inbox/' }}" data-mf-discard>Discard</a>
+      <a class="btn-ghost ml-auto" href="{{ next|default:'/inbox/' }}" data-mf-discard>Discard</a>
     </div>
   </form>
 </div>

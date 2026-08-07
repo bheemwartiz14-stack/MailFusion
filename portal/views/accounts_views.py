@@ -63,7 +63,7 @@ class AccountsAddView(LoginRequiredMixin, PortalView):
         return redirect(auth_url)
 
 
-class AccountsCallbackView(LoginRequiredMixin, View):
+class AccountsCallbackView(View):
     """Handle OAuth callback from Microsoft."""
 
     def get(self, request):
@@ -151,6 +151,16 @@ class AccountsDisconnectView(LoginRequiredMixin, View):
 class AccountsSyncView(LoginRequiredMixin, View):
     """Trigger a manual sync for an Outlook account."""
 
+    def post(self, request, account_id):
+        service = MicrosoftAuthService()
+        account = service.repository.get_account_or_none(account_id)
+        if not account or account.user != request.user:
+            return HttpResponse("Account not found.", status=404)
+        ok = service.sync_account(account)
+        if not ok:
+            return HttpResponse("Sync failed. Check the account connection.", status=500)
+        return HttpResponse(f"Sync initiated for {account.email}")
+
     def get(self, request, account_id):
         service = MicrosoftAuthService()
         account = service.repository.get_account_or_none(account_id)
@@ -164,6 +174,16 @@ class AccountsSyncView(LoginRequiredMixin, View):
 
 class AccountsSyncAllView(LoginRequiredMixin, View):
     """Trigger a manual sync for every connected account."""
+
+    def post(self, request):
+        service = MicrosoftAuthService()
+        accounts = service.repository.list_active_accounts_with_tokens(request.user)
+        synced = sum(1 for account in accounts if service.sync_account(account))
+        if synced:
+            return HttpResponse(
+                f"Sync initiated for {synced} account{'s' if synced != 1 else ''}."
+            )
+        return HttpResponse("No accounts could be synced.", status=500)
 
     def get(self, request):
         service = MicrosoftAuthService()

@@ -1,0 +1,61 @@
+{% load static %}
+
+<div class="relative overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
+  <div class="pointer-events-none absolute inset-0 bg-gradient-to-br {{ status_meta.ring }}"></div>
+
+  <div class="relative flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center">
+    <div class="flex items-center gap-4">
+      <span class="relative flex size-4 shrink-0">
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full {{ status_meta.dot }} opacity-40"></span>
+        <span class="relative inline-flex size-4 rounded-full {{ status_meta.dot }}"></span>
+      </span>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider {{ status_meta.text }}">{{ status_meta.pill }}</p>
+        <h2 class="text-2xl font-extrabold tracking-tight text-on-background dark:text-zinc-100">{{ status_meta.label }}</h2>
+        <p class="mt-0.5 text-sm text-on-surface-variant dark:text-zinc-400">Last updated {{ now|timesince }} ago · live metrics</p>
+      </div>
+    </div>
+
+    <div class="grid flex-1 grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-5">
+      <div class="flex items-start gap-3">
+        <span class="grid size-9 shrink-0 place-items-center rounded-lg {{ status_meta.bar }}"><i data-lucide="refresh-cw" class="size-4 {{ status_meta.text }}"></i></span>
+        <div class="min-w-0">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Last Sync</p>
+          <p class="truncate text-sm font-bold text-on-surface dark:text-zinc-200">{{ metrics.last_sync|timesince|default:"Never" }}</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-info/10"><i data-lucide="cpu" class="size-4 text-info"></i></span>
+        <div class="min-w-0">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Workers</p>
+          <p class="truncate text-sm font-bold text-on-surface dark:text-zinc-200">{{ worker.count|default:0 }} Running</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-success/10"><i data-lucide="database" class="size-4 text-success"></i></span>
+        <div class="min-w-0">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Database</p>
+          <p class="truncate text-sm font-bold text-success">Operational</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="grid size-9 shrink-0 place-items-center rounded-lg {% if broker %}bg-success/10{% else %}bg-danger/10{% endif %}"><i data-lucide="server" class="size-4 {% if broker %}text-success{% else %}text-danger{% endif %}"></i></span>
+        <div class="min-w-0">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Redis</p>
+          <p class="truncate text-sm font-bold {% if broker %}text-success{% else %}text-danger{% endif %}">{% if broker %}Operational{% else %}Unreachable{% endif %}</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10"><i data-lucide="cloud" class="size-4 text-primary"></i></span>
+        <div class="min-w-0">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Graph API</p>
+          <p class="truncate text-sm font-bold text-on-surface dark:text-zinc-200">Operational</p>
+        </div>
+      </div>
+    </div>
+
+    <a href="{% url 'sync_logs' %}" class="link-primary hidden shrink-0 items-center gap-1 lg:inline-flex">
+      View details <i data-lucide="chevron-right" class="size-4"></i>
+    </a>
+  </div>
+</div>

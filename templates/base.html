@@ -8,38 +8,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <meta name="description" content="Portal - Cloud-based Outlook email aggregation dashboard">
+  <meta name="csrf-token" content="{{ csrf_token }}">
 
   <title>
     {% block title %}
     {% if title %}{{ title }} · {% endif %}{{ app_name }}
     {% endblock %}
   </title>
-
-  <script src="{% static 'js/ui-components.js' %}"></script>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/logo.svg' %}">
+  <script src="{% static 'js/vendor/lucide.min.js' %}" defer></script>
 </head>
 
-<body class="{% block body_class %}{% endblock %}">
+<body class="min-h-screen bg-background antialiased {% block body_class %}{% endblock %}">
   {% if auth_page %}
   {% block auth_content %}
   {% endblock %}
   {% else %}
   <div class="flex h-screen overflow-hidden">
     {% include "partials/sidebar.html" %}
-    <main class="flex-1 flex flex-col overflow-hidden">
-      {% include "partials/navbar.html" %}
-      <section class="flex-1 overflow-y-auto p-8 space-y-8">
-        {% block content %} {% endblock %}
-      </section>
-    </main>
+    <div class="flex min-w-0 flex-1 flex-col">
+      {% block navbar %}{% include "partials/navbar.html" %}{% endblock %}
+      <main class="flex-1 overflow-y-auto">
+        <section class="animate-fade-in mx-auto w-full max-w-[1440px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+          {% include "partials/breadcrumbs.html" %}
+          {% include "partials/messages.html" %}
+          {% block page_header %}
+          {% if not has_header %}
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h1 class="page-title">{% block page_title %}{{ title|default:app_name }}{% endblock %}</h1>
+              {% block page_subtitle %}{% endblock %}
+            </div>
+            <div class="flex shrink-0 flex-wrap items-center gap-2">
+              {% block page_actions %}{% endblock %}
+            </div>
+          </div>
+          {% endif %}
+          {% endblock %}
+          {% block content %}{% endblock %}
+          {% include "partials/footer.html" %}
+        </section>
+      </main>
+    </div>
   </div>
-  {% endif %}
   {% include "partials/modals.html" %}
+  {% endif %}
+  <script src="{% static 'js/vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'js/ui-components.js' %}"></script>
+  <script>
+    // Apply persisted theme before paint to avoid flash.
+    (function () {
+      var saved = localStorage.getItem('mf-theme');
+      if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+    // Initialise Lucide icons everywhere.
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide && lucide.createIcons) { try { lucide.createIcons(); } catch (e) {} }
+    });
+  </script>
   {% block extra_js %}
   {% endblock %}
-
 </body>
 
 </html>

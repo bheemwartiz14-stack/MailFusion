@@ -3,160 +3,151 @@
 {% load static %}
 
 {% block page_subtitle %}
-<p class="text-sm text-on-surface-variant">View and manage every notification across your workspace.</p>
+<p class="prose-muted">View and manage every notification across your workspace.</p>
 {% endblock %}
 
 {% block page_actions %}
 <form method="post" action="{% url 'notifications_read_all' %}">
   {% csrf_token %}
-  <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-high">
-    <span class="material-symbols-outlined">check_all</span>Mark all as read
+  <button type="submit" class="btn-secondary">
+    Mark all as read
   </button>
 </form>
 {% endblock %}
 
 {% block content %}
-<!-- Summary strip -->
-<div class="rounded-2xl border border-outline-variant bg-surface p-6 shadow-sm mb-4">
-  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-    <div>
-      <div class="text-sm text-on-surface-variant">Total notifications</div>
-      <div class="mt-1 text-2xl font-bold text-on-surface">{{ page_obj.paginator.count }}</div>
-    </div>
-    <div>
-      <div class="text-sm text-on-surface-variant">Unread</div>
-      <div class="mt-1 text-2xl font-bold text-warning">{{ unread_count }}</div>
-    </div>
-    <div>
-      <div class="text-sm text-on-surface-variant">Read</div>
-      <div class="mt-1 text-2xl font-bold text-success">{{ read_count }}</div>
+<div class="animate-fade-up">
+  <!-- Summary strip -->
+  <div class="card mb-4 p-6">
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div>
+        <div class="stat-label">Total notifications</div>
+        <div class="stat-value mt-1">{{ page_obj.paginator.count }}</div>
+      </div>
+      <div class="lg:border-l lg:border-outline-variant lg:pl-6">
+        <div class="stat-label">Unread</div>
+        <div class="stat-value mt-1 text-warning">{{ unread_count }}</div>
+      </div>
+      <div class="lg:border-l lg:border-outline-variant lg:pl-6">
+        <div class="stat-label">Read</div>
+        <div class="stat-value mt-1 text-success">{{ read_count }}</div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Toolbar -->
-<div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center">
-  <form method="get" class="flex flex-1 gap-2">
-    <div class="relative flex-1 max-w-md">
-      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-      <input type="text" class="w-full rounded-lg border border-outline-variant bg-surface py-2 pl-10 pr-4 text-sm text-on-surface-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" placeholder="Search notifications..." data-mf-table-search="mfNotifTable">
-    </div>
-    <select class="rounded-lg border border-outline-variant bg-surface px-4 py-2 text-sm text-on-surface-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" name="status" onchange="this.form.submit()">
-      <option value="" {% if not current_status %}selected{% endif %}>All statuses</option>
-      <option value="unread" {% if current_status == 'unread' %}selected{% endif %}>Unread</option>
-      <option value="read" {% if current_status == 'read' %}selected{% endif %}>Read</option>
-    </select>
-  </form>
-  <span class="ml-auto hidden text-sm text-on-surface-variant sm:inline">{{ page_obj.paginator.count }} notifications</span>
-</div>
+  <!-- Toolbar -->
+  <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center">
+    <form method="get" class="flex flex-1 gap-2">
+      <div class="relative max-w-md flex-1">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[1.1rem] text-on-surface-variant">search</span>
+        <input type="text" class="input input-with-icon" placeholder="Search notifications..." data-mf-table-search="mfNotifTable" aria-label="Search notifications">
+      </div>
+      <select class="input w-auto !py-2.5" name="status" onchange="this.form.submit()">
+        <option value="" {% if not current_status %}selected{% endif %}>All statuses</option>
+        <option value="unread" {% if current_status == 'unread' %}selected{% endif %}>Unread</option>
+        <option value="read" {% if current_status == 'read' %}selected{% endif %}>Read</option>
+      </select>
+    </form>
+    <span class="ml-auto hidden text-sm text-on-surface-variant sm:inline">{{ page_obj.paginator.count }} notifications</span>
+  </div>
 
-{% if notifications %}
-<form method="post" action="{% url 'notifications_bulk' %}">
-  {% csrf_token %}
-  <div class="rounded-2xl border border-outline-variant bg-surface shadow-sm">
-    <div class="overflow-hidden">
-      <table class="min-w-full divide-y divide-outline-variant" data-mf-table id="mfNotifTable">
-        <thead>
-          <tr class="bg-surface-container">
-            <th style="width:40px" class="px-4 py-3 text-left">
-              <input class="rounded border-outline-variant" type="checkbox" data-mf-select-all>
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Status</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Notification</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Received</th>
-            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-outline-variant bg-surface">
-          {% for n in notifications %}
-          <tr class="hover:bg-surface-container transition" data-notification-read="{{ n.is_read|yesno:'read,unread' }}">
-            <td class="px-4 py-4">
-              <input class="rounded border-outline-variant" type="checkbox" name="notification_ids" value="{{ n.pk }}" data-mf-row-check>
-            </td>
-            <td class="px-4 py-4">
-              {% if n.is_read %}
-              <span class="inline-flex items-center gap-1 rounded-full bg-outline-variant px-3 py-1 text-xs font-medium text-on-surface-variant">
-                <span class="material-symbols-outlined text-[14px]">check</span>Read</span>
-              {% else %}
-              <span class="inline-flex items-center gap-1 rounded-full bg-primary-container px-3 py-1 text-xs font-medium text-primary">
-                <span class="material-symbols-outlined text-[14px]">fiber_manual_record</span>Unread</span>
-              {% endif %}
-            </td>
-            <td class="px-4 py-4">
-              <div class="flex items-center gap-2">
-                <span class="mf-stat__icon mf-stat__icon--{{ n.tone }}" style="width:34px;height:34px;font-size:.9rem"><i class="bi {{ n.icon }}"></i></span>
-                <div class="min-w-0">
-                  <div class="font-medium text-on-surface truncate {% if not n.is_read %}font-semibold{% endif %}">{{ n.title }}</div>
-                  <div class="text-sm text-on-surface-variant truncate">{{ n.detail }}</div>
+  {% if notifications %}
+  <form method="post" action="{% url 'notifications_bulk' %}">
+    {% csrf_token %}
+    <div class="card">
+      <div class="table-scroll">
+        <table class="table" data-mf-table id="mfNotifTable">
+          <thead>
+            <tr>
+              <th class="w-10"><input class="size-4 cursor-pointer rounded border-outline-variant text-primary focus:ring-primary/30" type="checkbox" data-mf-select-all aria-label="Select all"></th>
+              <th>Status</th>
+              <th>Notification</th>
+              <th>Received</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for n in notifications %}
+            <tr data-notification-read="{{ n.is_read|yesno:'read,unread' }}">
+              <td class="!py-4">
+                <input class="size-4 cursor-pointer rounded border-outline-variant text-primary focus:ring-primary/30" type="checkbox" name="notification_ids" value="{{ n.pk }}" data-mf-row-check aria-label="Select {{ n.title }}">
+              </td>
+              <td>
+                {% if n.is_read %}
+                <span class="badge-neutral"><span class="material-symbols-outlined text-sm">check</span>Read</span>
+                {% else %}
+                <span class="badge-primary"><span class="material-symbols-outlined text-sm">fiber_manual_record</span>Unread</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="min-w-0">
+                    <div class="truncate font-medium text-on-surface {% if not n.is_read %}font-semibold{% endif %}">{{ n.title }}</div>
+                    <div class="truncate text-sm text-on-surface-variant">{{ n.detail }}</div>
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td class="px-4 py-4 text-sm text-on-surface-variant">{{ n.created_at|timesince }} ago</td>
-            <td class="px-4 py-4">
-              <div class="flex justify-end gap-1">
-                <form method="post" action="{% url 'notification_toggle' n.pk %}">
-                  {% csrf_token %}
-                  <button type="submit" class="rounded-lg p-2 text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface" title="{% if n.is_read %}Mark as unread{% else %}Mark as read{% endif %}">
-                    {% if n.is_read %}
-                    <span class="material-symbols-outlined">email</span>
-                    {% else %}
-                    <span class="material-symbols-outlined">email_open</span>
-                    {% endif %}
-                  </button>
-                </form>
-                <form method="post" action="{% url 'notification_delete' n.pk %}">
-                  {% csrf_token %}
-                  <button type="submit" class="rounded-lg p-2 text-on-surface-variant transition hover:bg-error/10 hover:text-error" title="Delete">
-                    <span class="material-symbols-outlined">delete</span>
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+              </td>
+              <td class="text-on-surface-variant">{{ n.created_at|timesince }} ago</td>
+              <td>
+                <div class="flex justify-end gap-1">
+                  <form method="post" action="{% url 'notification_toggle' n.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-icon" title="{% if n.is_read %}Mark as unread{% else %}Mark as read{% endif %}">
+                      {% if n.is_read %}
+                      <span class="material-symbols-outlined text-[1.1rem]">email</span>
+                      {% else %}
+                      <span class="material-symbols-outlined text-[1.1rem]">mark_email_unread</span>
+                      {% endif %}
+                    </button>
+                  </form>
+                  <form method="post" action="{% url 'notification_delete' n.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-icon-danger" title="Delete">
+                      <span class="material-symbols-outlined text-[1.1rem]">delete</span>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-    <div class="hidden p-8 text-center" data-mf-empty-state>
-      <div class="mx-auto max-w-sm">
-        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-surface-container mx-auto">
-          <span class="material-symbols-outlined text-3xl text-outline">notifications_off</span>
+      <div class="hidden p-8 text-center" data-mf-empty-state>
+        <div class="mx-auto max-w-sm">
+          <div class="empty-icon mx-auto"><span class="material-symbols-outlined text-3xl">notifications_off</span></div>
+          <h3 class="empty-title">No notifications match your search</h3>
+          <p class="empty-text">Try a different search term or status filter.</p>
         </div>
-        <h3 class="mt-4 text-xl font-semibold text-on-surface">No notifications match your search</h3>
-        <p class="mt-2 text-on-surface-variant">Try a different search term or status filter.</p>
       </div>
     </div>
-  </div>
 
-  <!-- Bulk actions bar -->
-  <div class="mt-3 flex items-center gap-2">
-    <span class="text-sm text-on-surface-variant">Selected: <span data-mf-selected-count>0</span></span>
-    <span class="flex-grow-1"></span>
-    <button type="submit" name="bulk_action" value="mark_read" class="inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-high">
-      <span class="material-symbols-outlined">check_all</span>Mark selected as read
-    </button>
-    <button type="submit" name="bulk_action" value="delete" class="inline-flex items-center gap-2 rounded-lg border border-error/20 bg-error/10 px-4 py-2 text-sm font-medium text-error transition hover:bg-error/20">
-      <span class="material-symbols-outlined">delete</span>Delete selected
-    </button>
-  </div>
+    <!-- Bulk actions bar -->
+    <div class="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-outline-variant bg-surface p-3">
+      <span class="text-sm text-on-surface-variant">Selected: <span class="font-semibold text-on-surface" data-mf-selected-count>0</span></span>
+      <span class="flex-1"></span>
+      <button type="submit" name="bulk_action" value="mark_read" class="btn-secondary btn-sm">
+        Mark selected as read
+      </button>
+      <button type="submit" name="bulk_action" value="delete" class="btn-danger btn-sm">
+        <span class="material-symbols-outlined text-[1.1rem]">delete</span>Delete selected
+      </button>
+    </div>
 
-  {% include "partials/pagination.html" %}
-</form>
-{% else %}
-<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm">
-  <div class="p-8 text-center">
-    <div class="mx-auto max-w-sm">
-      <div class="flex h-20 w-20 items-center justify-center rounded-full bg-surface-container mx-auto">
-        <span class="material-symbols-outlined text-3xl text-outline">notifications_off</span>
-      </div>
-      <h3 class="mt-4 text-xl font-semibold text-on-surface">No notifications yet</h3>
-      <p class="mt-2 text-on-surface-variant">Notifications about syncs, logins and security events will appear here.</p>
-      <a href="{% url 'dashboard' %}" class="mt-6 inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface px-5 py-2.5 font-medium text-on-surface-variant transition hover:bg-surface-container-high">Back to dashboard</a>
+    {% include "partials/pagination.html" %}
+  </form>
+  {% else %}
+  <div class="card">
+    <div class="empty-state p-8 py-16">
+      <div class="empty-icon flex"><span class="material-symbols-outlined text-3xl">notifications_off</span></div>
+      <h3 class="empty-title">No notifications yet</h3>
+      <p class="empty-text">Notifications about syncs, logins and security events will appear here.</p>
+      <a href="{% url 'dashboard' %}" class="btn-secondary mt-6">Back to dashboard</a>
     </div>
   </div>
+  {% endif %}
 </div>
-{% endif %}
 {% endblock %}
 
 {% block extra_js %}

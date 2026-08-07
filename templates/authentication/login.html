@@ -3,58 +3,67 @@
 {% block body_class %}mf-body-auth{% endblock %}
 {% block auth_content %}
 <div class="flex min-h-screen bg-background">
-  <div class="flex min-h-screen flex-1 items-center justify-center bg-background px-4 py-12">
-    <div class="w-full max-w-md rounded-2xl border border-outline-variant bg-surface p-8 shadow-lg">
-      <div class="mb-5"><img src="{% static 'images/logo.svg' %}" alt="{{ app_name }}" class="h-12 rounded-xl"></div>
-      <h1 class="text-2xl font-bold text-on-background">Welcome back</h1>
-      <p class="mt-1 text-sm text-on-surface-variant">Sign in to your {{ app_name }} workspace.</p>
+  {% include "partials/auth_aside.html" %}
+
+  <div class="flex flex-1 items-center justify-center bg-background px-4 py-12">
+    <div class="animate-fade-up w-full max-w-md rounded-3xl border border-outline-variant bg-surface p-8 shadow-lg sm:p-10">
+      <div class="mb-6 flex items-center gap-3">
+        <div class="flex size-11 items-center justify-center overflow-hidden rounded-xl ring-1 ring-outline-variant">
+          <img src="{% static 'images/logo.svg' %}" alt="{{ app_name }}" class="h-full w-full object-cover">
+        </div>
+        <span class="text-lg font-extrabold tracking-tight text-on-background">{{ app_name }}</span>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-on-background">Welcome back</h1>
+      <p class="mt-1.5 text-sm text-on-surface-variant">Sign in to your {{ app_name }} workspace.</p>
+
       {% if form.non_field_errors %}
-      <div class="mt-4 flex items-start gap-2 rounded-xl border border-error/20 bg-error-container px-4 py-3 text-sm"
-        role="alert">
-        <span class="material-symbols-outlined mt-0.5 text-error">cancel</span>
+      <div class="alert-danger mt-5" role="alert">
+        <span class="material-symbols-outlined mt-0.5 text-[1.2rem]">cancel</span>
         <div>
           {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
         </div>
       </div>
       {% endif %}
+
       <form method="post" class="mt-6 space-y-5" novalidate>
         {% csrf_token %}
 
         <!-- Username / Email -->
         <div class="space-y-2">
-          <label for="id_username" class="block text-sm font-medium text-on-surface">
-            Username or Email
-          </label>
-
+          <label for="id_username" class="label">Username or Email</label>
           <input type="text" name="username" id="id_username" placeholder="Enter username or email"
-            value="{{ form.username.value|default:'' }}" class="w-full rounded-lg border border-outline-variant bg-surface px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-
+            value="{{ form.username.value|default:'' }}"
+            class="input {% if form.username.errors %}input-error{% endif %}">
           {% if form.username.errors %}
-          <p class="text-sm text-error">
-            {{ form.username.errors.0 }}
-          </p>
+          <p class="error-text">{{ form.username.errors.0 }}</p>
           {% endif %}
         </div>
+
         <!-- Password -->
         <div class="space-y-2">
-          <label for="id_password" class="block text-sm font-medium text-on-surface">
-            Password
-          </label>
-
-          <input type="password" name="password" id="id_password" autocomplete="current-password"
-            placeholder="Enter password"
-            class="w-full rounded-lg border border-outline-variant bg-surface px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+          <label for="id_password" class="label">Password</label>
+          <div class="relative">
+            <input type="password" name="password" id="id_password" autocomplete="current-password"
+              placeholder="Enter password"
+              class="input pr-11 {% if form.password.errors %}input-error{% endif %}">
+            <button type="button" data-mf-password-toggle aria-label="Toggle password visibility"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors hover:text-on-surface">
+              <span class="material-symbols-outlined text-[1.2rem]">visibility</span>
+            </button>
+          </div>
+          {% if form.password.errors %}
+          <p class="error-text">{{ form.password.errors.0 }}</p>
+          {% endif %}
         </div>
 
-        <button type="submit"
-          class="mt-4 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary/90">
-          Login
+        <button type="submit" class="btn-primary btn-block btn-lg mt-6">
+          Sign in
+          <span class="material-symbols-outlined text-[1.15rem]">arrow_forward</span>
         </button>
-
       </form>
 
-      <p class="mb-0 mt-4 text-center text-sm text-outline">
-        <a href="{% url 'password_reset' %}" class="font-medium text-primary hover:underline">Forgot your password?</a>
+      <p class="mt-6 text-center text-sm text-on-surface-variant">
+        <a href="{% url 'password_reset' %}" class="link-primary">Forgot your password?</a>
       </p>
     </div>
   </div>

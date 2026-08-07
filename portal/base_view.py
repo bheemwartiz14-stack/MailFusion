@@ -59,19 +59,19 @@ SIDEBAR_TOOLS = [
         "url": "/audit-logs/",
     },
     {
-        "label": "Sync Dashboard",
+        "label": "System Monitor",
         "icon": "bi-arrow-repeat",
-        "url": "/sync/",
+        "url": "/system-monitor/",
     },
     {
-        "label": "Sync Logs",
+        "label": "Monitor Logs",
         "icon": "bi-list-check",
-        "url": "/sync/logs/",
+        "url": "/system-monitor/logs/",
     },
     {
         "label": "Health & Queue",
         "icon": "bi-heart-pulse",
-        "url": "/sync/health/",
+        "url": "/system-monitor/health/",
     },
 ]
 

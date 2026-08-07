@@ -2,120 +2,73 @@
 {% load ui_extras %}
 {% load static %}
 
-{% block title %}Unified Inbox · {{ app_name }}{% endblock %}
-
-{% block page_subtitle %}
-<p class="text-sm text-gray-500">
-    Every mailbox, every message — one feed.
-</p>
-{% endblock %}
-
-{% block page_actions %}
-<div class="flex items-center gap-3">
-
-    <button
-        type="button"
-        data-mf-open-compose="new"
-        class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition hover:bg-primary-fixed-dim active:scale-95"
-        title="New message">
-
-        <span class="material-symbols-outlined">edit</span>
-        Compose
-
-    </button>
-
-    <button
-        type="button"
-        hx-get="{% url 'inbox_unread' %}"
-        hx-target="#mf-folder-counts"
-        hx-swap="innerHTML"
-        class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface text-on-surface-variant transition hover:bg-surface-container-highest"
-        title="Refresh folder counts">
-
-        <span class="material-symbols-outlined">refresh</span>
-
-    </button>
-
-</div>
-{% endblock %}
+{% block title %}Unified Inbox → {{ app_name }}{% endblock %}
 
 {% block content %}
+<div class="animate-fade-up grid gap-6 xl:grid-cols-12">
+  <!-- Sidebar (folder navigation) -->
+  <aside id="mf-folder-counts" class="h-fit rounded-2xl border border-outline-variant bg-surface p-4 shadow-sm xl:col-span-3">
+    {% include "inbox/partials/sidebar.html" %}
+  </aside>
 
-<div class="grid gap-6 xl:grid-cols-12">
+  <!-- Inbox: list + reading pane -->
+  <section class="flex min-h-[760px] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm xl:col-span-9">
+    <div class="flex items-center justify-between gap-3 border-b border-outline-variant px-4 py-3">
+      <div>
+        <h1 class="text-lg font-bold tracking-tight text-on-surface">Unified Inbox</h1>
+        <p class="text-sm text-on-surface-variant">Every mailbox, every message — one feed.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" data-mf-open-compose="new" class="btn-primary" title="New message">
+          <span class="material-symbols-outlined text-[1.1rem]">edit</span>Compose
+        </button>
+        <button type="button" hx-get="{% url 'inbox_unread' %}" hx-target="#mf-folder-counts" hx-swap="innerHTML"
+          class="btn-icon" title="Refresh folder counts" aria-label="Refresh folder counts">
+          <span class="material-symbols-outlined text-[1.1rem]">refresh</span>
+        </button>
+      </div>
+    </div>
 
-    <!-- Sidebar -->
-
-    <aside
-        id="mf-folder-counts"
-        class="xl:col-span-3 rounded-xl border border-gray-200 bg-white shadow-sm">
-
-        {% include "inbox/partials/sidebar.html" %}
-
-    </aside>
-
-    <!-- Inbox -->
-
-    <section class="xl:col-span-9 flex min-h-[700px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-
+    <div class="grid min-h-0 flex-1 divide-x divide-outline-variant xl:grid-cols-2">
+      <!-- Left: message list -->
+      <div class="flex min-w-0 flex-col">
         <!-- Toolbar -->
-
-        <div class="border-b border-gray-200">
-
-            {% include "inbox/partials/toolbar.html" %}
-
+        <div class="border-b border-outline-variant">
+          {% include "inbox/partials/toolbar.html" %}
         </div>
 
         <!-- Bulk Actions -->
-
-        <div class="border-b border-gray-200">
-
-            {% include "inbox/partials/bulk_bar.html" %}
-
+        <div class="border-b border-outline-variant">
+          {% include "inbox/partials/bulk_bar.html" %}
         </div>
 
         <!-- Email List -->
-
-        <div
-            class="flex-1 overflow-y-auto"
-            data-mf-inbox-scroll>
-
-            <div
-                id="mf-email-list"
-                hx-get="{% url 'inbox_list' %}?{{ querystring }}"
-                hx-trigger="load"
-                hx-swap="innerHTML">
-
-                <div class="flex flex-col items-center justify-center py-24 text-center">
-
-                    <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                        <i class="bi bi-inbox text-4xl"></i>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-gray-900">
-                        Loading your inbox
-                    </h3>
-
-                    <p class="mt-2 text-sm text-gray-500">
-                        Synchronizing across your connected accounts…
-                    </p>
-
-                </div>
-
+        <div class="flex-1 overflow-y-auto" data-mf-inbox-scroll>
+          <div id="mf-email-list" hx-get="{% url 'inbox_list' %}?{{ querystring }}" hx-trigger="load" hx-swap="innerHTML">
+            <div class="flex flex-col items-center justify-center px-4 py-24 text-center">
+              <div class="skeleton mb-5 size-20 rounded-full"></div>
+              <div class="skeleton h-5 w-48"></div>
+              <div class="skeleton mt-3 h-4 w-64"></div>
             </div>
-
+          </div>
         </div>
+      </div>
 
-    </section>
-
+      <!-- Right: reading pane -->
+      <div id="mf-preview-pane" class="hidden min-h-0 flex-col bg-background xl:flex">
+        <div id="mf-preview-loading" class="htmx-indicator flex flex-col items-center justify-center py-24 text-center">
+          <div class="skeleton mb-5 size-14 rounded-full"></div>
+          <div class="skeleton h-4 w-40"></div>
+        </div>
+        <div id="mf-email-preview" class="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div class="flex flex-1 flex-col items-center justify-center px-6 text-center">
+            <span class="mb-3 material-symbols-outlined text-[3rem] text-outline/60">drafts</span>
+            <h3 class="text-base font-semibold text-on-surface">Select a message</h3>
+            <p class="mt-1 max-w-xs text-sm text-on-surface-variant">Click any message in the list to preview it here without leaving your inbox.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
-
-<!-- Compose Modal -->
-
-<div id="mf-compose-modal-host"></div>
-
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'js/inbox.js' %}"></script>
-<script src="{% static 'js/compose.js' %}"></script>
 {% endblock %}

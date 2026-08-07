@@ -192,9 +192,7 @@ class InboxView(LoginRequiredMixin, PortalView):
             page_size=PAGE_SIZE,
             now=timezone.now(),
         )
-        print('context', context)
         return render(request, self.template_name, context)
-
 
 class EmailListView(LoginRequiredMixin, View):
     """HTMX partial: the next page of email rows for infinite scroll."""
@@ -226,6 +224,31 @@ class EmailListView(LoginRequiredMixin, View):
             "now": timezone.now(),
         }
         return render(request, "inbox/partials/email_list.html", context)
+
+
+class EmailPreviewPartialView(LoginRequiredMixin, View):
+    """HTMX partial: a compact email preview rendered in the inbox reading pane."""
+
+    def get(self, request, email_id):
+        service = EmailService()
+        email = service.get_message(request.user, email_id)
+        if email is None:
+            return HttpResponse(status=404)
+
+        if not email.is_read:
+            try:
+                service.set_read(request.user, email, True)
+            except MailActionError:
+                pass
+
+        context = {
+            "email": email,
+            "safe_body": sanitize_html(email.body_html),
+            "thread_count": len(service.get_thread(request.user, email.conversation_id)),
+            "attachments": email.attachments.all(),
+            "now": timezone.now(),
+        }
+        return render(request, "inbox/partials/email_preview.html", context)
 
 
 class EmailDetailView(LoginRequiredMixin, PortalView):

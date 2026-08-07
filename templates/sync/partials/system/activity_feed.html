@@ -1,0 +1,30 @@
+{% load ui_extras %}
+
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+    <div>
+      <h2 class="card-title">Live Activity</h2>
+      <p class="prose-muted mt-0.5">Real-time platform events</p>
+    </div>
+    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-success"><span class="size-1.5 animate-pulse rounded-full bg-success"></span>Live</span>
+  </div>
+
+  <div class="space-y-1 p-2" data-sys-feed>
+    {% for ev in activity_feed_events %}
+    <div class="sys-feed-item flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-surface-container/60 dark:hover:bg-zinc-800/50">
+      <span class="grid size-8 shrink-0 place-items-center rounded-full
+        {% if ev.tone == 'success' %}bg-success/10 text-success
+        {% elif ev.tone == 'warning' %}bg-warning/10 text-warning
+        {% elif ev.tone == 'info' %}bg-info/10 text-info
+        {% else %}bg-primary/10 text-primary{% endif %}">
+        <i data-lucide="{{ ev.icon }}" class="size-4"></i>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-semibold text-on-surface dark:text-zinc-200">{{ ev.kind }}</p>
+        <p class="truncate text-xs text-on-surface-variant">{{ ev.detail }}</p>
+      </div>
+      <span class="shrink-0 text-[11px] text-on-surface-variant/70">now</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>

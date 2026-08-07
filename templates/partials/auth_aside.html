@@ -1,20 +1,27 @@
 {% load static %}
-<aside class="hidden w-1/2 flex-col justify-between border-r border-outline-variant bg-primary-container p-10 lg:flex">
-  <div class="flex items-center gap-2">
-    <span class="mf-brand-logo"><img src="{% static 'images/logo.svg' %}" alt="{{ app_name }}" style="width:100%;height:100%;border-radius:10px"></span>
-    <span class="text-xl font-bold text-on-primary">{{ app_name }}</span>
+<aside class="relative hidden w-1/2 flex-col justify-between overflow-hidden border-r border-outline-variant bg-gradient-to-br from-primary via-primary to-primary-hover p-12 lg:flex">
+  <div class="absolute -right-24 -top-24 size-96 rounded-full bg-white/10 blur-3xl"></div>
+  <div class="absolute -bottom-32 -left-16 size-80 rounded-full bg-on-primary/10 blur-3xl"></div>
+
+  <div class="relative flex items-center gap-3">
+    <span class="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-surface/20 ring-1 ring-white/20 backdrop-blur">
+      <img src="{% static 'images/logo.svg' %}" alt="{{ app_name }}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">
+    </span>
+    <span class="text-xl font-extrabold tracking-tight text-white">{{ app_name }}</span>
   </div>
-  <div class="max-w-md">
-    <h2 class="text-3xl font-bold leading-tight text-on-primary">Every inbox.<br>One command center.</h2>
-    <p class="mt-4 text-on-primary-container">
+
+  <div class="relative max-w-md">
+    <h2 class="text-4xl font-extrabold leading-tight tracking-tight text-white">Every inbox.<br>One command center.</h2>
+    <p class="mt-5 text-base leading-relaxed text-white/85">
       Portal aggregates all of your Outlook mailboxes into a single,
       searchable, synchronized inbox &mdash; built for teams that move fast.
     </p>
-    <div class="mt-6 flex flex-wrap gap-4 text-on-primary-container">
-      <div class="flex items-center gap-2"><span class="material-symbols-outlined">check_circle</span><span class="text-sm">Unified inbox</span></div>
-      <div class="flex items-center gap-2"><span class="material-symbols-outlined">check_circle</span><span class="text-sm">Real-time sync</span></div>
-      <div class="flex items-center gap-2"><span class="material-symbols-outlined">check_circle</span><span class="text-sm">Enterprise audit</span></div>
+    <div class="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-white/90">
+      <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[1.2rem]">check_circle</span><span class="text-sm font-medium">Unified inbox</span></div>
+      <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[1.2rem]">check_circle</span><span class="text-sm font-medium">Real-time sync</span></div>
+      <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[1.2rem]">check_circle</span><span class="text-sm font-medium">Enterprise audit</span></div>
     </div>
   </div>
-  <div class="text-sm text-on-primary-container/80">© {% now "Y" %} {{ app_name }} &mdash; v{{ app_version }}</div>
+
+  <div class="relative text-sm text-white/70">© {% now "Y" %} {{ app_name }} &mdash; v{{ app_version }}</div>
 </aside>

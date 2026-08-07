@@ -1,0 +1,87 @@
+{% load ui_extras %}
+{% load static %}
+
+<div class="animate-fade-up">
+  <!-- Tab navigation -->
+  <div class="sticky top-16 z-20 -mx-1 rounded-t-2xl bg-background/90 px-1 py-3 backdrop-blur-md dark:bg-zinc-950/80">
+    <div class="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="System Monitor sections" data-sys-tabs>
+      <button type="button" role="tab" data-sys-tab="overview" class="sys-tab is-active" aria-selected="true">
+        <i data-lucide="gauge" class="size-4"></i>Overview
+      </button>
+      <button type="button" role="tab" data-sys-tab="sync" class="sys-tab" aria-selected="false">
+        <i data-lucide="refresh-cw" class="size-4"></i>Synchronization
+      </button>
+      <button type="button" role="tab" data-sys-tab="queue" class="sys-tab" aria-selected="false">
+        <i data-lucide="list-todo" class="size-4"></i>Queue &amp; Workers
+      </button>
+      <button type="button" role="tab" data-sys-tab="integrations" class="sys-tab" aria-selected="false">
+        <i data-lucide="plug-zap" class="size-4"></i>Integrations
+      </button>
+      <button type="button" role="tab" data-sys-tab="audit" class="sys-tab" aria-selected="false">
+        <i data-lucide="scroll-text" class="size-4"></i>Audit &amp; Activity
+      </button>
+      <button type="button" role="tab" data-sys-tab="logs" class="sys-tab" aria-selected="false">
+        <i data-lucide="terminal" class="size-4"></i>Logs
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <!-- Overview -->
+    <section role="tabpanel" data-sys-panel="overview" class="space-y-6">
+      {% include "sync/partials/system/status_banner.html" %}
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {% for kpi in kpi_cards %}
+          {% include "sync/partials/system/metric_card.html" %}
+        {% endfor %}
+      </div>
+
+      <div class="grid gap-6 xl:grid-cols-12">
+        <div class="space-y-6 xl:col-span-8">
+          {% include "sync/partials/system/activity_feed.html" %}
+        </div>
+        <div class="space-y-6 xl:col-span-4">
+          {% include "sync/partials/system/alerts.html" %}
+          {% include "sync/partials/system/metrics.html" %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Synchronization -->
+    <section role="tabpanel" data-sys-panel="sync" class="hidden space-y-6">
+      {% include "sync/partials/system/charts.html" %}
+      {% include "sync/partials/system/sync_table.html" %}
+      {% include "sync/partials/system/sync_timeline.html" %}
+    </section>
+
+    <!-- Queue & Workers -->
+    <section role="tabpanel" data-sys-panel="queue" class="hidden space-y-6">
+      <div class="grid gap-6 lg:grid-cols-2">
+        {% include "sync/partials/system/queue_monitor.html" %}
+        {% include "sync/partials/system/worker_status.html" %}
+      </div>
+    </section>
+
+    <!-- Integrations -->
+    <section role="tabpanel" data-sys-panel="integrations" class="hidden space-y-6">
+      <div class="grid gap-6 lg:grid-cols-2">
+        {% include "sync/partials/system/health_card.html" %}
+        {% include "sync/partials/system/api_status.html" %}
+      </div>
+    </section>
+
+    <!-- Audit & Activity -->
+    <section role="tabpanel" data-sys-panel="audit" class="hidden space-y-6">
+      <div class="grid gap-6 lg:grid-cols-2">
+        {% include "sync/partials/system/audit_table.html" %}
+        {% include "sync/partials/system/activity_feed.html" %}
+      </div>
+    </section>
+
+    <!-- Logs -->
+    <section role="tabpanel" data-sys-panel="logs" class="hidden">
+      {% include "sync/partials/system/logs_table.html" %}
+    </section>
+  </div>
+</div>

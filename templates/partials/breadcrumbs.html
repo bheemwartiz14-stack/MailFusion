@@ -1,13 +1,21 @@
 <nav aria-label="breadcrumb" class="mt-1">
-  <ol class="flex flex-wrap items-center gap-1.5 text-sm text-outline">
+  <ol class="flex flex-wrap items-center gap-1.5 text-sm text-on-surface-variant">
     <li>
-      <a href="/" class="flex items-center text-primary hover:underline"><span class="material-symbols-outlined text-[1.1rem]">home</span></a>
+      <a href="/" aria-label="Home" class="flex size-6 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary">
+        <span class="material-symbols-outlined text-[1.1rem]">home</span>
+      </a>
     </li>
     {% for crumb in breadcrumbs %}
       {% if crumb.url %}
-      <li class="flex items-center gap-1.5"><span class="text-outline-variant">/</span><a href="{{ crumb.url }}" class="text-primary hover:underline">{{ crumb.label }}</a></li>
+      <li class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-base text-on-surface-variant/50">chevron_right</span>
+        <a href="{{ crumb.url }}" class="font-medium text-primary transition-colors hover:text-primary-hover">{{ crumb.label }}</a>
+      </li>
       {% else %}
-      <li class="flex items-center gap-1.5"><span class="text-outline-variant">/</span><span class="text-on-surface-variant">{{ crumb.label }}</span></li>
+      <li class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-base text-on-surface-variant/50">chevron_right</span>
+        <span class="font-medium text-on-surface" aria-current="page">{{ crumb.label }}</span>
+      </li>
       {% endif %}
     {% endfor %}
   </ol>

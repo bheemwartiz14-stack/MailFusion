@@ -1,0 +1,35 @@
+{% load ui_extras %}
+
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
+  <div class="border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+    <h2 class="card-title">Metrics</h2>
+    <p class="prose-muted mt-0.5">Rollup of operational key figures</p>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 p-5">
+    <div>
+      <p class="text-xs font-medium text-on-surface-variant">Success Rate</p>
+      <p class="mt-1 flex items-baseline gap-2 text-xl font-extrabold text-success">{{ metrics_cards.success_rate }}%<span class="text-[11px] font-medium text-success">▲ 0.4%</span></p>
+    </div>
+    <div>
+      <p class="text-xs font-medium text-on-surface-variant">Avg Response Time</p>
+      <p class="mt-1 text-xl font-extrabold text-on-surface dark:text-zinc-100">{{ metrics_cards.avg_response_ms }}ms</p>
+    </div>
+    <div>
+      <p class="text-xs font-medium text-on-surface-variant">Daily Emails</p>
+      <p class="mt-1 text-xl font-extrabold text-primary">{{ metrics_cards.daily_emails }}</p>
+    </div>
+    <div>
+      <p class="text-xs font-medium text-on-surface-variant">Queue Speed</p>
+      <p class="mt-1 text-xl font-extrabold text-on-surface dark:text-zinc-100">{{ metrics_cards.queue_speed }}/min</p>
+    </div>
+    <div>
+      <p class="text-xs font-medium text-on-surface-variant">Worker Utilization</p>
+      <p class="mt-1 text-xl font-extrabold text-info">{{ metrics_cards.worker_utilization }}%</p>
+    </div>
+    <div>
+      <p class="text-xs font-medium text-on-surface-variant">Storage Used</p>
+      <p class="mt-1 text-xl font-extrabold text-warning">{{ metrics_cards.storage_used }}%</p>
+    </div>
+  </div>
+</div>

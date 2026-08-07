@@ -1,0 +1,74 @@
+{% load ui_extras %}
+
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+    <div>
+      <h2 class="card-title">Recent Synchronizations</h2>
+      <p class="prose-muted mt-0.5">Latest runs across all connected accounts</p>
+    </div>
+    <a href="{% url 'sync_logs' %}" class="link-primary text-sm">View all logs</a>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[820px]">
+      <thead class="border-b border-outline-variant bg-surface-container/50 dark:border-zinc-800 dark:bg-zinc-800/40">
+        <tr>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Status</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Account</th>
+          <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Emails Synced</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Duration</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Started</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Finished</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Trigger</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant dark:divide-zinc-800">
+        {% for log in recent_syncs %}
+        <tr class="transition-colors hover:bg-primary-soft/40 dark:hover:bg-zinc-800/50">
+          <td class="px-5 py-4">
+            {% if log.status == 'completed' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-semibold text-success"><span class="size-1.5 rounded-full bg-success"></span>Success</span>
+            {% elif log.status == 'failed' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2.5 py-0.5 text-xs font-semibold text-danger"><span class="size-1.5 rounded-full bg-danger"></span>Failed</span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2.5 py-0.5 text-xs font-semibold text-warning"><span class="size-1.5 animate-pulse rounded-full bg-warning"></span>Pending</span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-4">
+            <div class="flex items-center gap-3">
+              <span class="avatar-sm avatar-neutral">{{ log.account.email|first|upper }}</span>
+              <div class="min-w-0">
+                <p class="max-w-[200px] truncate text-sm font-semibold text-on-surface dark:text-zinc-200">{{ log.account.email }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-5 py-4 text-center font-semibold text-on-surface dark:text-zinc-200">{{ log.emails_synced }}</td>
+          <td class="px-5 py-4 text-on-surface-variant">{{ log.duration_seconds|floatformat:1 }}s</td>
+          <td class="px-5 py-4 whitespace-nowrap text-on-surface-variant">{{ log.start_time|date:"M d, H:i" }}</td>
+          <td class="px-5 py-4 whitespace-nowrap text-on-surface-variant">
+            {% if log.end_time %}{{ log.end_time|date:"M d, H:i" }}{% else %}—{% endif %}
+          </td>
+          <td class="px-5 py-4"><span class="badge-neutral">scheduled</span></td>
+          <td class="px-5 py-4">
+            <div class="flex items-center justify-end gap-1">
+              <a href="{% url 'sync_log_detail' log.id %}" class="btn-icon" title="View log" aria-label="View log"><i data-lucide="eye" class="size-4"></i></a>
+              <a href="{% url 'account_detail' log.account.pk %}" class="btn-icon" title="Open account" aria-label="Open account"><i data-lucide="external-link" class="size-4"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="px-5 py-14 text-center">
+            <div class="empty-state">
+              <div class="empty-icon"><i data-lucide="list" class="size-7"></i></div>
+              <h3 class="empty-title">No sync runs yet</h3>
+              <p class="empty-text">Sync runs will appear here once the background engine starts.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

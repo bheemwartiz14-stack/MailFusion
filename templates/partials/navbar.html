@@ -1,115 +1,107 @@
-<header class="h-16 flex items-center justify-between border-b border-outline-variant bg-surface px-8 z-10">
-  <div class="flex items-center gap-6 flex-1">
-    <div class="relative w-full max-w-md group">
-      <span
-        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
+{% load static %}
+
+<header class="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-outline-variant bg-surface/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+  <div class="flex flex-1 items-center gap-3">
+    <!-- Mobile sidebar toggle -->
+    <button type="button" data-mf-open-sidebar aria-label="Open menu"
+      class="flex size-9 items-center justify-center rounded-lg border border-outline-variant bg-surface text-on-surface-variant transition-colors hover:bg-surface-container lg:hidden">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+
+    <!-- Global search -->
+    <div class="relative w-full max-w-md">
+      <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[1.15rem] text-on-surface-variant">
         search
       </span>
-
-      <input
-        class="w-full bg-surface-container pl-10 pr-4 py-2 rounded-lg border-none focus:ring-2 focus:ring-primary/20 text-sm placeholder:text-outline transition-all"
-        placeholder="Search mailboxes, logs, or reports..." type="text" />
+      <input type="text" placeholder="Search…"
+        class="input input-with-icon !py-2 text-sm"
+        aria-label="Search mailboxes, logs, or reports" />
+      <span class="kbd absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex">⌘K</span>
     </div>
   </div>
 
+  <div class="flex items-center gap-2 sm:gap-3">
 
-  <div class="flex items-center gap-4">
-
-    <!-- Notification -->
-    <button class="p-2 rounded-full hover:bg-surface-container transition-colors relative">
-      <span class="material-symbols-outlined text-on-surface-variant">
-        notifications
-      </span>
-
-      <span class="absolute top-2 right-2 size-2 bg-error rounded-full ring-2 ring-surface"></span>
+    <!-- Theme toggle -->
+    <button type="button" data-mf-theme aria-label="Toggle dark mode"
+      class="relative flex size-9 items-center justify-center rounded-lg border border-outline-variant bg-surface text-on-surface-variant transition-colors hover:bg-surface-container">
+      <i data-lucide="moon" class="size-4"></i>
+      <i data-lucide="sun" class="hidden size-4"></i>
     </button>
 
-
-    <div class="h-8 w-px bg-outline-variant mx-2"></div>
-
-
-    <!-- Profile Dropdown -->
-    <div class="relative group">
-
-      <button class="flex items-center gap-3 pl-2 cursor-pointer">
-
-        <div class="text-right">
-          <p class="text-sm font-bold leading-none">
-            {{ current_user.name }}
-          </p>
-
-          <p class="text-[10px] text-outline mt-1 uppercase font-black">
-            {{ current_user.role }}
-          </p>
-        </div>
-
-
-        <div class="size-9 rounded-full bg-primary text-white flex items-center justify-center font-bold">
-          {{ current_user.name|first|upper }}
-        </div>
-
-
-        <span class="material-symbols-outlined text-outline">
-          expand_more
-        </span>
-
+    <!-- Notifications -->
+    <div class="relative" data-mf-menu-trigger>
+      <button type="button" aria-label="Notifications"
+        class="relative flex size-9 items-center justify-center rounded-lg border border-outline-variant bg-surface text-on-surface-variant transition-colors hover:bg-surface-container">
+        <span class="material-symbols-outlined">notifications</span>
+        {% if unread_count %}
+        <span class="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white ring-2 ring-surface">{{ unread_count }}</span>
+        {% endif %}
       </button>
 
+      <div data-mf-menu hidden class="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-lg">
+        <div class="flex items-center justify-between border-b border-outline-variant px-4 py-3">
+          <p class="card-title">Notifications</p>
+          <a href="{% url 'notifications' %}" class="link-primary text-xs">View all</a>
+        </div>
+        <div class="max-h-80 overflow-y-auto">
+          {% for n in notification_center %}
+          <a href="{% url 'notifications' %}" class="flex gap-3 px-4 py-3 transition-colors hover:bg-surface-container">
+            <span class="material-symbols-outlined mt-0.5 text-[1.2rem] {% if n.tone == 'success' %}text-success{% elif n.tone == 'danger' %}text-danger{% elif n.tone == 'warning' %}text-warning{% else %}text-primary{% endif %}">{{ n.icon }}</span>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-on-surface">{{ n.title }}</p>
+              <p class="truncate text-xs text-on-surface-variant">{{ n.detail }}</p>
+              <p class="mt-0.5 text-[11px] text-on-surface-variant/80">{{ n.time }}</p>
+            </div>
+          </a>
+          {% empty %}
+          <p class="px-4 py-8 text-center text-sm text-on-surface-variant">No notifications yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
 
-      <!-- Dropdown Menu -->
-      <div class="absolute right-0 top-12 w-52 bg-surface border border-outline-variant rounded-xl shadow-lg
-               opacity-0 invisible group-hover:opacity-100 group-hover:visible
-               transition-all duration-200 overflow-hidden z-50">
+    <div class="divider-vertical hidden sm:block"></div>
 
+    <!-- Profile dropdown -->
+    <div class="relative" data-mf-menu-trigger>
+      <button type="button" aria-haspopup="true" aria-expanded="false"
+        class="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-surface-container">
+        <div class="hidden text-right sm:block">
+          <p class="text-sm font-semibold leading-tight text-on-surface">{{ current_user.name }}</p>
+          <p class="text-[11px] font-medium uppercase tracking-wide text-on-surface-variant">{{ current_user.role }}</p>
+        </div>
+        <div class="avatar-md avatar-primary">{{ current_user.name|first|upper }}</div>
+      </button>
 
-        <!-- Profile -->
+      <div data-mf-menu hidden class="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-outline-variant bg-surface py-1.5 shadow-lg">
+        <div class="border-b border-outline-variant px-4 py-3">
+          <p class="truncate text-sm font-semibold text-on-surface">{{ current_user.name }}</p>
+          <p class="truncate text-xs text-on-surface-variant">{{ current_user.email }}</p>
+        </div>
+
         <a href="{% url 'profile' %}"
-          class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-surface-container transition">
-
-          <span class="material-symbols-outlined text-[20px]">
-            person
-          </span>
-
+          class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface transition-colors hover:bg-surface-container">
+          <span class="material-symbols-outlined text-[1.2rem] text-on-surface-variant">person</span>
           Profile
         </a>
-
-
-        <!-- Change Password -->
         <a href="{% url 'change_password' %}"
-          class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-surface-container transition">
-
-          <span class="material-symbols-outlined text-[20px]">
-            lock
-          </span>
-
+          class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface transition-colors hover:bg-surface-container">
+          <span class="material-symbols-outlined text-[1.2rem] text-on-surface-variant">lock</span>
           Change Password
         </a>
 
+        <div class="my-1 h-px bg-outline-variant"></div>
 
-        <div class="border-t border-outline-variant"></div>
-
-
-        <!-- Logout -->
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}
-
           <button type="submit"
-            class="w-full flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/10 transition">
-
-            <span class="material-symbols-outlined text-[20px]">
-              logout
-            </span>
-
+            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-danger transition-colors hover:bg-danger/10">
+            <span class="material-symbols-outlined text-[1.2rem]">logout</span>
             Logout
-
           </button>
-
         </form>
-
-
       </div>
-
     </div>
-
   </div>
 </header>

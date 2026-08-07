@@ -1,24 +1,25 @@
 {% load ui_extras %}
-<div class="group email-list-item {% if not email.is_read %}unread{% endif %} relative cursor-pointer overflow-hidden border-b border-outline-variant/50 p-4 transition-colors hover:bg-surface-container"
-     data-mf-email="{{ email.pk }}"
-     data-mf-email-subject="{{ email.subject|escapejs }}"
-     role="row">
+<div class="group email-list-item relative cursor-pointer border-b border-outline-variant/50 p-4 transition-colors hover:bg-surface-container {% if not email.is_read %}unread{% endif %}"
+     data-mf-email="{{ email.pk }}" data-mf-email-subject="{{ email.subject|escapejs }}" role="row">
 
-  <input class="absolute left-3 top-3 z-10 h-4 w-4 cursor-pointer rounded opacity-0 transition-opacity group-hover:opacity-100"
+  <input class="absolute left-3 top-3 z-10 size-4 cursor-pointer rounded border-outline-variant text-primary opacity-0 transition-opacity focus:ring-primary/30 group-hover:opacity-100"
          type="checkbox" value="{{ email.pk }}" data-mf-email-check aria-label="Select message">
 
   {% if mode == "drafts" %}
   <a class="block" href="{% url 'compose_draft' email.pk %}" data-mf-email-link>
   {% else %}
-  <a class="block" href="{% url 'email_detail' email.pk %}" data-mf-email-link>
+  <a class="block" href="{% url 'email_detail' email.pk %}"
+     hx-get="{% url 'email_preview' email.pk %}"
+     hx-target="#mf-email-preview" hx-swap="innerHTML" hx-push-url="false"
+     hx-indicator="#mf-preview-loading" data-mf-email-link>
   {% endif %}
     <div class="flex items-start justify-between">
-      <div class="flex items-center gap-2 min-w-0">
-        <span class="size-2 shrink-0 rounded-full {% if not email.is_read %}bg-primary-container{% else %}bg-transparent{% endif %}" title="{% if not email.is_read %}Unread{% endif %}"></span>
+      <div class="flex min-w-0 items-center gap-2">
+        <span class="size-2 shrink-0 rounded-full {% if not email.is_read %}bg-primary{% else %}bg-outline-variant{% endif %}" title="{% if not email.is_read %}Unread{% endif %}"></span>
         <span class="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold uppercase text-on-primary bg-primary-container">{{ email.from_name|default:email.from_email|initials }}</span>
         <p class="truncate text-body-md {% if not email.is_read %}font-bold text-on-background{% else %}font-medium text-on-surface-variant{% endif %}">
-          {% if email.is_starred %}<span class="material-symbols-outlined align-middle text-[15px] text-primary" data-weight="fill">star</span>{% endif %}
-          {% if email.is_flagged %}<span class="material-symbols-outlined align-middle text-[15px] text-error" data-weight="fill">flag</span>{% endif %}
+          {% if email.is_starred %}<span class="material-symbols-outlined align-middle text-[0.94rem] text-primary" data-weight="fill">star</span>{% endif %}
+          {% if email.is_flagged %}<span class="material-symbols-outlined align-middle text-[0.94rem] text-error" data-weight="fill">flag</span>{% endif %}
           {{ email.from_name|default:email.from_email|default:"Unknown sender" }}
         </p>
       </div>
@@ -42,8 +43,8 @@
     </p>
 
     <div class="mt-2 flex items-center gap-2">
-      <span class="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">{{ email.outlook_account.nickname|default:email.outlook_account.name }}</span>
-      {% if email.has_attachments or email.attachments.exists %}<span class="material-symbols-outlined text-[16px] text-outline">attach_file</span>{% endif %}
+      <span class="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">{{ email.outlook_account.nickname|default:email.outlook_account.name }}</span>
+      {% if email.has_attachments or email.attachments.exists %}<span class="material-symbols-outlined text-[1rem] text-outline">attach_file</span>{% endif %}
     </div>
   </a>
 </div>

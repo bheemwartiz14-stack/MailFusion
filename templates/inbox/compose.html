@@ -1,14 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% extends "base.html" %}
-{% load static %}
-
 {% block title %}{{ title }} · {{ app_name }}{% endblock %}
 
 {% block page_subtitle %}
 <div class="flex items-center gap-3">
-  <div class="p-2 bg-primary/10 text-primary rounded-lg">
+  <div class="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
     {% if mode == "reply" %}
       <span class="material-symbols-outlined">reply</span>
     {% elif mode == "reply_all" %}
@@ -34,7 +31,7 @@
     <button
       type="button"
       onclick="window.location.href='{% url 'inbox' %}?folder=drafts'"
-      class="inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-highest">
+      class="btn-secondary">
       <span class="material-symbols-outlined">draft</span>
       Drafts
     </button>
@@ -42,7 +39,7 @@
   {% if original %}
     <a
       href="{% url 'email_detail' original.pk %}"
-      class="inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-highest">
+      class="btn-secondary">
       <span class="material-symbols-outlined">visibility</span>
       View Original
     </a>
@@ -59,11 +56,7 @@
 
     <div class="hidden lg:col-span-4 lg:block">
       <div class="sticky top-6 space-y-6">
-        {% if accounts %}
-          {% include "inbox/partials/compose_sidebar.html" with accounts=accounts %}
-        {% endif %}
-
-        <div class="rounded-2xl border border-outline-variant bg-surface p-6">
+        <div class="card p-6">
           <h3 class="mb-4 text-lg font-semibold text-on-surface">Quick Actions</h3>
           <div class="space-y-2">
             <button
@@ -90,7 +83,7 @@
           </div>
         </div>
 
-        <div class="rounded-2xl border border-outline-variant bg-surface p-6">
+        <div class="card p-6">
           <h3 class="mb-4 text-lg font-semibold text-on-surface">Attachments</h3>
           <div class="rounded-lg border-2 border-dashed border-outline-variant bg-surface-container p-8 text-center transition hover:border-primary">
             <span class="material-symbols-outlined text-4xl text-outline-variant">cloud_upload</span>

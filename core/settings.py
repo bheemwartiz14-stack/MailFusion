@@ -244,6 +244,6 @@ SYNC_WEBHOOK_BASE_URL = os.environ.get("SYNC_WEBHOOK_BASE_URL", "")
 SYNC_LOG_RETENTION_DAYS = env_int("SYNC_LOG_RETENTION_DAYS", 30)
 SYNC_MAX_ATTACHMENT_BYTES = env_int("SYNC_MAX_ATTACHMENT_BYTES", 25 * 1024 * 1024)
 
-# --- Tailwind CSS (django-tailwind) ---
-TAILWIND_APP_NAME = "theme"
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
+
+# --- Synchronization tuning ---

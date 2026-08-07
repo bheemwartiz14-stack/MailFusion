@@ -1,14 +1,15 @@
 """
-Synchronization monitoring views: dashboard, logs, health, queue and account
+System Monitor views: dashboard, logs, health, queue, oauth and account
 details. These pages render the state produced by the background sync engine
 and provide HTMX partials for lightweight polling updates.
+
+Served under the ``/system-monitor/`` URL namespace.
 """
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db.models import Count
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from portal.base_view import PortalView
@@ -21,52 +22,43 @@ from portal.models import (
     SyncJob,
     SyncLog,
 )
-from portal.services.sync_services import SyncService
+from portal.utils.monitor import get_system_context
 from portal.utils.querystring import _querystring
 from portal.utils.tasks import broker_healthy, queue_depth, worker_status
 
 
-class SyncDashboardView(LoginRequiredMixin, PortalView):
+class SystemMonitorView(LoginRequiredMixin, PortalView):
     template_name = "sync/dashboard.html"
-    title = "Sync Dashboard"
-    breadcrumbs = [{"label": "Sync Dashboard"}]
+    title = "System Monitor"
+    breadcrumbs = [{"label": "System Monitor"}]
     active_page = "sync"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        service = SyncService()
+        context.update(get_system_context())
         context.update(
-            metrics=service.sync_metrics(),
-            queue_depth=queue_depth(),
-            worker=worker_status(),
-            broker=broker_healthy(),
-            accounts=OutlookAccount.objects.select_related("health", "sync_state", "oauth_token").all(),
-            recent_logs=SyncLog.objects.select_related("account").order_by("-start_time")[:8],
+            accounts=OutlookAccount.objects.select_related(
+                "health", "sync_state", "oauth_token"
+            ).all(),
         )
         return context
 
 
-class SyncDashboardPartialView(LoginRequiredMixin, PortalView):
-    """HTMX partial returning just the stat cards + queue/worker strip."""
+class SystemMonitorPartialView(LoginRequiredMixin, PortalView):
+    """HTMX partial returning the full monitor body (banner + KPIs + rails)."""
 
-    template_name = "sync/partials/dashboard_stats.html"
+    template_name = "sync/partials/system/system_monitor.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        service = SyncService()
-        context.update(
-            metrics=service.sync_metrics(),
-            queue_depth=queue_depth(),
-            worker=worker_status(),
-            broker=broker_healthy(),
-        )
+        context.update(get_system_context())
         return context
 
 
 class SyncLogsView(LoginRequiredMixin, PortalView):
     template_name = "sync/logs.html"
     title = "Synchronization Logs"
-    breadcrumbs = [{"label": "Sync Dashboard", "url": "/sync/"}, {"label": "Logs"}]
+    breadcrumbs = [{"label": "System Monitor", "url": "/system-monitor/"}, {"label": "Logs"}]
     active_page = "sync"
     page_size = 20
 
@@ -122,8 +114,8 @@ class SyncLogDetailView(LoginRequiredMixin, PortalView):
         context.update(
             title=f"Sync log · {log.account.email}",
             breadcrumbs=[
-                {"label": "Sync Dashboard", "url": "/sync/"},
-                {"label": "Logs", "url": "/sync/logs/"},
+                {"label": "System Monitor", "url": "/system-monitor/"},
+                {"label": "Logs", "url": "/system-monitor/logs/"},
                 {"label": str(log.pk)[:8]},
             ],
             log=log,
@@ -131,10 +123,10 @@ class SyncLogDetailView(LoginRequiredMixin, PortalView):
         return context
 
 
-class HealthStatusView(LoginRequiredMixin, PortalView):
+class SystemHealthView(LoginRequiredMixin, PortalView):
     template_name = "sync/health.html"
     title = "Health Monitoring"
-    breadcrumbs = [{"label": "Sync Dashboard", "url": "/sync/"}, {"label": "Health"}]
+    breadcrumbs = [{"label": "System Monitor", "url": "/system-monitor/"}, {"label": "Health"}]
     active_page = "sync"
 
     def get_context_data(self, **kwargs):
@@ -169,7 +161,7 @@ class HealthPartialView(LoginRequiredMixin, PortalView):
 class QueueStatusView(LoginRequiredMixin, PortalView):
     template_name = "sync/queue.html"
     title = "Queue Status"
-    breadcrumbs = [{"label": "Sync Dashboard", "url": "/sync/"}, {"label": "Queue"}]
+    breadcrumbs = [{"label": "System Monitor", "url": "/system-monitor/"}, {"label": "Queue"}]
     active_page = "sync"
 
     def get_context_data(self, **kwargs):
@@ -191,7 +183,7 @@ class QueueStatusView(LoginRequiredMixin, PortalView):
 class OAuthStatusView(LoginRequiredMixin, PortalView):
     template_name = "sync/oauth.html"
     title = "OAuth Status"
-    breadcrumbs = [{"label": "Sync Dashboard", "url": "/sync/"}, {"label": "OAuth"}]
+    breadcrumbs = [{"label": "System Monitor", "url": "/system-monitor/"}, {"label": "OAuth"}]
     active_page = "sync"
 
     def get_context_data(self, **kwargs):

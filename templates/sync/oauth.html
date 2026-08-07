@@ -2,195 +2,90 @@
 {% load ui_extras %}
 
 {% block page_subtitle %}
-<p class="text-sm text-gray-500">
-    OAuth token lifecycle per connected mailbox.
-</p>
+<p class="prose-muted">OAuth token lifecycle per connected mailbox.</p>
 {% endblock %}
 
 {% block content %}
+<div class="animate-fade-up">
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th>OAuth Status</th>
+            <th>Token Status</th>
+            <th>Expires At</th>
+            <th>Health</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for acc in accounts %}
+          <tr>
+            <td>
+              <div class="font-medium text-on-surface">{{ acc.name }}</div>
+              <div class="mt-0.5 text-sm text-on-surface-variant">{{ acc.email }}</div>
+            </td>
 
-<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <td>
+              {% if acc.oauth_status == 'connected' %}
+              <span class="badge-success">Connected</span>
+              {% elif acc.oauth_status == 'expired' %}
+              <span class="badge-warning">Expired</span>
+              {% elif acc.oauth_status == 'revoked' %}
+              <span class="badge-danger">Revoked</span>
+              {% else %}
+              <span class="badge-neutral">Pending</span>
+              {% endif %}
+            </td>
 
-    <div class="overflow-x-auto">
+            <td>
+              {% if acc.oauth_token %}
+                {% if acc.oauth_token.is_expired %}
+                <span class="badge-warning">Expired</span>
+                {% else %}
+                <span class="badge-success">Valid</span>
+                {% endif %}
+              {% else %}
+              <span class="text-sm text-on-surface-variant">No Token</span>
+              {% endif %}
+            </td>
 
-        <table class="min-w-full divide-y divide-gray-200">
+            <td class="whitespace-nowrap text-on-surface-variant">{{ acc.oauth_token.expires_at|date:"Y-m-d H:i"|default:"—" }}</td>
 
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Account
-                    </th>
+            <td>
+              {% if acc.health.oauth_ok %}
+              <span class="badge-success">OK</span>
+              {% else %}
+              <span class="badge-danger">Error</span>
+              {% endif %}
+            </td>
 
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        OAuth Status
-                    </th>
-
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Token Status
-                    </th>
-
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Expires At
-                    </th>
-
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Health
-                    </th>
-
-                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Actions
-                    </th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y divide-gray-100 bg-white">
-
-                {% for acc in accounts %}
-
-                <tr class="hover:bg-gray-50">
-
-                    <!-- Account -->
-                    <td class="px-6 py-4">
-
-                        <div class="font-medium text-gray-900">
-                            {{ acc.name }}
-                        </div>
-
-                        <div class="mt-1 text-sm text-gray-500">
-                            {{ acc.email }}
-                        </div>
-
-                    </td>
-
-                    <!-- OAuth Status -->
-                    <td class="px-6 py-4">
-
-                        {% if acc.oauth_status == 'connected' %}
-                        <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                            Connected
-                        </span>
-
-                        {% elif acc.oauth_status == 'expired' %}
-                        <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-                            Expired
-                        </span>
-
-                        {% elif acc.oauth_status == 'revoked' %}
-                        <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-                            Revoked
-                        </span>
-
-                        {% else %}
-                        <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                            Pending
-                        </span>
-                        {% endif %}
-
-                    </td>
-
-                    <!-- Token -->
-                    <td class="px-6 py-4">
-
-                        {% if acc.oauth_token %}
-
-                            {% if acc.oauth_token.is_expired %}
-                            <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-                                Expired
-                            </span>
-                            {% else %}
-                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                Valid
-                            </span>
-                            {% endif %}
-
-                        {% else %}
-
-                            <span class="text-sm text-gray-500">
-                                No Token
-                            </span>
-
-                        {% endif %}
-
-                    </td>
-
-                    <!-- Expiry -->
-                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                        {{ acc.oauth_token.expires_at|date:"Y-m-d H:i"|default:"—" }}
-                    </td>
-
-                    <!-- Health -->
-                    <td class="px-6 py-4">
-
-                        {% if acc.health.oauth_ok %}
-                        <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                            OK
-                        </span>
-                        {% else %}
-                        <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-                            Error
-                        </span>
-                        {% endif %}
-
-                    </td>
-
-                    <!-- Action -->
-                    <td class="px-6 py-4 text-right">
-
-                        {% if acc.oauth_status != 'connected' %}
-
-                        <a href="{% url 'accounts_reconnect' acc.pk %}"
-                           class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-
-                            <span class="material-symbols-outlined text-[18px]">
-                                refresh
-                            </span>
-
-                            Reauthorize
-
-                        </a>
-
-                        {% endif %}
-
-                    </td>
-
-                </tr>
-
-                {% empty %}
-
-                <tr>
-
-                    <td colspan="6" class="px-6 py-12 text-center">
-
-                        <div class="flex flex-col items-center">
-
-                            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-                                <span class="material-symbols-outlined text-3xl text-gray-400">
-                                    account_circle_off
-                                </span>
-                            </div>
-
-                            <h3 class="mt-4 text-base font-semibold text-gray-900">
-                                No accounts connected
-                            </h3>
-
-                            <p class="mt-1 text-sm text-gray-500">
-                                Connect an Outlook account to begin synchronization.
-                            </p>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
+            <td class="text-right">
+              {% if acc.oauth_status != 'connected' %}
+              <a href="{% url 'accounts_reconnect' acc.pk %}" class="btn-secondary btn-sm">
+                <span class="material-symbols-outlined text-[1.1rem]">refresh</span>Reauthorize
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="flex flex-col items-center px-6 py-14 text-center">
+                <div class="flex size-14 items-center justify-center rounded-full bg-surface-container">
+                  <span class="material-symbols-outlined text-3xl text-on-surface-variant">account_circle_off</span>
+                </div>
+                <h3 class="mt-4 text-base font-semibold text-on-background">No accounts connected</h3>
+                <p class="prose-muted mt-1">Connect an Outlook account to begin synchronization.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
+  </div>
 </div>
-
 {% endblock %}

@@ -9,4 +9,3 @@ requests>=2.31
 bleach>=6.1
 celery>=5.3
 redis>=5.0
-django-tailwind[cookiecutter,honcho,reload]>=4.5

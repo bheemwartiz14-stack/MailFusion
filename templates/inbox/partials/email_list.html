@@ -20,8 +20,8 @@
   {% endif %}
 </div>
 {% else %}
-<div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-  <span class="material-symbols-outlined mb-3 text-[40px] text-outline">inbox</span>
+<div class="flex flex-col items-center justify-center px-4 py-16 text-center">
+  <span class="mb-3 material-symbols-outlined text-[2.5rem] text-outline">inbox</span>
   <h4 class="text-base font-semibold text-on-background">No messages</h4>
   <p class="mt-1 text-sm text-outline">
     {% if filters.q or filters.read is not None or filters.importance or filters.account %}
@@ -30,7 +30,7 @@
       Nothing here yet — new mail will appear automatically.
     {% endif %}
   </p>
-  <button class="mt-4 rounded-lg border border-outline-variant px-4 py-1.5 text-sm font-semibold hover:bg-surface-container-high"
+  <button class="mt-4 rounded-lg border border-outline-variant px-4 py-1.5 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-high"
           type="button" data-mf-clear-filters>Clear filters</button>
 </div>
 {% endif %}
