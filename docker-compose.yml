@@ -44,35 +44,10 @@ services:
     environment:
       POSTGRES_HOST: postgres
       REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
     command: >
       sh -c "cd /app &&
              pip install --no-cache-dir -r requirements.txt &&
-             celery -A core worker --loglevel=info --concurrency=4"
-    volumes:
-      - .:/app
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  beat:
-    image: python:3.14-slim
-    container_name: InboxFusion-beat
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      POSTGRES_HOST: postgres
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-    command: >
-      sh -c "cd /app &&
-             pip install --no-cache-dir -r requirements.txt &&
-             celery -A core beat --loglevel=info"
+             python manage.py scheduled_tasks --once"
     volumes:
       - .:/app
     depends_on:

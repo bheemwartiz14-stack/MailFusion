@@ -98,6 +98,22 @@ Covers the delta engine (create/idempotent/removal), paused and tokenless accoun
 
 ---
 
+## Deploy to Render
+
+The repo ships a `render.yaml` blueprint (`blueprint` / "New + → Blueprint" in Render) and a `Dockerfile`.
+
+1. Push this repo to GitHub, then in Render create a **New Blueprint** from it (or use the Blueprint Run button).
+2. Blueprint creates automatically:
+   - **Web** service `mailfusion-web` — gunicorn (`migrate` + `collectstatic` run on boot).
+   - **Cron** service `mailfusion-scheduler` — runs `manage.py scheduled_tasks` every minute (replaces Celery Beat). Each job self-throttles by its cadence in Redis, so concurrent cron triggers are safe.
+   - **Redis** `mailfusion-redis` and **Postgres** `mailfusion-db` (free tiers).
+3. Fill in env vars marked manual: `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, and `MICROSOFT_REDIRECT_URI` (point it at `https://<your-app>.onrender.com/accounts/callback/`). `SECRET_KEY`/`DEBUG` are auto-configured.
+4. Once deployed, run `python manage.py createsuperuser` from the Render shell (or via `scheduled_tasks`'s `--once`) to create your admin login.
+
+> Free-tier web services sleep; the first request may be slow to wake. Health check points at `/login/`.
+
+---
+
 ## Authentication & Authorization (Django built-in)
 
 The app uses Django's built-in auth framework end to end — no custom user model, no custom RBAC, no role enums, no permission seeders.

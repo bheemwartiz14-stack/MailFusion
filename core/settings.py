@@ -81,16 +81,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB", "InboxFusion"),
-        "USER": os.environ.get("POSTGRES_USER", "InboxFusion"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "InboxFusion"),
-        "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+_DATABASE_URL = os.environ.get("DATABASE_URL")
+if _DATABASE_URL:
+    from urllib.parse import urlparse
+
+    _parsed = urlparse(_DATABASE_URL)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": _parsed.path.lstrip("/"),
+            "USER": _parsed.username or "",
+            "PASSWORD": _parsed.password or "",
+            "HOST": _parsed.hostname or "127.0.0.1",
+            "PORT": _parsed.port or 5432,
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "InboxFusion"),
+            "USER": os.environ.get("POSTGRES_USER", "InboxFusion"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "InboxFusion"),
+            "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
