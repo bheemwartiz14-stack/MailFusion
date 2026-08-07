@@ -9,6 +9,8 @@ from pathlib import Path
 
 import os
 
+import dj_database_url
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -81,32 +83,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-_DATABASE_URL = os.environ.get("DATABASE_URL")
-if _DATABASE_URL:
-    from urllib.parse import urlparse
-
-    _parsed = urlparse(_DATABASE_URL)
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": _parsed.path.lstrip("/"),
-            "USER": _parsed.username or "",
-            "PASSWORD": _parsed.password or "",
-            "HOST": _parsed.hostname or "127.0.0.1",
-            "PORT": _parsed.port or 5432,
-        }
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("POSTGRES_DB", "InboxFusion"),
-            "USER": os.environ.get("POSTGRES_USER", "InboxFusion"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "InboxFusion"),
-            "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
-            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-        }
-    }
+# --- Database ---
+# Prefer a DATABASE_URL (e.g. postgres://user:pass@host:5432/db) set by Render
+# or your local .env; otherwise fall back to the individual POSTGRES_* vars
+# (used by docker compose).
+DATABASES = {"default": dj_database_url.config(
+    default=(
+        f"postgres://{os.environ.get('POSTGRES_USER', 'InboxFusion')}:"
+        f"{os.environ.get('POSTGRES_PASSWORD', 'InboxFusion')}@"
+        f"{os.environ.get('POSTGRES_HOST', '127.0.0.1')}:"
+        f"{os.environ.get('POSTGRES_PORT', '5432')}/"
+        f"{os.environ.get('POSTGRES_DB', 'InboxFusion')}"
+    ),
+    conn_max_age=600,
+)}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
