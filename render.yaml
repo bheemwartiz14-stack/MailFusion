@@ -6,9 +6,6 @@ services:
     runtime: docker
     plan: free
     healthCheckPath: /login/
-    preDeployCommand: >
-      .venv/bin/python manage.py migrate --noinput &&
-      .venv/bin/python manage.py collectstatic --noinput
     envVars:
       - key: DATABASE_URL
         fromDatabase:
