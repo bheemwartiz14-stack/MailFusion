@@ -1,32 +1,27 @@
 """
-Celery tasks for account management and background synchronization.
+Django Task background jobs for account management and synchronization.
 
-Every task is idempotent and safe to retry. Heavier work is delegated to the
-service layer; tasks only orchestrate, track ``SyncJob`` rows and perform
-graceful retries with exponential backoff.
+Runs against the configured ``django.tasks`` backend (immediate, in-process
+by default). Every task is idempotent and safe to call repeatedly. Heavier work
+is delegated to the service layer; tasks only orchestrate and track ``SyncJob``
+rows.
 """
 
 import logging
 import socket
-from datetime import timedelta
 
-from celery import shared_task
+from django.tasks import task
 
 logger = logging.getLogger(__name__)
-
-
-def _backoff(attempt):
-    """Exponential backoff in seconds, capped at one hour."""
-    return min(60 * (2 ** max(attempt, 0)), 3600)
 
 
 def _worker_id(requested_by):
     return f"{requested_by}@{socket.gethostname()}"
 
 
-@shared_task(bind=True, name="portal.tasks.sync_account", acks_late=True, track_started=True, max_retries=5, default_retry_delay=60)
-def sync_account(self, pk, requested_by="celery"):
-    """Synchronize a single account; retries with exponential backoff on failure."""
+@task
+def sync_account(pk, requested_by="web"):
+    """Synchronize a single account."""
     from portal.models import OutlookAccount
     from portal.repositories import SyncRepository
     from portal.services.sync_services import SyncService
@@ -41,7 +36,7 @@ def sync_account(self, pk, requested_by="celery"):
     job = repo.gets_in_flight_job(account, "sync") or repo.create_job(
         job_type="sync", account=account, priority=3
     )
-    repo.mark_job_running(job, task_id=self.request.id or "")
+    repo.mark_job_running(job)
 
     result = SyncService().sync_account(account, worker=_worker_id(requested_by))
     if result.success:
@@ -58,14 +53,12 @@ def sync_account(self, pk, requested_by="celery"):
         }
 
     repo.mark_job_failure(job, result.error)
-    if job.attempts < job.max_attempts:
-        raise self.retry(countdown=_backoff(job.attempts))
     return {"status": "failed", "account": account.email, "error": result.error}
 
 
-@shared_task(name="portal.tasks.sync_all_accounts", max_retries=3)
+@task
 def sync_all_accounts():
-    """Enqueue a sync task for every syncable account (used by Celery Beat)."""
+    """Run a sync for every syncable account (scheduled)."""
     from portal.models import OutlookAccount
     from portal.repositories import SyncRepository
 
@@ -78,38 +71,36 @@ def sync_all_accounts():
     ):
         if repo.gets_in_flight_job(account, "sync"):
             continue
-        sync_account.delay(account.pk, requested_by="beat")
+        sync_account.enqueue(str(account.pk), requested_by="schedule")
         dispatched.append(str(account.pk))
     return {"dispatched": dispatched}
 
 
-@shared_task(name="portal.tasks.refresh_expired_tokens")
+@task
 def refresh_expired_tokens():
     from portal.services.sync_services import SyncService
 
-    refreshed, failed = SyncService().refresh_expired_tokens(worker="beat")
+    refreshed, failed = SyncService().refresh_expired_tokens(worker="schedule")
     return {"refreshed": refreshed, "failed": failed}
 
 
-@shared_task(name="portal.tasks.renew_webhook_subscriptions")
+@task
 def renew_webhook_subscriptions():
     from portal.services.sync_services import SyncService
 
-    renewed, failed = SyncService().renew_webhooks(worker="beat")
+    renewed, failed = SyncService().renew_webhooks(worker="schedule")
     return {"renewed": renewed, "failed": failed}
 
 
-@shared_task(bind=True, name="portal.tasks.download_attachment", acks_late=True, max_retries=3, default_retry_delay=90)
-def download_attachment(self, attachment_id, job_pk=None):
-    """Download one attachment's binary content; idempotent and retryable."""
+@task
+def download_attachment(attachment_id, job_pk=None):
+    """Download one attachment's binary content; idempotent."""
     from portal.repositories import SyncRepository
     from portal.services.sync_services import SyncService
 
     repo = SyncRepository()
     job = repo.get_attachment_job(job_pk) if job_pk else None
-    try:
-        att = repo.get_attachment(attachment_id)
-    except Exception:
+    if repo.get_attachment(attachment_id) is None:
         return {"status": "failed", "reason": "attachment missing"}
     attempts = (job.attempts + 1) if job else 1
     if job:
@@ -117,19 +108,19 @@ def download_attachment(self, attachment_id, job_pk=None):
     if SyncService().download_attachment(attachment_id):
         if job:
             repo.mark_attachment_job(job, status="downloaded")
-        return {"status": "downloaded", "attachment_id": attachment_id}
+        return {"status": "downloaded", "attachment_id": str(attachment_id)}
     if job:
         repo.mark_attachment_job(
             job, status="failed", attempts=attempts, error="Graph download failed"
         )
-    if attempts < (job.max_attempts if job else 3):
-        raise self.retry(countdown=_backoff(attempts - 1))
-    return {"status": "failed", "attachment_id": attachment_id}
+    return {"status": "failed", "attachment_id": str(attachment_id)}
 
 
-@shared_task(name="portal.tasks.cleanup_old_logs")
+@task
 def cleanup_old_logs():
     """Delete sync logs older than the configured retention window."""
+    from datetime import timedelta
+
     from django.conf import settings
     from django.utils import timezone
 
@@ -140,34 +131,22 @@ def cleanup_old_logs():
     return {"deleted": deleted}
 
 
-@shared_task(name="portal.tasks.run_system_health_checks")
+@task
 def run_system_health_checks():
-    """Health: broker/persistence reachability, queue depth, sync failures."""
-    from django.conf import settings
+    """Health: persistence reachability, job backlog, sync failures."""
     from django.utils import timezone
 
     from portal.services.notification_service import NotificationService
     from portal.services.sync_services import SyncService
-    from portal.utils.tasks import broker_healthy
 
     notify = NotificationService()
     alerts = []
-
-    if not broker_healthy():
-        notify.notify(
-            title="Celery broker unreachable",
-            detail="Redis/Celery broker could not be reached by the health check.",
-            icon="bi-hdd-network",
-            tone="danger",
-        )
-        return {"healthy": False, "reason": "broker"}
-
     metrics = SyncService().sync_metrics()
 
     if metrics["queued_jobs"] > 100:
         notify.notify(
-            title="Queue backlog growing",
-            detail=f"{metrics['queued_jobs']} jobs queued; workers may be behind.",
+            title="Job backlog growing",
+            detail=f"{metrics['queued_jobs']} jobs queued; processing may be behind.",
             icon="bi-hourglass-split",
             tone="warning",
         )
@@ -182,21 +161,29 @@ def run_system_health_checks():
         )
         alerts.append("sync_failures")
 
-    return {"healthy": True, "alerts": alerts, "metrics": metrics}
+    from portal.models import SyncLog
 
+    try:
+        fresh = SyncLog.objects.filter(start_time__gte=timezone.now()).exists()
+        if not fresh:
+            notify.notify(
+                title="No recent sync activity",
+                detail="No sync log entries have been recorded recently.",
+                icon="bi-clock-history",
+                tone="warning",
+            )
+            alerts.append("no_activity")
+    except Exception:  # noqa: BLE001
+        pass
 
-@shared_task(name="portal.tasks.monitor_queue")
-def monitor_queue():
-    """Low-frequency queue watcher that alerts on excessive backlog."""
-    from portal.services.notification_service import NotificationService
-    from portal.services.sync_services import SyncService
-
-    metrics = SyncService().sync_metrics()
-    if metrics["running_jobs"] == 0 and metrics["queued_jobs"] > 0:
-        NotificationService().notify(
-            title="No consumers running",
-            detail="There are queued jobs but no running workers detected.",
-            icon="bi-play-circle",
-            tone="danger",
-        )
-    return {"queued": metrics["queued_jobs"], "running": metrics["running_jobs"]}
+    return {
+        "healthy": True,
+        "alerts": alerts,
+        "metrics": {
+            "queued_jobs": metrics.get("queued_jobs", 0),
+            "running_jobs": metrics.get("running_jobs", 0),
+            "failed_jobs": metrics.get("failed_jobs", 0),
+            "failed_syncs": metrics.get("failed_syncs", 0),
+            "unread_notifications": metrics.get("unread_notifications", 0),
+        },
+    }

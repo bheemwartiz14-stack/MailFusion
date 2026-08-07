@@ -125,9 +125,9 @@ def health_cards(broker, worker, queue):
     db_ok = _safe(lambda: SyncLog.objects.count() is not None)
     cards = [
         _status_card("Database", "database", "ok" if db_ok else "err", "4ms"),
-        _status_card("Redis Broker", "server", "ok" if broker else "err",
+        _status_card("Redis Coordination", "server", "ok" if broker else "err",
                      "1ms" if broker else None),
-        _status_card("Celery Workers", "cpu",
+        _status_card("Task Backend", "cpu",
                      "ok" if worker.get("active") else "warn",
                      None, f"{worker.get('count', 0)} online"
                      if worker.get("active") else "offline"),
@@ -185,7 +185,7 @@ def worker_status_rich(worker, logs):
     for i in range(max(online, 1)):
         log = logs[i] if i < len(logs) else None
         rows.append({
-            "name": f"worker@{i + 1}" if online else "worker-celery",
+            "name": f"worker@{i + 1}" if online else "task-backend",
             "status": "online" if online else "offline",
             "current_job": (log.account.email if log else "Idle"),
             "memory": f"{38 + i * 6}MB",
@@ -277,10 +277,10 @@ def activity_alerts_list(metrics, broker, worker):
     alerts = []
     if not broker:
         alerts.append(alert("critical", "Redis down",
-                            "Message broker connection has been lost.", "Retry"))
+                            "Coordination/cache layer (Redis) connection lost.", "Retry"))
     if not worker.get("active"):
-        alerts.append(alert("critical", "Worker offline",
-                            "No Celery workers are responding to ping.", "Restart"))
+        alerts.append(alert("critical", "Task backend offline",
+                            "The in-process task backend is unavailable.", "Restart"))
     if metrics.get("failed_jobs"):
         alerts.append(alert("warning", "Queue overflow",
                             f"{metrics['failed_jobs']} failed job(s) need retrying.",

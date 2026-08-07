@@ -172,7 +172,7 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# --- Redis (caching + Celery broker/result backend) ---
+# --- Redis (caching + task coordination) ---
 REDIS_URL = os.environ.get(
     "REDIS_URL",
     f"redis://{os.environ.get('REDIS_HOST', '127.0.0.1')}:{env_int('REDIS_PORT', 6379)}/0",
@@ -185,58 +185,32 @@ CACHES = {
     }
 }
 
-# --- Celery (background email synchronization engine) ---
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", REDIS_URL)
-CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", REDIS_URL)
-CELERY_TIMEZONE = "UTC"
-CELERY_TASK_ALWAYS_EAGER = env_bool("CELERY_TASK_ALWAYS_EAGER", False)
-CELERY_TASK_EAGER_PROPAGATES = True
-CELERY_TASK_ACKS_LATE = True
-CELERY_TASK_REJECT_ON_WORKER_LOST = True
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
-# Retry policy for sync tasks: exponential backoff (e.g. 60, 120, 240 ...).
-CELERY_TASK_DEFAULT_RETRY_DELAY = 60
-CELERY_TASK_DEFAULT_MAX_RETRIES = 5
-
-CELERY_BROKER_TRANSPORT_OPTIONS = {
-    "visibility_timeout": 3600,
-    "max_retries": 5,
+# --- Tasks (Django background tasks) ---
+# Tasks are defined in ``portal/tasks`` via ``@task``. The built-in
+# ``immediate`` backend runs them synchronously in-process (no worker process
+# or broker). Recurring jobs are invoked externally (e.g. a scheduled
+# management command driven by cron / systemd timer).
+TASKS = {
+    "default": {
+        "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
+    }
 }
 
-# Celery Beat persistent schedule file (must live on a writable path).
-CELERY_BEAT_SCHEDULE_FILENAME = os.environ.get(
-    "CELERY_BEAT_SCHEDULE_FILENAME", "/tmp/celerybeat-schedule"
-)
-
-# --- Celery Beat schedule (scheduled synchronization fallback) ---
-CELERY_BEAT_SCHEDULE = {
-    "sync-all-accounts": {
-        "task": "portal.tasks.sync_all_accounts",
-        "schedule": env_int("SYNC_INTERVAL_SECONDS", 300),  # every 5 minutes
-        "options": {"expires": 260},
-    },
-    "refresh-expired-tokens": {
-        "task": "portal.tasks.refresh_expired_tokens",
-        "schedule": float(os.environ.get("TOKEN_REFRESH_INTERVAL_MINUTES", 10)) * 60,
-    },
-    "renew-webhook-subscriptions": {
-        "task": "portal.tasks.renew_webhook_subscriptions",
-        "schedule": float(os.environ.get("WEBHOOK_RENEW_INTERVAL_MINUTES", 15)) * 60,
-    },
-    "cleanup-old-logs": {
-        "task": "portal.tasks.cleanup_old_logs",
-        "schedule": float(os.environ.get("LOG_CLEANUP_INTERVAL_HOURS", 24)) * 3600,
-    },
-    "run-health-checks": {
-        "task": "portal.tasks.run_system_health_checks",
-        "schedule": float(os.environ.get("HEALTH_CHECK_INTERVAL_MINUTES", 5)) * 60,
-    },
-}
+# --- Task scheduling (recurring jobs, run via `manage.py scheduled_tasks`) ---
+# Intervals expressed in seconds; override via env for systemd/cron cadence.
+TASK_SYNC_INTERVAL_SECONDS = env_int("SYNC_INTERVAL_SECONDS", 300)
+TASK_TOKEN_REFRESH_SECONDS = float(
+    os.environ.get("TOKEN_REFRESH_INTERVAL_MINUTES", 10)
+) * 60
+TASK_WEBHOOK_RENEW_SECONDS = float(
+    os.environ.get("WEBHOOK_RENEW_INTERVAL_MINUTES", 15)
+) * 60
+TASK_LOG_CLEANUP_SECONDS = float(
+    os.environ.get("LOG_CLEANUP_INTERVAL_HOURS", 24)
+) * 3600
+TASK_HEALTH_CHECK_SECONDS = float(
+    os.environ.get("HEALTH_CHECK_INTERVAL_MINUTES", 5)
+) * 60
 
 # --- Synchronization tuning ---
 SYNC_WEBHOOK_EXPIRATION_DAYS = env_int("SYNC_WEBHOOK_EXPIRATION_DAYS", 3)

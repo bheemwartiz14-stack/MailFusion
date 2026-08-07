@@ -4,7 +4,7 @@ Synchronization engine.
 Implements the hybrid sync strategy:
     Primary   - Microsoft Graph Change Notifications (webhooks)
     Secondary - Microsoft Graph Delta Queries
-    Fallback  - Celery Beat scheduled sync every 5-10 minutes
+    Fallback  - scheduled sync via the recurring maintenance task (5-10 minutes)
 
 The engine is idempotent and safe to run concurrently: it tracks a stable
 ``@odata.deltaLink`` per account and only commits it after a fully successful
@@ -300,10 +300,10 @@ class SyncService:
     # -------------------- attachments --------------------
 
     def _sync_attachments(self, account, access_token, new_count):
-        """Placeholder hook; real downloads run asynchronously via Celery.
+        """Placeholder hook; real downloads run as a background task.
 
-        Kept intentionally light - binary attachment fetching is queued by the
-        ``download_attachment`` task to avoid blocking the sync worker.
+        Kept intentionally light - binary attachment fetching is handled by the
+        ``download_attachment`` task to avoid blocking the sync call.
         """
         return None
 

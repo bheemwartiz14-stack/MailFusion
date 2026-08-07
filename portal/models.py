@@ -423,7 +423,7 @@ class SyncLog(models.Model):
 
 
 class SyncJob(models.Model):
-    """Queue/metadata record for a background Celery job."""
+    """Queue/metadata record for a background job."""
 
     JOB_TYPE_CHOICES = [
         ("sync", "Sync"),

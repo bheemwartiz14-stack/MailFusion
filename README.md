@@ -1,8 +1,8 @@
 # Portal — UI/UX Design System & Django Template Architecture
 
-Cloud-based **Outlook Email Aggregation** dashboard. This repository contains the complete, polished, production-ready **Django Template UI** for Portal, plus a production-grade **Microsoft Account Management & Background Synchronization module** (Microsoft Graph + MSAL + Celery/Redis).
+Cloud-based **Outlook Email Aggregation** dashboard. This repository contains the complete, polished, production-ready **Django Template UI** for Portal, plus a production-grade **Microsoft Account Management & Background Synchronization module** (Microsoft Graph + MSAL + Django 6 Tasks/Redis).
 
-> **Scope:** UI + Django's built-in authentication/authorization + Microsoft account management, OAuth, and a Celery-based background email synchronization engine. Unified Inbox UI is out of scope for the sync module; emails are stored and exposed for the inbox layer to consume.
+> **Scope:** UI + Django's built-in authentication/authorization + Microsoft account management, OAuth, and a background email synchronization engine built on Django's Task framework. Unified Inbox UI is out of scope for the sync module; emails are stored and exposed for the inbox layer to consume.
 
 ---
 
@@ -13,15 +13,14 @@ pip install -r requirements.txt        # Django 5.2+ (Django 6 compatible)
 docker compose up -d postgres redis    # start PostgreSQL + Redis (see .env)
 python manage.py migrate               # apply auth/admin/session + portal tables
 python manage.py createsuperuser       # your login account
-celery -A core worker -l info          # background sync worker
-celery -A core beat -l info            # scheduled sync (fallback every 5 min)
+python manage.py scheduled_tasks --once  # run recurring background jobs now
 python manage.py runserver             # http://127.0.0.1:8000/
 ```
 
 Then sign in at `/login/` with the superuser you created. App pages (dashboard, accounts, inbox) require authentication; Django Admin at `/admin/` manages Users, Groups, Permissions and the sync cluster tables.
 
 - Light theme only (dark mode removed).
-- Local dev without a worker/Redis: set `CELERY_TASK_ALWAYS_EAGER=True` in `.env` to run sync tasks inline.
+- Background tasks use Django's `immediate` backend (run synchronously in-process, no worker/Redis broker needed). Recurring jobs are driven by `manage.py scheduled_tasks` — set it up in cron/systemd timer for a truly background schedule.
 
 ---
 
@@ -33,7 +32,7 @@ Connects multiple Outlook.com mailboxes via Microsoft Graph OAuth 2.0 and synchr
 |---|---|
 | **Primary** | Microsoft Graph Change Notifications (webhooks) |
 | **Secondary** | Microsoft Graph Delta Queries (`@odata.deltaLink` per account) |
-| **Fallback** | Celery Beat scheduled sync every 5 minutes |
+| **Fallback** | Django task scheduled every 5 minutes |
 
 ### OAuth flow (`/accounts/connect/` → `/accounts/callback/`)
 
@@ -49,30 +48,30 @@ Connects multiple Outlook.com mailboxes via Microsoft Graph OAuth 2.0 and synchr
 - Idempotent by construction: emails are keyed on `(outlook_account, graph_message_id)`; delta updates only touch properties present in the payload; paused accounts are skipped.
 - `SyncService.sync_all`, `refresh_expired_tokens`, `renew_webhooks`, `download_attachment`, `sync_metrics`.
 
-### Celery tasks (`portal/tasks.py`)
+### Django Tasks (`portal/tasks.py`)
 
 | Task | Purpose |
 |---|---|
-| `portal.tasks.sync_account` | Sync one account, with exponential backoff retries and `SyncJob` tracking |
-| `portal.tasks.sync_all_accounts` | Beat entry point; enqueues one sync per syncable account |
+| `portal.tasks.sync_account` | Sync one account, with `SyncJob` tracking |
+| `portal.tasks.sync_all_accounts` | Scheduled entry point; runs one sync per syncable account |
 | `portal.tasks.refresh_expired_tokens` | Refresh all expired access tokens |
 | `portal.tasks.renew_webhook_subscriptions` | Renew expiring Graph subscriptions |
 | `portal.tasks.download_attachment` | Fetch one attachment's binary content |
 | `portal.tasks.cleanup_old_logs` | Purge `SyncLog` older than the retention window |
-| `portal.tasks.run_system_health_checks` | Broker/queue/failure checks → notifications |
-| `portal.tasks.monitor_queue` | Alerts when jobs are queued but no workers run |
+| `portal.tasks.run_system_health_checks` | Job backlog / failure checks → notifications |
 
-Beat schedule lives in `core/settings.py` (`CELERY_BEAT_SCHEDULE`), tunable via env vars (`SYNC_INTERVAL_SECONDS`, `TOKEN_REFRESH_INTERVAL_MINUTES`, `WEBHOOK_RENEW_INTERVAL_MINUTES`, etc.).
+The recurring set is orchestrated by `manage.py scheduled_tasks`, which replaces Celery Beat. Each job cadence is tunable via env vars (`SYNC_INTERVAL_SECONDS`, `TOKEN_REFRESH_INTERVAL_MINUTES`, `WEBHOOK_RENEW_INTERVAL_MINUTES`, etc.).
 
 ### Monitoring pages
 
 | URL | Purpose |
 |---|---|
-| `/sync/` | Sync dashboard: accounts, sync health, worker/broker/queue status (HTMX auto-refresh) |
-| `/sync/logs/` | Filterable sync logs (`?q=&status=&account=`) + detail pages |
-| `/sync/health/` | OAuth/Graph/Webhook health badges + webhook expiration |
-| `/sync/queue/` | `SyncJob` and attachment download job queues |
-| `/sync/oauth/` | OAuth/token lifecycle per account |
+| `/system-monitor/` | Overview tab: system health, KPI cards, activity (HTMX auto-refresh) |
+| `/system-monitor/logs/` | Filterable sync logs (`?q=&status=&account=`) + detail pages |
+| `/system-monitor/health/` | OAuth/Graph/Webhook health badges + webhook expiration |
+| `/system-monitor/queue/` | `SyncJob` and attachment download job queues |
+| `/system-monitor/oauth/` | OAuth/token lifecycle per account |
+| `/system-monitor/` | Tabbed Sync/Queue/Integrations/Audit views |
 | `/accounts/<uuid>/` | Account detail: metadata, rename, pause/resume, syncs, emails |
 
 ### Models
@@ -82,10 +81,11 @@ Beat schedule lives in `core/settings.py` (`CELERY_BEAT_SCHEDULE`), tunable via 
 ### Management commands
 
 ```bash
+python manage.py scheduled_tasks       # run all recurring background jobs (cron/timer)
 python manage.py sync --all            # run a sync now (or --account <pk>)
 python manage.py renew_webhooks        # renew expiring subscriptions
 python manage.py cleanup_logs          # prune old sync logs
-python manage.py health_check          # broker/queue/failure summary
+python manage.py health_check          # redis/db/job summary
 ```
 
 ### Tests

@@ -427,8 +427,9 @@ class MicrosoftAuthService:
         """
         Trigger a sync for an account.
 
-        Dispatches the work to the Celery worker (background). Returns True if
-        a sync was queued, False otherwise.
+        Dispatches the work to the Django task backend (background/in-process
+        depending on the configured backend). Returns True if a sync was queued,
+        False otherwise.
         """
         from portal.tasks import sync_account
 
@@ -436,7 +437,7 @@ class MicrosoftAuthService:
         if not access_token:
             self._mark_account_oauth_error(account, "No valid access token")
             return False
-        sync_account.delay(account.pk, requested_by="web")
+        sync_account.enqueue(str(account.pk), requested_by="web")
         self.repository.update_account(account, last_sync_at=timezone.now())
         return True
 
