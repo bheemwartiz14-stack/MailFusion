@@ -84,19 +84,11 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 # --- Database ---
-# Prefer a DATABASE_URL (e.g. postgres://user:pass@host:5432/db) set by Render
-# or your local .env; otherwise fall back to the individual POSTGRES_* vars
-# (used by docker compose).
-DATABASES = {"default": dj_database_url.config(
-    default=(
-        f"postgres://{os.environ.get('POSTGRES_USER', 'InboxFusion')}:"
-        f"{os.environ.get('POSTGRES_PASSWORD', 'InboxFusion')}@"
-        f"{os.environ.get('POSTGRES_HOST', '127.0.0.1')}:"
-        f"{os.environ.get('POSTGRES_PORT', '5432')}/"
-        f"{os.environ.get('POSTGRES_DB', 'InboxFusion')}"
-    ),
-    conn_max_age=600,
-)}
+# Built from the DATABASE_URL env var (set in .env locally, and by Render via
+# the DATABASE_URL service binding). Requires DATABASE_URL to be present.
+DATABASES = {
+    "default": dj_database_url.parse(os.getenv("DATABASE_URL"))
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
