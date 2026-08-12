@@ -1,100 +1,199 @@
 {% load static %}
 
-<header class="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-outline-variant bg-surface/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
-  <div class="flex flex-1 items-center gap-3">
-    <!-- Mobile sidebar toggle -->
-    <button type="button" data-mf-open-sidebar aria-label="Open menu"
-      class="flex size-9 items-center justify-center rounded-lg border border-outline-variant bg-surface text-on-surface-variant transition-colors hover:bg-surface-container lg:hidden">
-      <span class="material-symbols-outlined">menu</span>
+<header
+  class="sticky top-0 z-40 flex h-[68px] items-center justify-between border-b border-outline-variant/70 bg-surface/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8"
+>
+  <!-- Left -->
+  <div class="flex min-w-0 flex-1 items-center gap-3">
+
+    <!-- Mobile menu -->
+    <button
+      type="button"
+      data-mf-open-sidebar
+      aria-label="Open menu"
+      class="flex size-10 shrink-0 items-center justify-center rounded-xl border border-outline-variant/80 bg-surface-container/40 text-on-surface-variant transition-all hover:bg-surface-container hover:text-on-surface active:scale-95 lg:hidden"
+    >
+      <span class="material-symbols-outlined text-[21px]">menu</span>
     </button>
 
-    <!-- Global search -->
-    <div class="relative w-full max-w-md">
-      <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[1.15rem] text-on-surface-variant">
-        search
-      </span>
-      <input type="text" placeholder="Search…"
-        class="input input-with-icon !py-2 text-sm"
-        aria-label="Search mailboxes, logs, or reports" />
-      <span class="kbd absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex">⌘K</span>
+    <!-- Page/header spacing -->
+    <div class="hidden h-7 w-px bg-outline-variant sm:block"></div>
+
+    <!-- Optional page title -->
+    <div class="hidden min-w-0 sm:block">
+      <p class="truncate text-sm font-semibold text-on-surface">
+        MailFusion
+      </p>
+      <p class="text-xs text-on-surface-variant">
+        Outlook Email Management
+      </p>
     </div>
   </div>
 
-  <div class="flex items-center gap-2 sm:gap-3">
 
-    <!-- Notifications -->
+  <!-- Right -->
+  <div class="flex items-center gap-1.5 sm:gap-2">
+    <!-- Profile -->
     <div class="relative" data-mf-menu-trigger>
-      <button type="button" aria-label="Notifications"
-        class="relative flex size-9 items-center justify-center rounded-lg border border-outline-variant bg-surface text-on-surface-variant transition-colors hover:bg-surface-container">
-        <span class="material-symbols-outlined">notifications</span>
-        {% if unread_count %}
-        <span class="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white ring-2 ring-surface">{{ unread_count }}</span>
-        {% endif %}
-      </button>
+      <button
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        class="group flex items-center gap-2 rounded-xl p-1.5 pr-2 transition-all hover:bg-surface-container active:scale-[.98]"
+      >
 
-      <div data-mf-menu hidden class="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-lg">
-        <div class="flex items-center justify-between border-b border-outline-variant px-4 py-3">
-          <p class="card-title">Notifications</p>
-          <a href="{% url 'notifications' %}" class="link-primary text-xs">View all</a>
-        </div>
-        <div class="max-h-80 overflow-y-auto">
-          {% for n in notification_center %}
-          <a href="{% url 'notifications' %}" class="flex gap-3 px-4 py-3 transition-colors hover:bg-surface-container">
-            <span class="material-symbols-outlined mt-0.5 text-[1.2rem] {% if n.tone == 'success' %}text-success{% elif n.tone == 'danger' %}text-danger{% elif n.tone == 'warning' %}text-warning{% else %}text-primary{% endif %}">{{ n.icon }}</span>
-            <div class="min-w-0">
-              <p class="truncate text-sm font-semibold text-on-surface">{{ n.title }}</p>
-              <p class="truncate text-xs text-on-surface-variant">{{ n.detail }}</p>
-              <p class="mt-0.5 text-[11px] text-on-surface-variant/80">{{ n.time }}</p>
-            </div>
-          </a>
-          {% empty %}
-          <p class="px-4 py-8 text-center text-sm text-on-surface-variant">No notifications yet.</p>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-
-    <div class="divider-vertical hidden sm:block"></div>
-
-    <!-- Profile dropdown -->
-    <div class="relative" data-mf-menu-trigger>
-      <button type="button" aria-haspopup="true" aria-expanded="false"
-        class="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-surface-container">
+        <!-- User information -->
         <div class="hidden text-right sm:block">
-          <p class="text-sm font-semibold leading-tight text-on-surface">{{ current_user.name }}</p>
-          <p class="text-[11px] font-medium uppercase tracking-wide text-on-surface-variant">{{ current_user.role }}</p>
+          <p class="max-w-[150px] truncate text-sm font-semibold leading-5 text-on-surface">
+            {{ current_user.name }}
+          </p>
+
+          <p class="text-[10px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">
+            {{ current_user.role }}
+          </p>
         </div>
-        <div class="avatar-md avatar-primary">{{ current_user.name|first|upper }}</div>
+
+        <!-- Avatar -->
+        <div
+          class="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-on-primary shadow-sm ring-2 ring-primary/10"
+        >
+          {{ current_user.name|first|upper }}
+
+          <!-- Online indicator -->
+          <span
+            class="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-surface bg-success"
+          ></span>
+        </div>
+
+        <!-- Chevron -->
+        <span
+          class="material-symbols-outlined hidden text-[18px] text-on-surface-variant transition-transform group-aria-expanded:rotate-180 sm:block"
+        >
+          expand_more
+        </span>
       </button>
 
-      <div data-mf-menu hidden class="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-outline-variant bg-surface py-1.5 shadow-lg">
-        <div class="border-b border-outline-variant px-4 py-3">
-          <p class="truncate text-sm font-semibold text-on-surface">{{ current_user.name }}</p>
-          <p class="truncate text-xs text-on-surface-variant">{{ current_user.email }}</p>
+
+      <!-- Dropdown -->
+      <div
+        data-mf-menu
+        hidden
+        class="absolute right-0 z-50 mt-2 w-[280px] overflow-hidden rounded-2xl border border-outline-variant/80 bg-surface shadow-xl shadow-black/10"
+      >
+
+        <!-- Profile header -->
+        <div class="border-b border-outline-variant/70 bg-surface-container/30 p-4">
+          <div class="flex items-center gap-3">
+
+            <div
+              class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-base font-bold text-on-primary"
+            >
+              {{ current_user.name|first|upper }}
+            </div>
+
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-on-surface">
+                {{ current_user.name }}
+              </p>
+
+              <p class="mt-0.5 truncate text-xs text-on-surface-variant">
+                {{ current_user.email }}
+              </p>
+
+              <span
+                class="mt-2 inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary"
+              >
+                {{ current_user.role }}
+              </span>
+            </div>
+
+          </div>
         </div>
 
-        <a href="{% url 'profile' %}"
-          class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface transition-colors hover:bg-surface-container">
-          <span class="material-symbols-outlined text-[1.2rem] text-on-surface-variant">person</span>
-          Profile
-        </a>
-        <a href="{% url 'change_password' %}"
-          class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface transition-colors hover:bg-surface-container">
-          <span class="material-symbols-outlined text-[1.2rem] text-on-surface-variant">lock</span>
-          Change Password
-        </a>
 
-        <div class="my-1 h-px bg-outline-variant"></div>
+        <!-- Account -->
+        <div class="p-1.5">
 
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit"
-            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-danger transition-colors hover:bg-danger/10">
-            <span class="material-symbols-outlined text-[1.2rem]">logout</span>
-            Logout
-          </button>
-        </form>
+          <a
+            href="{% url 'profile' %}"
+            class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-on-surface transition-colors hover:bg-surface-container"
+          >
+            <span
+              class="flex size-8 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant group-hover:text-on-surface"
+            >
+              <span class="material-symbols-outlined text-[18px]">
+                person
+              </span>
+            </span>
+
+            <span class="flex-1">
+              <span class="block font-medium">Profile</span>
+              <span class="block text-[11px] text-on-surface-variant">
+                Manage your account
+              </span>
+            </span>
+
+            <span class="material-symbols-outlined text-[17px] text-on-surface-variant">
+              chevron_right
+            </span>
+          </a>
+
+
+          <a
+            href="{% url 'change_password' %}"
+            class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-on-surface transition-colors hover:bg-surface-container"
+          >
+            <span
+              class="flex size-8 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant group-hover:text-on-surface"
+            >
+              <span class="material-symbols-outlined text-[18px]">
+                lock
+              </span>
+            </span>
+
+            <span class="flex-1">
+              <span class="block font-medium">Change Password</span>
+              <span class="block text-[11px] text-on-surface-variant">
+                Update your password
+              </span>
+            </span>
+
+            <span class="material-symbols-outlined text-[17px] text-on-surface-variant">
+              chevron_right
+            </span>
+          </a>
+
+        </div>
+
+
+        <!-- Logout -->
+        <div class="border-t border-outline-variant/70 p-1.5">
+
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+
+            <button
+              type="submit"
+              class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-danger transition-colors hover:bg-danger/10"
+            >
+              <span
+                class="flex size-8 items-center justify-center rounded-lg bg-danger/10"
+              >
+                <span class="material-symbols-outlined text-[18px]">
+                  logout
+                </span>
+              </span>
+
+              <span class="flex-1 text-left font-medium">
+                Logout
+              </span>
+            </button>
+          </form>
+
+        </div>
+
       </div>
     </div>
+
   </div>
 </header>

@@ -311,13 +311,11 @@ class EmailDetailView(LoginRequiredMixin, PortalView):
         if email is None:
             messages.error(request, "Email not found.")
             return redirect("inbox")
-
         if not email.is_read:
             try:
                 service.set_read(request.user, email, True)
             except MailActionError:
-                pass  # local state is already updated; Graph sync optional
-
+                pass 
         thread = service.get_thread(request.user, email.conversation_id)
         for item in thread:
             item._safe_body = sanitize_html(item.body_html)

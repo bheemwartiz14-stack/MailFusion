@@ -31,7 +31,8 @@
     <div class="flex min-w-0 flex-1 flex-col">
       {% block navbar %}{% include "partials/navbar.html" %}{% endblock %}
       <main class="flex-1 overflow-y-auto">
-        <section class="animate-fade-in mx-auto w-full max-w-[1440px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 {% block section_class %}{% endblock %}">
+        <section
+          class="animate-fade-in mx-auto w-full max-w-[1440px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 {% block section_class %}{% endblock %}">
           {% include "partials/breadcrumbs.html" %}
           {% include "partials/messages.html" %}
           {% block page_header %}
@@ -60,7 +61,159 @@
   <script>
     // Initialise Lucide icons everywhere.
     document.addEventListener('DOMContentLoaded', function () {
-      if (window.lucide && lucide.createIcons) { try { lucide.createIcons(); } catch (e) {} }
+      if (window.lucide && lucide.createIcons) { try { lucide.createIcons(); } catch (e) { } }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+      const sidebar = document.querySelector("[data-mf-sidebar]");
+      const openSidebarButton = document.querySelector("[data-mf-open-sidebar]");
+      const closeSidebarButton = document.querySelector("[data-mf-close-sidebar]");
+      const sidebarOverlay = document.querySelector("[data-mf-sidebar-overlay]");
+      function openSidebar() {
+        if (!sidebar) return;
+
+        sidebar.classList.remove("-translate-x-full");
+
+        if (sidebarOverlay) {
+          sidebarOverlay.classList.remove("hidden");
+        }
+        if (openSidebarButton) {
+          openSidebarButton.setAttribute("aria-expanded", "true");
+        }
+        document.body.classList.add("overflow-hidden");
+      }
+
+      function closeSidebar() {
+        if (!sidebar) return;
+
+        sidebar.classList.add("-translate-x-full");
+
+        if (sidebarOverlay) {
+          sidebarOverlay.classList.add("hidden");
+        }
+
+        if (openSidebarButton) {
+          openSidebarButton.setAttribute("aria-expanded", "false");
+        }
+        document.body.classList.remove("overflow-hidden");
+      }
+
+
+      openSidebarButton?.addEventListener("click", function (event) {
+        event.preventDefault();
+        openSidebar();
+      });
+
+
+      closeSidebarButton?.addEventListener("click", function (event) {
+        event.preventDefault();
+        closeSidebar();
+      });
+      sidebarOverlay?.addEventListener("click", function () {
+        closeSidebar();
+      });
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | ESC closes sidebar
+      |--------------------------------------------------------------------------
+      */
+
+      document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+          closeSidebar();
+          closeAllMenus();
+        }
+
+      });
+      /*
+      |--------------------------------------------------------------------------
+      | Profile Dropdown
+      |--------------------------------------------------------------------------
+      */
+
+      const menuTriggers = document.querySelectorAll("[data-mf-menu-trigger]");
+      function closeAllMenus() {
+
+        document.querySelectorAll("[data-mf-menu]").forEach(function (menu) {
+
+          menu.hidden = true;
+
+        });
+
+
+        document.querySelectorAll("[data-mf-menu-trigger] button").forEach(function (button) {
+
+          button.setAttribute("aria-expanded", "false");
+
+        });
+
+      }
+
+
+      menuTriggers.forEach(function (trigger) {
+
+        const button = trigger.querySelector("button");
+        const menu = trigger.querySelector("[data-mf-menu]");
+
+        if (!button || !menu) return;
+
+
+        button.addEventListener("click", function (event) {
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const isOpen = !menu.hidden;
+
+          closeAllMenus();
+
+          if (!isOpen) {
+
+            menu.hidden = false;
+
+            button.setAttribute(
+              "aria-expanded",
+              "true"
+            );
+
+          }
+
+        });
+
+      });
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | Click Outside
+      |--------------------------------------------------------------------------
+      */
+
+      document.addEventListener("click", function (event) {
+
+        menuTriggers.forEach(function (trigger) {
+
+          const menu = trigger.querySelector("[data-mf-menu]");
+
+          if (!menu) return;
+
+          if (!trigger.contains(event.target)) {
+            menu.hidden = true;
+
+            const button = trigger.querySelector("button");
+
+            button?.setAttribute(
+              "aria-expanded",
+              "false"
+            );
+          }
+
+        });
+
+      });
+
     });
   </script>
   {% block extra_js %}
