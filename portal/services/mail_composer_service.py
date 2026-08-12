@@ -269,9 +269,7 @@ class MailComposerService:
         account = original.outlook_account
         token = self._token(account)
         raw = (
-            self.graph.create_reply_all(token, original.graph_message_id)
-            if as_reply_all
-            else self.graph.create_reply(token, original.graph_message_id)
+            self.graph.create_reply(token, original.graph_message_id)
         )
         # Patch body/subject onto the Graph reply draft.
         return account, token, raw

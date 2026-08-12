@@ -8,7 +8,7 @@ from portal.views.inbox_module_views import (
     AttachmentDownloadAllView, AttachmentDownloadView, AttachmentPreviewView,
     ComposeSubmitView, EmailActionView,
     EmailDetailView, EmailDownloadEmlView, EmailHeadersPartialView, EmailListView,
-    EmailPreviewPartialView, EmailThreadPartialView, InboxView, UnreadCountPartialView,
+    EmailReplyView, EmailThreadPartialView, InboxView, UnreadCountPartialView,
 )
 from portal.views.notification_views import NotificationActionView, NotificationBulkActionView, NotificationsView
 from portal.views.sync import sync_api
@@ -55,7 +55,7 @@ urlpatterns = [
     path("inbox/unread/", UnreadCountPartialView.as_view(), name="inbox_unread"),
     path("inbox/actions/", EmailActionView.as_view(), name="email_action"),
     path("inbox/emails/<uuid:email_id>/", EmailDetailView.as_view(), name="email_detail"),
-    path("inbox/emails/<uuid:email_id>/reply/", EmailPreviewPartialView.as_view(), name="reply"),
+    path("inbox/emails/<uuid:email_id>/reply/", EmailReplyView.as_view(), name="reply"),
     path("inbox/emails/<uuid:email_id>/download-eml/", EmailDownloadEmlView.as_view(), name="email_download_eml"),
     path("inbox/emails/<uuid:email_id>/thread/", EmailThreadPartialView.as_view(), name="email_thread"),
     path("inbox/emails/<uuid:email_id>/headers/", EmailHeadersPartialView.as_view(), name="email_headers"),

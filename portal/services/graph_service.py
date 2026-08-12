@@ -339,6 +339,7 @@ class GraphService:
     # -------------------- reply / forward drafts --------------------
 
     def create_reply(self, access_token, message_id):
+        print(f"{self.base_url}/me/messages/{_u(message_id)}/createReply")
         """Create an editable reply draft; returns the draft message JSON."""
         return self._request_or_raise(
             "POST", access_token,
@@ -347,6 +348,7 @@ class GraphService:
         )
 
     def create_reply_all(self, access_token, message_id):
+        print(f"{self.base_url}/me/messages/{_u(message_id)}/createReply")
         """Create an editable reply-all draft; returns the draft message JSON."""
         return self._request_or_raise(
             "POST", access_token,

@@ -223,49 +223,11 @@ class EmailListView(LoginRequiredMixin, View):
         return render(request, "inbox/partials/email_list.html", context)
 
 
-class EmailPreviewPartialView(LoginRequiredMixin, View):
-    """HTMX partial: a compact email preview rendered in the inbox reading pane.
-
-    HTMX requests return just the reading-pane fragment; a plain page load
-    returns the full inbox UI with the message opened in the reading pane.
-    """
-
-    def get(self, request, email_id):
-        service = EmailService()
-        email = service.get_message(request.user, email_id)
-        if email is None:
-            return HttpResponse(status=404)
-
-        if not email.is_read:
-            try:
-                service.set_read(request.user, email, True)
-            except MailActionError:
-                pass
-
-        context = {
-            "email": email,
-            "safe_body": sanitize_html(email.body_html),
-            "thread_count": len(service.get_thread(request.user, email.conversation_id)),
-            "attachments": email.attachments.all(),
-            "now": timezone.now(),
-        }
-
-        if request.headers.get("HX-Request") == "true":
-            return render(request, "inbox/partials/inbox.html", context)
-
-        full = _inbox_context(request, initial_preview=True, **context)
-        full.update(build_shell_context(
-            title=email.subject or "(no subject)",
-            breadcrumbs=[{"label": "Unified Inbox", "url": reverse("inbox")},
-                         {"label": email.subject or "(no subject)"}],
-            active_page="inbox",
-        ))
-        full["current_user"] = shell_user(request.user)
-        return render(request, "inbox/inbox.html", full)
-
+class EmailReplyView(LoginRequiredMixin, View):
     def post(self, request, email_id):
         """POST: send a reply / reply-all to the message identified by url."""
-
+        
+    
         if not _rate_limited(request):
             return HttpResponse("Too many requests", status=429)
 
@@ -282,6 +244,7 @@ class EmailPreviewPartialView(LoginRequiredMixin, View):
             "body_text": request.POST.get("body_text", ""),
             "subject": request.POST.get("subject", "").strip(),
         }
+        print('EmailReplyView data ' , data )
         attachments = _read_uploaded_files(request)
         try:
             composer.send_reply(
@@ -296,15 +259,14 @@ class EmailPreviewPartialView(LoginRequiredMixin, View):
         except Exception:  # noqa: BLE001
             logger.exception("Reply submit failed")
             messages.error(request, "Could not send the reply. Please try again.")
-        return redirect("inbox")
+        return redirect("email_detail", email_id=email_id)
+        # return redirect("inbox")
 
 
 class EmailDetailView(LoginRequiredMixin, PortalView):
     """Full email viewer: headers, body, attachments, thread."""
-
     template_name = "inbox/email_viewer.html"
     active_page = "inbox"
-
     def get(self, request, email_id):
         service = EmailService()
         email = service.get_message(request.user, email_id)
