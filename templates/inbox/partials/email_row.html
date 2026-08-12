@@ -1,39 +1,31 @@
 {% load ui_extras %}
-<div class="group email-list-item relative cursor-pointer border-b border-outline-variant/50 p-4 transition-colors hover:bg-surface-container {% if not email.is_read %}unread{% endif %}"
+<div class="group email-list-item relative cursor-pointer transition-colors hover:bg-surface-container/60 {% if not email.is_read %}unread{% endif %}"
      data-mf-email="{{ email.pk }}" data-mf-email-subject="{{ email.subject|escapejs }}" role="row">
 
-  <input class="absolute left-3 top-3 z-10 size-4 cursor-pointer rounded border-outline-variant text-primary opacity-0 transition-opacity focus:ring-primary/30 group-hover:opacity-100"
-         type="checkbox" value="{{ email.pk }}" data-mf-email-check aria-label="Select message">
+  <a class="flex items-center gap-3 px-3 py-[0.875rem]" href="{% url 'email_detail' email.pk %}">
+    <input class="mx-1 size-4 shrink-0 cursor-pointer rounded border-outline-variant text-primary focus:ring-primary/30"
+           type="checkbox" value="{{ email.pk }}" data-mf-email-check aria-label="Select message"
+           onclick="event.stopPropagation()">
 
-  <a class="block" href="{% url 'email_detail' email.pk %}"
-     hx-get="{% url 'email_preview' email.pk %}"
-     hx-target="#mf-email-preview" hx-swap="innerHTML" hx-push-url="false"
-     hx-indicator="#mf-preview-loading" data-mf-email-link>
-    <div class="flex items-start justify-between">
-      <div class="flex min-w-0 items-center gap-2">
-        <span class="size-2 shrink-0 rounded-full {% if not email.is_read %}bg-primary{% else %}bg-outline-variant{% endif %}" title="{% if not email.is_read %}Unread{% endif %}"></span>
-        <span class="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold uppercase text-on-primary bg-primary-container">{{ email.from_name|default:email.from_email|initials }}</span>
-        <p class="truncate text-body-md {% if not email.is_read %}font-bold text-on-background{% else %}font-medium text-on-surface-variant{% endif %}">
-          {% if email.is_starred %}<span class="material-symbols-outlined align-middle text-[0.94rem] text-primary" data-weight="fill">star</span>{% endif %}
-          {% if email.is_flagged %}<span class="material-symbols-outlined align-middle text-[0.94rem] text-error" data-weight="fill">flag</span>{% endif %}
-          {{ email.from_name|default:email.from_email|default:"Unknown sender" }}
-        </p>
-      </div>
-      <span class="shrink-0 text-xs text-outline">{{ email.received_at|date:"M j" }}{% if email.received_at|date:"Ymd" == now|date:"Ymd" %} {{ email.received_at|time:"H:i" }}{% endif %}</span>
-    </div>
+    <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold uppercase text-on-primary bg-primary/90">
+      {{ email.from_name|default:email.from_email|initials }}
+    </span>
 
-    <p class="mt-1 line-clamp-1 {% if not email.is_read %}font-semibold text-on-surface{% else %}font-medium text-on-surface-variant{% endif %}">
-      {% if email.importance == "high" %}<span class="material-symbols-outlined align-middle text-[15px] text-error" data-weight="fill">priority_high</span>{% endif %}
+    <span class="mf-sender w-[190px] shrink-0 truncate text-body-md {% if not email.is_read %}font-bold text-on-background{% else %}font-medium text-on-surface-variant{% endif %}">
+      <span class="material-symbols-outlined align-middle text-[0.9rem] {% if email.is_starred %}text-warning{% else %}text-outline/40{% endif %}" data-star="{% if email.is_starred %}fill{% endif %}">star</span>
+      {{ email.from_name|default:email.from_email|default:"Unknown sender" }}
+    </span>
+
+    <span class="min-w-0 flex-1 truncate text-sm {% if not email.is_read %}font-semibold text-on-surface{% else %}font-normal text-on-surface-variant{% endif %}">
       {{ email.subject|default:"(no subject)" }}
-    </p>
+      {% if email.preview_text or email.body_html %}
+      <span class="font-normal text-on-surface-variant/70">&nbsp;–&nbsp;{{ email.preview_text|default:email.body_html|striptags|truncatechars:60 }}</span>
+      {% endif %}
+    </span>
 
-    <p class="mt-0.5 line-clamp-2 text-body-sm text-on-surface-variant">
-      {{ email.preview_text|default:email.body_html|striptags|truncatechars:120 }}
-    </p>
+    {% if email.is_flagged %}<span class="material-symbols-outlined shrink-0 text-[1.1rem] text-error" data-weight="fill">flag</span>{% endif %}
+    {% if email.has_attachments or email.attachments.exists %}<span class="material-symbols-outlined shrink-0 text-[1.1rem] text-outline">attach_file</span>{% endif %}
 
-    <div class="mt-2 flex items-center gap-2">
-      <span class="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">{{ email.outlook_account.nickname|default:email.outlook_account.name }}</span>
-      {% if email.has_attachments or email.attachments.exists %}<span class="material-symbols-outlined text-[1rem] text-outline">attach_file</span>{% endif %}
-    </div>
+    <span class="w-14 shrink-0 text-right text-xs {% if not email.is_read %}font-semibold text-on-surface{% else %}text-on-surface-variant{% endif %}">{{ email.received_at|date:"M j" }}{% if email.received_at|date:"Ymd" == now|date:"Ymd" %} {{ email.received_at|time:"H:i" }}{% endif %}</span>
   </a>
 </div>

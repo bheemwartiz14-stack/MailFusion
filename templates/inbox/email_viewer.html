@@ -4,136 +4,168 @@
 
 {% block title %}{{ email.subject|default:"(no subject)" }} · {{ app_name }}{% endblock %}
 
-{% block page_actions %}
-<div class="flex flex-wrap items-center gap-2">
-  <div class="relative">
-    <button class="btn-icon" type="button" data-mf-menu-trigger aria-label="More actions"><span class="material-symbols-outlined">more_vert</span></button>
-    <div class="absolute right-0 top-12 hidden w-56 rounded-xl border border-outline-variant bg-surface p-2 shadow-xl" data-mf-menu>
-      <form method="post" action="{% url 'email_action' %}">
-        {% csrf_token %}
-        <input type="hidden" name="email_ids" value="{{ email.pk }}">
-        <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" type="submit" name="action" value="unread"><span class="material-symbols-outlined text-[1.1rem]">mark_email_unread</span>Mark unread</button>
-        <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" type="submit" name="action" value="{% if email.is_starred %}unstar{% else %}star{% endif %}"><span class="material-symbols-outlined text-[1.1rem]">star</span>{% if email.is_starred %}Remove star{% else %}Star{% endif %}</button>
-        <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" type="submit" name="action" value="{% if email.is_flagged %}unflag{% else %}flag{% endif %}"><span class="material-symbols-outlined text-[1.1rem]">flag</span>{% if email.is_flagged %}Unflag{% else %}Flag{% endif %}</button>
-        <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" type="submit" name="action" value="archive"><span class="material-symbols-outlined text-[1.1rem]">archive</span>Archive</button>
-        <div class="my-1 h-px bg-outline-variant"></div>
-        <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" type="submit" name="action" value="trash"><span class="material-symbols-outlined text-[1.1rem]">delete</span>Move to trash</button>
-        <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-danger transition hover:bg-danger/10" type="submit" name="action" value="delete" data-mf-confirm data-mf-confirm-title="Delete permanently?" data-mf-confirm-message="This permanently deletes the message from Microsoft Graph."><span class="material-symbols-outlined text-[1.1rem]">delete_forever</span>Delete permanently</button>
-        <div class="my-1 h-px bg-outline-variant"></div>
-        <a class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" href="{% url 'email_download_eml' email.pk %}"><span class="material-symbols-outlined text-[1.1rem]">download</span>Download .eml</a>
-        <a class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" href="#" data-mf-print><span class="material-symbols-outlined text-[1.1rem]">print</span>Print</a>
-      </form>
-    </div>
-  </div>
-</div>
-{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<div class="animate-fade-up grid gap-6 lg:grid-cols-[minmax(0,2fr)_360px]">
-  <div>
-    <div class="card p-6">
-      <div class="mb-6 flex flex-wrap items-start gap-2">
-        <h1 class="text-xl font-semibold text-on-surface">{{ email.subject|default:"(no subject)" }}</h1>
-        {% if email.is_flagged %}<span class="badge badge-danger"><span class="material-symbols-outlined text-[1rem]">flag</span>Flagged</span>{% endif %}
-        {% if email.is_starred %}<span class="badge badge-warning"><span class="material-symbols-outlined text-[1rem]">star</span>Starred</span>{% endif %}
-        {% if email.importance == "high" %}<span class="badge badge-danger"><span class="material-symbols-outlined text-[1rem]">priority_high</span>High importance</span>{% endif %}
-        <span class="badge badge-neutral">{{ email.outlook_account.nickname|default:email.outlook_account.name }}</span>
-      </div>
+<div class="animate-fade-up mx-auto w-full max-w-4xl">
+  <!-- Gmail-style action bar -->
+  <div class="flex items-center gap-1 pb-3">
+    <a class="btn-icon !size-9" href="{% url 'inbox' %}" title="Back to inbox" aria-label="Back to inbox">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
 
-      <div class="flex flex-wrap items-center gap-3 border-b border-outline-variant pb-4">
-        <div class="flex size-11 items-center justify-center rounded-full bg-primary text-sm font-semibold uppercase text-on-primary">{{ email.from_name|default:email.from_email|initials }}</div>
-        <div class="min-w-0 flex-1">
-          <div class="font-semibold text-on-surface">{{ email.from_name|default:"Unknown sender" }}{% if email.from_email %} <span class="font-normal text-on-surface-variant">&lt;{{ email.from_email }}&gt;</span>{% endif %}</div>
-          <div class="mt-1 text-sm text-on-surface-variant">
-            to
-            {% for r in email.recipients.all %}{% if r.recipient_type == 'to' %}{{ r.name|default:r.address }}{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}
-            {% if email.ccRecipients %}<span class="ml-1"><span class="material-symbols-outlined align-middle text-[1rem]">group</span> Cc: {{ email.ccRecipients|truncatechars:80 }}</span>{% endif %}
-          </div>
-        </div>
-        <div class="ml-auto text-sm text-on-surface-variant">
-          <div class="font-semibold text-on-surface">{{ email.received_at|date:"D, M j, Y H:i" }}</div>
-          <div class="mt-1">via {{ email.outlook_account.email }}</div>
-        </div>
+    <div class="ml-auto relative" data-mf-menu-trigger>
+      <button class="btn-icon !size-9" type="button" title="More actions" aria-label="More actions">
+        <span class="material-symbols-outlined">more_vert</span>
+      </button>
+      <div class="absolute right-0 top-10 hidden w-56 overflow-hidden rounded-xl border border-outline-variant bg-surface p-2 shadow-xl" data-mf-menu>
+        <form method="post" action="{% url 'email_action' %}">
+          {% csrf_token %}
+          <input type="hidden" name="email_ids" value="{{ email.pk }}">
+          <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" type="submit" name="action" value="{% if email.is_flagged %}unflag{% else %}flag{% endif %}"><span class="material-symbols-outlined text-[1.1rem]">flag</span>{% if email.is_flagged %}Unflag{% else %}Flag{% endif %}</button>
+          <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" type="submit" name="action" value="archive"><span class="material-symbols-outlined text-[1.1rem]">archive</span>Archive</button>
+          <div class="my-1 h-px bg-outline-variant"></div>
+          <button class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-danger transition hover:bg-danger/10" type="submit" name="action" value="delete" data-mf-confirm data-mf-confirm-title="Delete permanently?" data-mf-confirm-message="This permanently deletes the message from Microsoft Graph."><span class="material-symbols-outlined text-[1.1rem]">delete_forever</span>Delete permanently</button>
+          <div class="my-1 h-px bg-outline-variant"></div>
+          <a class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" href="{% url 'email_download_eml' email.pk %}"><span class="material-symbols-outlined text-[1.1rem]">download</span>Download .eml</a>
+          <a class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition hover:bg-surface-container" href="#" data-mf-print><span class="material-symbols-outlined text-[1.1rem]">print</span>Print</a>
+        </form>
       </div>
+    </div>
+  </div>
 
-      <div class="prose prose-slate mt-6 max-w-none text-sm text-on-surface">
-        {% if safe_body %}
-          {{ safe_body|safe }}
-        {% else %}
-          <pre class="whitespace-pre-wrap font-inherit">{{ email.body_text|default:"(empty message)" }}</pre>
-        {% endif %}
-      </div>
+  <div class="rounded-2xl border border-outline-variant bg-surface shadow-sm">
+    <!-- Subject -->
+    <div class="flex flex-wrap items-center gap-2 px-6 pb-3 pt-5">
+      <h1 class="min-w-0 flex-1 truncate text-xl font-medium tracking-tight text-on-surface">{{ email.subject|default:"(no subject)" }}</h1>
+      {% if email.is_flagged %}<span class="badge badge-danger"><span class="material-symbols-outlined text-[1rem]">flag</span>Flagged</span>{% endif %}
+      {% if email.importance == "high" %}<span class="badge badge-danger"><span class="material-symbols-outlined text-[1rem]">priority_high</span>High importance</span>{% endif %}
+    </div>
 
-      {% if attachments %}
-      <div class="mt-8 border-t border-outline-variant pt-6">
-        <div class="mb-3 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2 text-sm font-semibold text-on-surface"><span class="material-symbols-outlined text-[1.1rem]">attach_file</span> {{ attachments|length }} attachment{% if attachments|length > 1 %}s{% endif %}</div>
-          <a class="btn-secondary" href="{% url 'attachment_download_all' email.pk %}"><span class="material-symbols-outlined text-[1.1rem]">archive</span>Download all</a>
+    <!-- Envelope -->
+    <div class="flex flex-wrap items-center gap-3 border-b border-outline-variant px-6 py-4">
+      <div class="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover text-sm font-semibold uppercase text-on-primary shadow-sm">{{ email.from_name|default:email.from_email|initials }}</div>
+      <div class="min-w-0 flex-1">
+        <div class="truncate text-[15px] font-semibold text-on-surface">
+          {{ email.from_name|default:"Unknown sender" }}
+          {% if email.from_email %}<span class="font-normal text-on-surface-variant">&lt;{{ email.from_email }}&gt;</span>{% endif %}
         </div>
-        <div class="flex flex-wrap gap-3">
-          {% for attachment in attachments %}
-          <div class="flex min-w-[260px] items-center gap-3 rounded-xl border border-outline-variant bg-surface-container p-3">
-            {% with type=attachment|display_type %}
-            <span class="flex size-10 items-center justify-center rounded-lg bg-primary text-on-primary">
-              <span class="material-symbols-outlined">{% if type == 'image' %}image{% elif type == 'pdf' %}picture_as_pdf{% elif type == 'word' %}description{% elif type == 'excel' %}table_chart{% elif type == 'slides' %}slideshow{% else %}attach_file{% endif %}</span>
-            </span>
-            {% endwith %}
-            <div class="min-w-0 flex-1">
-              <div class="truncate text-sm font-semibold text-on-surface" title="{{ attachment.name }}">{{ attachment.name }}</div>
-              <div class="text-sm text-on-surface-variant">{{ attachment.size_bytes|filesizeformat }}</div>
-            </div>
-            {% if not attachment.is_inline %}
-            {% if attachment|is_previewable %}
-            <a class="btn-icon" title="Preview" href="{% url 'attachment_preview' email.pk attachment.pk %}" target="_blank"><span class="material-symbols-outlined text-[1.1rem]">visibility</span></a>
-            {% endif %}
-            <a class="btn-icon" title="Download" href="{% url 'attachment_download' email.pk attachment.pk %}"><span class="material-symbols-outlined text-[1.1rem]">download</span></a>
-            {% endif %}
-          </div>
-          {% endfor %}
+        <div class="truncate text-sm text-on-surface-variant">
+          to
+          {% for r in email.recipients.all %}{% if r.recipient_type == 'to' %}{{ r.name|default:r.address }}{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}
+          {% if email.ccRecipients %}<span class="ml-1"><span class="material-symbols-outlined align-middle text-[1rem]">group</span> Cc: {{ email.ccRecipients|truncatechars:80 }}</span>{% endif %}
         </div>
       </div>
+      <div class="shrink-0 text-right text-sm text-on-surface-variant">
+        <div class="font-semibold text-on-surface">{{ email.received_at|date:"D, M j" }}</div>
+        <div class="mt-0.5">{{ email.received_at|time:"H:i" }} · {{ email.outlook_account.nickname|default:email.outlook_account.name }}</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="prose prose-slate max-w-none px-6 py-6 text-sm text-on-surface">
+      {% if safe_body %}
+        {{ safe_body|safe }}
+      {% else %}
+        <pre class="whitespace-pre-wrap font-inherit">{{ email.body_text|default:"(empty message)" }}</pre>
       {% endif %}
     </div>
 
-    {% if thread_count > 1 %}
-    <div class="card mt-6 p-6">
-      <div class="flex items-center justify-between gap-3">
-        <h2 class="text-lg font-semibold text-on-surface">Conversation <span class="ml-2 rounded-full bg-surface-container px-2.5 py-1 text-xs font-semibold text-on-surface-variant">{{ thread_count }} messages</span></h2>
-        <button class="btn-secondary" type="button" data-mf-thread-toggle>Expand</button>
+    <!-- Attachments -->
+    {% if attachments %}
+    <div class="border-t border-outline-variant px-6 py-5">
+      <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-on-surface">
+        <span class="material-symbols-outlined text-[1.1rem]">attach_file</span>
+        {{ attachments|length }} attachment{{ attachments|length|pluralize }}
+        <a class="ml-auto text-xs font-semibold text-primary hover:underline" href="{% url 'attachment_download_all' email.pk %}">Download all</a>
       </div>
-      <div class="mt-4 hidden" id="mfThread">
-        <div hx-get="{% url 'email_thread' email.pk %}" hx-trigger="load">
-          <div class="flex justify-center py-3"><div class="h-5 w-5 animate-spin rounded-full border-2 border-outline-variant border-t-primary"></div></div>
+      <div class="flex flex-wrap gap-3">
+        {% for attachment in attachments %}
+        <div class="flex min-w-[240px] items-center gap-3 rounded-xl border border-outline-variant bg-surface-container/60 p-3 transition-colors hover:bg-surface-container">
+          {% with type=attachment|display_type %}
+          <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <span class="material-symbols-outlined text-[1.2rem]">{% if type == 'image' %}image{% elif type == 'pdf' %}picture_as_pdf{% elif type == 'word' %}description{% elif type == 'excel' %}table_chart{% elif type == 'slides' %}slideshow{% else %}attach_file{% endif %}</span>
+          </span>
+          {% endwith %}
+          <div class="min-w-0 flex-1">
+            <div class="truncate text-sm font-semibold text-on-surface" title="{{ attachment.name }}">{{ attachment.name }}</div>
+            <div class="text-xs text-on-surface-variant">{{ attachment.size_bytes|filesizeformat }}</div>
+          </div>
+          {% if not attachment.is_inline %}
+          {% if attachment|is_previewable %}
+          <a class="btn-icon" title="Preview" href="{% url 'attachment_preview' email.pk attachment.pk %}" target="_blank"><span class="material-symbols-outlined text-[1.1rem]">visibility</span></a>
+          {% endif %}
+          <a class="btn-icon" title="Download" href="{% url 'attachment_download' email.pk attachment.pk %}"><span class="material-symbols-outlined text-[1.1rem]">download</span></a>
+          {% endif %}
         </div>
+        {% endfor %}
       </div>
     </div>
     {% endif %}
+
+    <!-- Inline reply -->
+    <div class="border-t border-outline-variant px-6 py-5">
+      <form method="post" action="{% url 'reply' email.pk %}" data-mf-reply-form>
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="reply">
+        <div class="mb-2 flex items-center justify-between">
+          <span class="text-sm font-semibold text-on-surface">Reply to {{ email.from_name|default:"sender" }}</span>
+          <button type="button" class="btn-secondary btn-sm" data-mf-reply-toggle data-mf-reply-all>
+            <span class="material-symbols-outlined text-[1rem]">reply_all</span>Reply all
+          </button>
+        </div>
+        <textarea name="body_html" rows="4"
+          class="input min-h-[108px] resize-y font-inherit"
+          placeholder="Write your reply…" data-mf-reply-body></textarea>
+        <div class="mt-3 flex items-center gap-2">
+          <button class="btn-primary btn-sm" type="submit">
+            <span class="material-symbols-outlined text-[1rem]">send</span>Send
+          </button>
+          <button class="btn-ghost btn-sm" type="reset" data-mf-reply-discard>Discard</button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <div>
-    <div class="card p-6">
-      <h2 class="text-lg font-semibold text-on-surface">Email details</h2>
-      <div class="mt-4 space-y-3 text-sm text-on-surface-variant">
-        <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">From</span><span class="text-right text-on-surface">{{ email.from_name|default:email.from_email|default:"—" }}</span></div>
-        <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">From email</span><span class="break-all text-right text-on-surface">{{ email.from_email|default:"—" }}</span></div>
-        <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">To</span><span class="break-all text-right text-on-surface">{{ email.toRecipients|default:"—" }}</span></div>
-        {% if email.ccRecipients %}<div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Cc</span><span class="break-all text-right text-on-surface">{{ email.ccRecipients }}</span></div>{% endif %}
-        {% if email.reply_to %}<div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Reply-To</span><span class="break-all text-right text-on-surface">{{ email.reply_to }}</span></div>{% endif %}
-        <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Mailbox</span><span class="text-right text-on-surface">{{ email.outlook_account.email }}</span></div>
-        <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Received</span><span class="text-right text-on-surface">{{ email.received_at|date:"D, M j, Y H:i" }}</span></div>
-        <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Importance</span><span class="text-right text-on-surface">{{ email.importance }}</span></div>
-        <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Message ID</span><span class="break-all font-mono text-right text-on-surface">{{ email.graph_message_id }}</span></div>
-        {% if email.internet_message_id %}<div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Internet ID</span><span class="break-all font-mono text-right text-on-surface">{{ email.internet_message_id }}</span></div>{% endif %}
-        {% if email.conversation_id %}<div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Conversation</span><span class="break-all font-mono text-right text-on-surface">{{ email.conversation_id }}</span></div>{% endif %}
+  <!-- Conversation -->
+  {% if thread_count > 1 %}
+  <div class="card mt-6">
+    <div class="flex items-center justify-between gap-3 px-5 py-4">
+      <h2 class="text-base font-semibold text-on-surface">Conversation <span class="ml-2 rounded-full bg-surface-container px-2.5 py-1 text-xs font-semibold text-on-surface-variant">{{ thread_count }} messages</span></h2>
+      <button class="btn-secondary btn-sm" type="button" data-mf-thread-toggle>Expand</button>
+    </div>
+    <div class="hidden px-5 pb-5" id="mfThread">
+      <div hx-get="{% url 'email_thread' email.pk %}" hx-trigger="load">
+        <div class="flex justify-center py-3"><div class="h-5 w-5 animate-spin rounded-full border-2 border-outline-variant border-t-primary"></div></div>
       </div>
-      <div class="mt-5 border-t border-outline-variant pt-4">
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Details -->
+  <details class="card mt-6 group">
+    <summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-on-surface-variant transition-colors hover:text-on-surface">
+      <span class="material-symbols-outlined mr-1 align-middle text-[1.1rem]">info</span>Show details
+    </summary>
+    <div class="space-y-3 border-t border-outline-variant px-5 py-4 text-sm text-on-surface-variant">
+      <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">From</span><span class="break-all text-right text-on-surface">{{ email.from_name|default:email.from_email|default:"—" }}</span></div>
+      <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">To</span><span class="break-all text-right text-on-surface">{{ email.toRecipients|default:"—" }}</span></div>
+      {% if email.ccRecipients %}<div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Cc</span><span class="break-all text-right text-on-surface">{{ email.ccRecipients }}</span></div>{% endif %}
+      {% if email.reply_to %}<div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Reply-To</span><span class="break-all text-right text-on-surface">{{ email.reply_to }}</span></div>{% endif %}
+      <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Mailbox</span><span class="text-right text-on-surface">{{ email.outlook_account.email }}</span></div>
+      <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Received</span><span class="text-right text-on-surface">{{ email.received_at|date:"D, M j, Y H:i" }}</span></div>
+      <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Importance</span><span class="text-right text-on-surface">{{ email.importance }}</span></div>
+      <div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Message ID</span><span class="break-all font-mono text-right text-on-surface">{{ email.graph_message_id }}</span></div>
+      {% if email.internet_message_id %}<div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Internet ID</span><span class="break-all font-mono text-right text-on-surface">{{ email.internet_message_id }}</span></div>{% endif %}
+      {% if email.conversation_id %}<div class="flex items-start justify-between gap-3"><span class="text-on-surface-variant/70">Conversation</span><span class="break-all font-mono text-right text-on-surface">{{ email.conversation_id }}</span></div>{% endif %}
+      <div class="border-t border-outline-variant pt-3">
         <button class="btn-secondary w-full" type="button" hx-get="{% url 'email_headers' email.pk %}" hx-target="#mf-internet-headers" hx-swap="innerHTML">
           <span class="material-symbols-outlined">list_alt</span> View internet headers
         </button>
         <div id="mf-internet-headers" class="mt-3"></div>
       </div>
     </div>
-  </div>
+  </details>
 </div>
 {% endblock %}
 

@@ -1,25 +1,30 @@
 {% load ui_extras %}
-<div class="flex h-14 items-center justify-between gap-3 border-b border-outline-variant px-4">
-  <div class="flex items-center gap-3">
-    <input class="size-4 cursor-pointer rounded border-outline-variant text-primary focus:ring-primary/30" type="checkbox" id="mfSelectAll" data-mf-select-all aria-label="Select all on this page">
-    <h2 class="text-lg font-bold tracking-tight text-on-surface">Inbox</h2>
-    {% if page_obj.paginator.count %}<span class="text-xs font-medium text-on-surface-variant">{{ page_obj.paginator.count }}</span>{% endif %}
-  </div>
+<div class="flex h-12 items-center gap-2 px-2">
+  <input class="size-4 shrink-0 cursor-pointer rounded border-outline-variant text-primary focus:ring-primary/30" type="checkbox" id="mfSelectAll" data-mf-select-all aria-label="Select all on this page">
 
-  <div class="relative flex items-center gap-1">
-    <button class="btn-icon !size-8" type="button" title="Bulk actions" data-mf-bulk-dropdown aria-label="Bulk actions">
-      <span class="material-symbols-outlined text-[1.1rem]">more_vert</span>
+  <span class="material-symbols-outlined shrink-0 text-[1.2rem] text-outline">inbox</span>
+  <h2 class="text-[15px] font-semibold tracking-tight text-on-surface">Inbox</h2>
+  {% if page_obj.paginator.count %}<span class="text-xs font-medium text-on-surface-variant">{{ page_obj.paginator.count }} messages</span>{% endif %}
+
+  <div class="relative ml-auto flex items-center gap-0.5">
+    <button class="btn-icon !size-8" type="button" title="Refresh" hx-get="{% url 'inbox_list' %}?folder={{ folder }}" hx-target="#mf-email-list" hx-swap="innerHTML" aria-label="Refresh">
+      <span class="material-symbols-outlined text-[1.1rem]">refresh</span>
     </button>
-    <div class="absolute right-0 top-12 hidden w-56 rounded-xl border border-outline-variant bg-surface p-2 shadow-lg" data-mf-bulk-menu>
-      <div class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Selected: <span data-mf-selected-count>0</span></div>
-      <div class="my-1 h-px bg-outline-variant"></div>
-      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="read"><span class="material-symbols-outlined text-[1.1rem]">mark_email_read</span>Mark read</a>
-      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="unread"><span class="material-symbols-outlined text-[1.1rem]">mark_email_unread</span>Mark unread</a>
-      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="star"><span class="material-symbols-outlined text-[1.1rem]">star</span>Star</a>
-      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="flag"><span class="material-symbols-outlined text-[1.1rem]">flag</span>Flag</a>
-      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="archive"><span class="material-symbols-outlined text-[1.1rem]">archive</span>Archive</a>
-      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="trash"><span class="material-symbols-outlined text-[1.1rem]">delete</span>Move to trash</a>
-      <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-danger transition-colors hover:bg-danger/10" href="#" data-mf-bulk-action="delete"><span class="material-symbols-outlined text-[1.1rem]">delete_forever</span>Delete permanently</a>
+    <div class="relative">
+      <button class="btn-icon !size-8" type="button" title="Bulk actions" data-mf-bulk-dropdown aria-label="Bulk actions">
+        <span class="material-symbols-outlined text-[1.1rem]">more_vert</span>
+      </button>
+      <div class="absolute right-0 top-10 hidden w-56 rounded-xl border border-outline-variant bg-surface p-2 shadow-lg" data-mf-bulk-menu>
+        <div class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Selected: <span data-mf-selected-count>0</span></div>
+        <div class="my-1 h-px bg-outline-variant"></div>
+        <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="read"><span class="material-symbols-outlined text-[1.1rem]">mark_email_read</span>Mark read</a>
+        <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="unread"><span class="material-symbols-outlined text-[1.1rem]">mark_email_unread</span>Mark unread</a>
+        <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="star"><span class="material-symbols-outlined text-[1.1rem]">star</span>Star</a>
+        <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="flag"><span class="material-symbols-outlined text-[1.1rem]">flag</span>Flag</a>
+        <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="archive"><span class="material-symbols-outlined text-[1.1rem]">archive</span>Archive</a>
+        <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface transition-colors hover:bg-surface-container" href="#" data-mf-bulk-action="trash"><span class="material-symbols-outlined text-[1.1rem]">delete</span>Move to trash</a>
+        <a class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-danger transition-colors hover:bg-danger/10" href="#" data-mf-bulk-action="delete"><span class="material-symbols-outlined text-[1.1rem]">delete_forever</span>Delete permanently</a>
+      </div>
     </div>
   </div>
 </div>

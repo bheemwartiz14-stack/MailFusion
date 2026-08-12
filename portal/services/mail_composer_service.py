@@ -297,6 +297,15 @@ class MailComposerService:
         )
         return sent
 
+    def send_reply(self, request, user, original, *, body_html, body_text,
+                   subject=None, attachments=None, as_reply_all=False):
+        """Send a reply / reply-all to an original message."""
+        return self._send_reply(
+            request, user, original,
+            body_html=body_html, body_text=body_text,
+            subject=subject, attachments=attachments, as_reply_all=as_reply_all,
+        )
+
     def save_reply_draft(self, request, user, original, *, body_html, body_text,
                          subject=None, attachments=None, as_reply_all=False):
         account, token, raw = self._reply_base(request, user, original, as_reply_all=as_reply_all)

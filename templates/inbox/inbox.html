@@ -4,70 +4,50 @@
 
 {% block title %}Unified Inbox → {{ app_name }}{% endblock %}
 
+{% block section_class %}flex h-full min-h-0 min-w-0 flex-col overflow-hidden{% endblock %}
+
 {% block content %}
-<div class="animate-fade-up flex h-full flex-col">
-  <!-- Header -->
-  <div class="mb-4 flex items-center justify-between gap-3">
+<div class="animate-fade-up flex min-h-0 flex-1 flex-col">
+  <!-- Page header -->
+  <div class="flex items-end justify-between gap-4 pb-4">
     <div>
-      <h1 class="text-xl font-bold tracking-tight text-on-surface">Inbox</h1>
-      <p class="text-sm text-on-surface-variant">Every mailbox, every message — one feed.</p>
+      <p class="mt-1 text-sm text-on-surface-variant">Every mailbox, every message — one feed.</p>
     </div>
-    <div class="flex items-center gap-2">
-      <form method="get" action="{% url 'inbox' %}" class="relative">
-        <input type="text" name="q" value="{{ filters.q|default:'' }}" placeholder="Search mail…"
-          class="input w-56 !py-2 pl-9 sm:w-72" aria-label="Search mail">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[1.1rem] text-on-surface-variant">search</span>
-      </form>
-      <button type="button" hx-get="{% url 'inbox_unread' %}" hx-target="#mf-folder-counts" hx-swap="innerHTML"
-        class="btn-icon" title="Refresh" aria-label="Refresh">
-        <span class="material-symbols-outlined text-[1.1rem]">refresh</span>
-      </button>
+    <div class="hidden shrink-0 items-center gap-2 sm:flex">
+      <span class="badge-neutral badge">{{ page_obj.paginator.count|default:0 }} messages</span>
     </div>
   </div>
 
-  <div class="grid min-h-0 flex-1 gap-4 xl:grid-cols-12">
+  <!-- Gmail-style: slim sidebar + full-width message list -->
+  <div class="grid min-h-0 flex-1 gap-px overflow-hidden rounded-2xl border border-outline-variant bg-outline-variant shadow-sm xl:grid-cols-12">
     <!-- Sidebar (folder navigation) -->
-    <aside id="mf-folder-counts" class="hidden h-fit rounded-2xl border border-outline-variant bg-surface p-4 shadow-sm xl:col-span-2 xl:block">
+    <aside id="mf-folder-counts" class="hidden overflow-y-auto bg-surface p-4 xl:col-span-2 xl:block">
       {% include "inbox/partials/sidebar.html" %}
     </aside>
 
     <!-- Message list column -->
-    <section class="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm xl:col-span-4">
+    <section class="flex min-h-0 flex-col overflow-hidden bg-surface xl:col-span-10">
       <div class="border-b border-outline-variant">
         {% include "inbox/partials/toolbar.html" %}
       </div>
-      <div class="border-b border-outline-variant">
+      <div class="transition-all duration-300">
         {% include "inbox/partials/bulk_bar.html" %}
       </div>
       <div class="flex-1 overflow-y-auto" data-mf-inbox-scroll>
-        <div id="mf-email-list">
+        <div id="mf-email-list" class="divide-y divide-outline-variant/50">
           {% if emails %}
             {% for email in emails %}
               {% include "inbox/partials/email_row.html" with email=email mode="inbox" %}
             {% endfor %}
-          {% include "partials/pagination.html" %}
           {% else %}
           <div class="flex flex-col items-center justify-center px-4 py-16 text-center">
-            <span class="mb-3 material-symbols-outlined text-[2.5rem] text-outline">inbox</span>
+            <div class="mb-3 flex size-14 items-center justify-center rounded-2xl bg-surface-container">
+              <span class="material-symbols-outlined text-2xl text-outline">inbox</span>
+            </div>
             <h4 class="text-base font-semibold text-on-background">No messages</h4>
-            <p class="mt-1 text-sm text-outline">Nothing here yet — new mail will appear automatically.</p>
+            <p class="mt-1 max-w-xs text-sm text-outline">Nothing here yet — new mail will appear automatically.</p>
           </div>
           {% endif %}
-        </div>
-      </div>
-    </section>
-
-    <!-- Reading pane -->
-    <section class="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm xl:col-span-6">
-      <div id="mf-preview-loading" class="htmx-indicator flex flex-col items-center justify-center py-24 text-center">
-        <div class="skeleton mb-5 size-14 rounded-full"></div>
-        <div class="skeleton h-4 w-40"></div>
-      </div>
-      <div id="mf-email-preview" class="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div class="flex flex-1 flex-col items-center justify-center px-6 text-center">
-          <span class="mb-3 material-symbols-outlined text-[3rem] text-outline/60">drafts</span>
-          <h3 class="text-base font-semibold text-on-surface">Select a message</h3>
-          <p class="mt-1 max-w-xs text-sm text-on-surface-variant">Click any message in the list to preview it here without leaving your inbox.</p>
         </div>
       </div>
     </section>

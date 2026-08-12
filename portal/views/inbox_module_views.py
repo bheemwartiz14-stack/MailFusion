@@ -31,7 +31,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.views import View
 
-from portal.base_view import PortalView
+from portal.base_view import PortalView, build_shell_context, shell_user
 from portal.repositories import MicrosoftAuthRepository
 from portal.services import (
     AttachmentService,
@@ -39,6 +39,7 @@ from portal.services import (
     MailComposerService,
 )
 from portal.services.email_services import MailActionError
+from portal.services.graph_service import GraphApiError
 from portal.services.mail_composer_service import MailComposeError
 from portal.utils.html import sanitize_html
 
@@ -167,29 +168,36 @@ class InboxView(LoginRequiredMixin, PortalView):
     active_page = "inbox"
 
     def get(self, request):
-        service = EmailService()
-        folder = request.GET.get("folder", "all")
-        filters = _parse_filters(request, folder=folder)
-        filters.setdefault("include_drafts", folder.lower() == "drafts")
-
-        emails = service.list_messages(request.user, **filters)
-        page_obj = Paginator(emails, _inbox_page_size(request)).get_page(request.GET.get("page"))
         context = self.get_context_data()
-        context.update(
-            emails=page_obj.object_list,
-            page_obj=page_obj,
-            folder=folder,
-            filters=filters,
-            folders=service.folder_counts(request.user),
-            accounts=service.list_accounts(request.user),
-            categories=service.list_categories(request.user),
-            tags=service.list_tags(request.user),
-            extra_querystring=_page_query(request),
-            page_size_options=PAGE_SIZE_OPTIONS,
-            page_size=PAGE_SIZE,
-            now=timezone.now(),
-        )
+        context.update(_inbox_context(request))
         return render(request, self.template_name, context)
+
+
+def _inbox_context(request, **extra):
+    """Build the shared full-page inbox context (list, sidebar, filters)."""
+    service = EmailService()
+    folder = request.GET.get("folder", "all")
+    filters = _parse_filters(request, folder=folder)
+    filters.setdefault("include_drafts", folder.lower() == "drafts")
+
+    emails = service.list_messages(request.user, **filters)
+    page_obj = Paginator(emails, _inbox_page_size(request)).get_page(request.GET.get("page"))
+    context = {
+        "emails": page_obj.object_list,
+        "page_obj": page_obj,
+        "folder": folder,
+        "filters": filters,
+        "folders": service.folder_counts(request.user),
+        "accounts": service.list_accounts(request.user),
+        "categories": service.list_categories(request.user),
+        "tags": service.list_tags(request.user),
+        "extra_querystring": _page_query(request),
+        "page_size_options": PAGE_SIZE_OPTIONS,
+        "page_size": PAGE_SIZE,
+        "now": timezone.now(),
+    }
+    context.update(extra)
+    return context
 
 class EmailListView(LoginRequiredMixin, View):
     """HTMX partial: a page of email rows (numbered pagination)."""
@@ -216,7 +224,11 @@ class EmailListView(LoginRequiredMixin, View):
 
 
 class EmailPreviewPartialView(LoginRequiredMixin, View):
-    """HTMX partial: a compact email preview rendered in the inbox reading pane."""
+    """HTMX partial: a compact email preview rendered in the inbox reading pane.
+
+    HTMX requests return just the reading-pane fragment; a plain page load
+    returns the full inbox UI with the message opened in the reading pane.
+    """
 
     def get(self, request, email_id):
         service = EmailService()
@@ -237,7 +249,54 @@ class EmailPreviewPartialView(LoginRequiredMixin, View):
             "attachments": email.attachments.all(),
             "now": timezone.now(),
         }
-        return render(request, "inbox/partials/email_preview.html", context)
+
+        if request.headers.get("HX-Request") == "true":
+            return render(request, "inbox/partials/inbox.html", context)
+
+        full = _inbox_context(request, initial_preview=True, **context)
+        full.update(build_shell_context(
+            title=email.subject or "(no subject)",
+            breadcrumbs=[{"label": "Unified Inbox", "url": reverse("inbox")},
+                         {"label": email.subject or "(no subject)"}],
+            active_page="inbox",
+        ))
+        full["current_user"] = shell_user(request.user)
+        return render(request, "inbox/inbox.html", full)
+
+    def post(self, request, email_id):
+        """POST: send a reply / reply-all to the message identified by url."""
+
+        if not _rate_limited(request):
+            return HttpResponse("Too many requests", status=429)
+
+        service = EmailService()
+        original = service.get_message(request.user, email_id)
+        if original is None:
+            messages.error(request, "The message you are replying to could not be found.")
+            return redirect("inbox")
+
+        mode = request.POST.get("mode", "reply")
+        composer = MailComposerService()
+        data = {
+            "body_html": request.POST.get("body_html", ""),
+            "body_text": request.POST.get("body_text", ""),
+            "subject": request.POST.get("subject", "").strip(),
+        }
+        attachments = _read_uploaded_files(request)
+        try:
+            composer.send_reply(
+                request, request.user, original,
+                body_html=data["body_html"], body_text=data["body_text"],
+                subject=data["subject"], attachments=attachments,
+                as_reply_all=(mode == "reply_all"),
+            )
+            messages.success(request, "Reply sent.")
+        except (MailComposeError, MailActionError, GraphApiError) as exc:
+            messages.error(request, str(exc))
+        except Exception:  # noqa: BLE001
+            logger.exception("Reply submit failed")
+            messages.error(request, "Could not send the reply. Please try again.")
+        return redirect("inbox")
 
 
 class EmailDetailView(LoginRequiredMixin, PortalView):
@@ -380,7 +439,7 @@ class ComposeSubmitView(LoginRequiredMixin, View):
                 as_reply_all=(mode == "reply_all"),
             )
             messages.success(request, "Reply sent.")
-        except (MailComposeError, MailActionError) as exc:
+        except (MailComposeError, MailActionError, GraphApiError) as exc:
             messages.error(request, str(exc))
         except Exception:  # noqa: BLE001
             logger.exception("Reply submit failed")

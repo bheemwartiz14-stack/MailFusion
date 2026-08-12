@@ -7,19 +7,6 @@
       <p class="mt-1 text-sm text-on-surface-variant">Real-time synchronization and deliverability health across all connected mailboxes.</p>
     </div>
     <div class="flex flex-wrap items-center gap-3">
-      <span class="inline-flex items-center gap-2 rounded-xl border border-outline-variant bg-surface px-3.5 py-2 text-sm font-medium text-on-surface shadow-sm">
-        <span class="relative flex size-2">
-          {% if status == "healthy" %}
-          <span class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60"></span>
-          <span class="relative inline-flex size-2 rounded-full bg-success"></span>
-          {% elif status == "degraded" %}
-          <span class="inline-flex size-2 rounded-full bg-warning"></span>
-          {% else %}
-          <span class="inline-flex size-2 rounded-full bg-error"></span>
-          {% endif %}
-        </span>
-        <span class="capitalize">{{ status }}</span>
-      </span>
       <a href="{% url 'sync_dashboard' %}" class="btn-secondary">
         <span class="material-symbols-outlined text-[1.05rem]">monitor_heart</span>System Monitor
       </a>
@@ -46,106 +33,6 @@
       </div>
     </div>
     {% endfor %}
-  </div>
-
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-    <!-- System health -->
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">System health</h2>
-        <span class="badge-success"><span class="material-symbols-outlined text-xs">monitor_heart</span>Operational</span>
-      </div>
-      <div class="card-body space-y-4">
-        <div>
-          <div class="mb-1.5 flex items-center justify-between text-sm">
-            <span class="text-on-surface-variant">Redis / Broker</span>
-            <span class="font-semibold text-on-surface">{% if broker %}Online{% else %}Offline{% endif %}</span>
-          </div>
-          <div class="progress"><div class="progress-bar {% if broker %}bg-success{% else %}bg-error{% endif %}" style="width:{% if broker %}100{% else %}10{% endif %}%"></div></div>
-        </div>
-        <div>
-          <div class="mb-1.5 flex items-center justify-between text-sm">
-            <span class="text-on-surface-variant">Task worker</span>
-            <span class="font-semibold text-on-surface">{{ worker.count|default:0 }} online</span>
-          </div>
-          <div class="progress"><div class="progress-bar {% if worker.active %}bg-success{% else %}bg-error{% endif %}" style="width:{% if worker.active %}100{% else %}10{% endif %}%"></div></div>
-        </div>
-        <div>
-          <div class="mb-1.5 flex items-center justify-between text-sm">
-            <span class="text-on-surface-variant">Attachments today</span>
-            <span class="font-semibold text-on-surface">{{ metrics.queued_jobs }} queued</span>
-          </div>
-          <div class="progress"><div class="progress-bar bg-primary" style="width:{% widthratio metrics.queued_jobs 10 100 %}%"></div></div>
-        </div>
-        <div>
-          <div class="mb-1.5 flex items-center justify-between text-sm">
-            <span class="text-on-surface-variant">Failed jobs</span>
-            <span class="font-semibold text-on-surface">{{ metrics.failed_jobs }}</span>
-          </div>
-          <div class="progress"><div class="progress-bar {% if metrics.failed_jobs %}bg-error{% else %}bg-success{% endif %}" style="width:{% if metrics.failed_jobs %}100{% else %}12{% endif %}%"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick actions -->
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">Quick actions</h2>
-      </div>
-      <div class="card-body">
-        <div class="grid grid-cols-2 gap-3">
-          <a href="{% url 'accounts' %}" class="flex flex-col items-center gap-2 rounded-2xl border border-outline-variant bg-surface p-5 text-center transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft hover:shadow-md">
-            <span class="material-symbols-outlined text-[1.4rem] text-primary">account_tree</span>
-            <span class="text-sm font-medium text-on-surface">Accounts</span>
-          </a>
-          <a href="{% url 'inbox' %}" class="flex flex-col items-center gap-2 rounded-2xl border border-outline-variant bg-surface p-5 text-center transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft hover:shadow-md">
-            <span class="material-symbols-outlined text-[1.4rem] text-info">mail</span>
-            <span class="text-sm font-medium text-on-surface">Unified Inbox</span>
-          </a>
-          <a href="{% url 'accounts_connect' %}" class="flex flex-col items-center gap-2 rounded-2xl border border-outline-variant bg-surface p-5 text-center transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft hover:shadow-md">
-            <span class="material-symbols-outlined text-[1.4rem] text-success">add</span>
-            <span class="text-sm font-medium text-on-surface">Connect account</span>
-          </a>
-          <a href="{% url 'sync_dashboard' %}" class="block">
-            <div class="flex flex-col items-center gap-2 rounded-2xl border border-outline-variant bg-surface p-5 text-center transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft hover:shadow-md">
-              <span class="material-symbols-outlined text-[1.4rem] text-warning">sync_alt</span>
-              <span class="text-sm font-medium text-on-surface">Live Monitor</span>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sync metrics -->
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">Today at a glance</h2>
-      </div>
-      <div class="card-body">
-        <ul class="divide-y divide-outline-variant">
-          <li class="flex items-center justify-between gap-3 py-2.5">
-            <span class="text-sm text-on-surface-variant">Emails processed</span>
-            <span class="text-sm font-semibold text-on-surface">{{ metrics.emails_processed_today }}</span>
-          </li>
-          <li class="flex items-center justify-between gap-3 py-2.5">
-            <span class="text-sm text-on-surface-variant">Syncs run</span>
-            <span class="text-sm font-semibold text-on-surface">{{ metrics.syncs_today }}</span>
-          </li>
-          <li class="flex items-center justify-between gap-3 py-2.5">
-            <span class="text-sm text-on-surface-variant">Avg sync duration</span>
-            <span class="text-sm font-semibold text-on-surface">{{ metrics.avg_sync_seconds }}s</span>
-          </li>
-          <li class="flex items-center justify-between gap-3 py-2.5">
-            <span class="text-sm text-on-surface-variant">Needs re-auth</span>
-            <span class="text-sm font-semibold {% if metrics.needs_reauthorization %}text-error{% else %}text-on-surface{% endif %}">{{ metrics.needs_reauthorization }}</span>
-          </li>
-          <li class="flex items-center justify-between gap-3 py-2.5">
-            <span class="text-sm text-on-surface-variant">Unread notifications</span>
-            <span class="text-sm font-semibold text-on-surface">{{ metrics.unread_notifications }}</span>
-          </li>
-        </ul>
-      </div>
-    </div>
   </div>
 </div>
 {% endblock %}

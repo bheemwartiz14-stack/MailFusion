@@ -476,6 +476,38 @@
     }
 }
 
+@layer components {
+    /* ================= Unified Inbox ================= */
+    .email-list-item.unread {
+        @apply bg-primary/5;
+    }
+    .email-list-item.unread .mf-sender {
+        @apply !font-bold !text-on-background;
+    }
+    .email-list-item.selected {
+        @apply bg-primary/10;
+    }
+    .email-list-item .material-symbols-outlined[data-weight="fill"] {
+        font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    .text-body-md {
+        font-size: 0.875rem;
+    }
+    .font-inherit {
+        font-family: inherit;
+    }
+
+    /* HTMX loading indicators are hidden unless a request is in flight */
+    .htmx-indicator {
+        opacity: 0;
+        transition: opacity 200ms ease-in;
+    }
+    .htmx-request .htmx-indicator,
+    .htmx-request.htmx-indicator {
+        opacity: 1;
+    }
+}
+
 @layer utilities {
     .bg-primary-5 {
         background-color: color-mix(in srgb, var(--color-primary) 5%, transparent);

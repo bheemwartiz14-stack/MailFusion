@@ -31,7 +31,7 @@
     <div class="flex min-w-0 flex-1 flex-col">
       {% block navbar %}{% include "partials/navbar.html" %}{% endblock %}
       <main class="flex-1 overflow-y-auto">
-        <section class="animate-fade-in mx-auto w-full max-w-[1440px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        <section class="animate-fade-in mx-auto w-full max-w-[1440px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 {% block section_class %}{% endblock %}">
           {% include "partials/breadcrumbs.html" %}
           {% include "partials/messages.html" %}
           {% block page_header %}

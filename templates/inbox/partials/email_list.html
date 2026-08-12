@@ -1,10 +1,9 @@
 {% load ui_extras %}
 {% if emails %}
-<div data-mf-email-list>
+<div id="mf-email-list" class="divide-y divide-outline-variant/50" data-mf-email-list>
   {% for email in emails %}
     {% include "inbox/partials/email_row.html" with email=email mode=mode|default:"inbox" %}
   {% endfor %}
-  {% include "partials/pagination.html" %}
 </div>
 {% else %}
 <div class="flex flex-col items-center justify-center px-4 py-16 text-center">

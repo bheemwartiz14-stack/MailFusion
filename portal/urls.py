@@ -56,6 +56,7 @@ urlpatterns = [
     path("inbox/actions/", EmailActionView.as_view(), name="email_action"),
     path("inbox/emails/<uuid:email_id>/", EmailDetailView.as_view(), name="email_detail"),
     path("inbox/emails/<uuid:email_id>/preview/", EmailPreviewPartialView.as_view(), name="email_preview"),
+    path("inbox/emails/<uuid:email_id>/reply/", EmailPreviewPartialView.as_view(), name="reply"),
     path("inbox/emails/<uuid:email_id>/download-eml/", EmailDownloadEmlView.as_view(), name="email_download_eml"),
     path("inbox/emails/<uuid:email_id>/thread/", EmailThreadPartialView.as_view(), name="email_thread"),
     path("inbox/emails/<uuid:email_id>/headers/", EmailHeadersPartialView.as_view(), name="email_headers"),

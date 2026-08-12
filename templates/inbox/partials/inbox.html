@@ -1,20 +1,23 @@
 {% load ui_extras %}
 <div class="flex h-full flex-col" data-mf-preview>
-  <!-- Preview header + actions -->
+  <!-- Preview header -->
   <div class="flex items-center justify-between gap-3 border-b border-outline-variant px-5 py-3">
     <h2 class="truncate text-base font-bold tracking-tight text-on-surface">{{ email.subject|default:"(no subject)" }}</h2>
+    <a class="link-primary shrink-0 text-xs font-semibold" href="{% url 'email_detail' email.pk %}">Open full view</a>
   </div>
 
   <!-- Scrollable body -->
   <div class="flex-1 overflow-y-auto">
     <!-- Envelope -->
     <div class="flex flex-wrap items-center gap-3 border-b border-outline-variant px-5 py-4">
-      <div class="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold uppercase text-on-primary">{{ email.from_name|default:email.from_email|initials }}</div>
+      <div class="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover text-sm font-semibold uppercase text-on-primary shadow-sm">{{ email.from_name|default:email.from_email|initials }}</div>
       <div class="min-w-0 flex-1">
-        <div class="truncate font-semibold text-on-surface">{{ email.from_name|default:"Unknown sender" }}
+        <div class="truncate font-semibold text-on-surface">
+          {{ email.from_name|default:"Unknown sender" }}
           {% if email.from_email %}<span class="font-normal text-on-surface-variant">&lt;{{ email.from_email }}&gt;</span>{% endif %}
         </div>
-        <div class="truncate text-sm text-on-surface-variant">to
+        <div class="truncate text-sm text-on-surface-variant">
+          to
           {% for r in email.recipients.all %}{% if r.recipient_type == 'to' %}{{ r.name|default:r.address }}{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}
           {% if email.ccRecipients %}<span class="material-symbols-outlined align-middle text-[1rem]">group</span> Cc{% endif %}
         </div>
@@ -46,9 +49,9 @@
       </div>
       <div class="flex flex-wrap gap-3">
         {% for attachment in attachments %}
-        <div class="flex min-w-[220px] items-center gap-3 rounded-xl border border-outline-variant bg-surface-container p-3">
+        <div class="flex min-w-[220px] items-center gap-3 rounded-xl border border-outline-variant bg-surface-container/60 p-3 transition-colors hover:bg-surface-container">
           {% with type=attachment|display_type %}
-          <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary">
+          <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <span class="material-symbols-outlined text-[1.1rem]">{% if type == 'image' %}image{% elif type == 'pdf' %}picture_as_pdf{% elif type == 'word' %}description{% elif type == 'excel' %}table_chart{% elif type == 'slides' %}slideshow{% else %}attach_file{% endif %}</span>
           </span>
           {% endwith %}
