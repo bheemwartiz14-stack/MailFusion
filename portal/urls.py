@@ -11,6 +11,7 @@ from portal.views.inbox_module_views import (
     EmailPreviewPartialView, EmailThreadPartialView, InboxView, UnreadCountPartialView,
 )
 from portal.views.notification_views import NotificationActionView, NotificationBulkActionView, NotificationsView
+from portal.views.sync import sync_api
 from portal.views.system_monitor_views import (
     AccountDetailView, HealthPartialView, OAuthStatusView, QueueStatusView,
     SyncLogDetailView, SyncLogsPartialView, SyncLogsView, SystemHealthView,
@@ -21,6 +22,7 @@ from portal.views.system_monitor_views import (
 
 
 urlpatterns = [
+     path("api/sync/", sync_api, name="sync-api"),
     # auth - Django built-in views, custom Bootstrap templates
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
