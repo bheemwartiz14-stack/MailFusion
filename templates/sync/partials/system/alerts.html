@@ -1,7 +1,7 @@
 {% load ui_extras %}
 
-<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
-  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4">
     <div>
       <h2 class="card-title">Alerts</h2>
       <p class="prose-muted mt-0.5">{{ alerts|length }} active</p>
@@ -21,7 +21,7 @@
           {% elif alert.severity == 'warning' %}text-warning
           {% else %}text-success{% endif %}"></i>
         <div class="min-w-0 flex-1">
-          <p class="flex items-center gap-2 text-sm font-semibold text-on-surface dark:text-zinc-200">
+          <p class="flex items-center gap-2 text-sm font-semibold text-on-surface">
             {{ alert.title }}
             <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide
               {% if alert.severity == 'critical' %}bg-danger/10 text-danger

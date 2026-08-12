@@ -93,25 +93,6 @@ function executeBulkAction(action: string): void {
   }
 }
 
-function openComposer(): void {
-  const modal = document.getElementById("mfComposeModal")
-  if (modal) {
-    modal.classList.remove("hidden")
-    return
-  }
-  // The modal may be delivered via HTMX into a host container.
-  const host = document.getElementById("mf-compose-modal-host")
-  const htmx = (window as any).htmx
-  if (host && htmx && typeof htmx.ajax === "function") {
-    htmx.ajax("GET", "/inbox/compose/modal/", { target: host, swap: "innerHTML" })
-  }
-}
-
-function closeComposer(): void {
-  const modal = document.getElementById("mfComposeModal")
-  if (modal) modal.classList.add("hidden")
-}
-
 function init(): void {
   refreshUI()
 
@@ -151,8 +132,16 @@ function init(): void {
       return
     }
 
-    if ((e.target as HTMLElement).closest("[data-mf-open-compose]")) {
-      openComposer()
+    const replyAll = (e.target as HTMLElement).closest<HTMLElement>("[data-mf-reply-toggle][data-mf-reply-all]")
+    if (replyAll) {
+      const form = replyAll.closest<HTMLFormElement>("[data-mf-reply-form]")
+      if (!form) return
+      const mode = form.querySelector<HTMLInputElement>('input[name="mode"]')
+      const isAll = mode?.value === "reply_all"
+      if (mode) mode.value = isAll ? "reply" : "reply_all"
+      // Swap label text (last text node inside the button).
+      const label = replyAll.querySelector("span:last-of-type") || replyAll
+      label.textContent = isAll ? " Reply" : " Reply all"
       return
     }
   })
@@ -173,7 +162,7 @@ function init(): void {
   })
 }
 
-const inbox = { init, openComposer, closeComposer, refreshUI, showToast }
+const inbox = { init, refreshUI, showToast }
 ;(window as any).InboxFusion = (window as any).InboxFusion || {}
 ;(window as any).InboxFusion.inbox = inbox
 

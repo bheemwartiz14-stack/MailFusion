@@ -1,7 +1,7 @@
 {% load ui_extras %}
 
-<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
-  <div class="border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors">
+  <div class="border-b border-outline-variant px-5 py-4">
     <h2 class="card-title">Metrics</h2>
     <p class="prose-muted mt-0.5">Rollup of operational key figures</p>
   </div>
@@ -13,7 +13,7 @@
     </div>
     <div>
       <p class="text-xs font-medium text-on-surface-variant">Avg Response Time</p>
-      <p class="mt-1 text-xl font-extrabold text-on-surface dark:text-zinc-100">{{ metrics_cards.avg_response_ms }}ms</p>
+      <p class="mt-1 text-xl font-extrabold text-on-surface">{{ metrics_cards.avg_response_ms }}ms</p>
     </div>
     <div>
       <p class="text-xs font-medium text-on-surface-variant">Daily Emails</p>
@@ -21,7 +21,7 @@
     </div>
     <div>
       <p class="text-xs font-medium text-on-surface-variant">Queue Speed</p>
-      <p class="mt-1 text-xl font-extrabold text-on-surface dark:text-zinc-100">{{ metrics_cards.queue_speed }}/min</p>
+      <p class="mt-1 text-xl font-extrabold text-on-surface">{{ metrics_cards.queue_speed }}/min</p>
     </div>
     <div>
       <p class="text-xs font-medium text-on-surface-variant">Worker Utilization</p>

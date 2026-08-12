@@ -14,8 +14,8 @@
   "scripts": {
     "css:dev": "bunx @tailwindcss/cli -i ./static_src/mailfusion.css -o ./portal/static/css/app.css --watch",
     "css:build": "bunx @tailwindcss/cli -i ./static_src/mailfusion.css -o ./portal/static/css/app.css --minify",
-    "js:dev": "bun build ./static_src/mailfusion.ts ./static_src/inbox.ts ./static_src/compose.ts --outdir ./portal/static/js --watch",
-    "js:build": "bun build ./static_src/mailfusion.ts ./static_src/inbox.ts ./static_src/compose.ts --outdir ./portal/static/js --minify",
+    "js:dev": "bun build ./static_src/mailfusion.ts ./static_src/inbox.ts --outdir ./portal/static/js --watch",
+    "js:build": "bun build ./static_src/mailfusion.ts ./static_src/inbox.ts --outdir ./portal/static/js --minify",
     "dev": "bun run css:dev & bun run js:dev",
     "watch": "bun run css:dev & bun run js:dev",
     "build": "bun run css:build && bun run js:build"

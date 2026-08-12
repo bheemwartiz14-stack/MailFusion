@@ -6,10 +6,9 @@ from portal.views.dashboard_view import DashboardView
 from portal.views.error_views import error_403, error_404, error_500, maintenance
 from portal.views.inbox_module_views import (
     AttachmentDownloadAllView, AttachmentDownloadView, AttachmentPreviewView,
-    ComposeAttachmentRemoveView, ComposeAttachmentUploadView, ComposeAutosaveView,
-    ComposeModalView, ComposeSubmitView, ComposeView, DraftsView, EmailActionView,
+    ComposeSubmitView, EmailActionView,
     EmailDetailView, EmailDownloadEmlView, EmailHeadersPartialView, EmailListView,
-    EmailPreviewPartialView,     EmailThreadPartialView, InboxView, SearchView, SentItemsView, UnreadCountPartialView,
+    EmailPreviewPartialView, EmailThreadPartialView, InboxView, UnreadCountPartialView,
 )
 from portal.views.notification_views import NotificationActionView, NotificationBulkActionView, NotificationsView
 from portal.views.system_monitor_views import (
@@ -51,9 +50,6 @@ urlpatterns = [
     # emails - unified inbox module
     path("inbox/", InboxView.as_view(), name="inbox"),
     path("inbox/list/", EmailListView.as_view(), name="inbox_list"),
-    path("inbox/sent/", SentItemsView.as_view(), name="sent_items"),
-    path("inbox/drafts/", DraftsView.as_view(), name="drafts"),
-    path("inbox/search/", SearchView.as_view(), name="inbox_search"),
     path("inbox/unread/", UnreadCountPartialView.as_view(), name="inbox_unread"),
     path("inbox/actions/", EmailActionView.as_view(), name="email_action"),
     path("inbox/emails/<uuid:email_id>/", EmailDetailView.as_view(), name="email_detail"),
@@ -64,18 +60,8 @@ urlpatterns = [
     path("inbox/emails/<uuid:email_id>/attachments/download-all/", AttachmentDownloadAllView.as_view(), name="attachment_download_all"),
     path("inbox/emails/<uuid:email_id>/attachments/<uuid:attachment_id>/download/", AttachmentDownloadView.as_view(), name="attachment_download"),
     path("inbox/emails/<uuid:email_id>/attachments/<uuid:attachment_id>/preview/", AttachmentPreviewView.as_view(), name="attachment_preview"),
-    # compose / reply / forward
-    path("compose/", ComposeView.as_view(), name="compose"),
-    path("compose/<uuid:draft_id>/", ComposeView.as_view(), name="compose_draft"),
+    # compose / reply
     path("compose/submit/", ComposeSubmitView.as_view(), name="compose_submit"),
-    path("compose/autosave/", ComposeAutosaveView.as_view(), name="compose_autosave"),
-    path("compose/upload/", ComposeAttachmentUploadView.as_view(), name="compose_upload"),
-    path("compose/drafts/<uuid:draft_id>/attachments/<path:attachment_id>/remove/", ComposeAttachmentRemoveView.as_view(), name="compose_attachment_remove"),
-    path("compose/modal/", ComposeModalView.as_view(), name="compose_modal"),
-    path("inbox/emails/<uuid:email_id>/reply/", ComposeModalView.as_view(), kwargs={"mode": "reply"}, name="reply_modal"),
-    path("inbox/emails/<uuid:email_id>/reply-all/", ComposeModalView.as_view(), kwargs={"mode": "reply_all"}, name="reply_all_modal"),
-    path("inbox/emails/<uuid:email_id>/forward/", ComposeModalView.as_view(), kwargs={"mode": "forward"}, name="forward_modal"),
-    path("compose/<uuid:email_id>/<str:mode>/", ComposeView.as_view(), name="compose_mode"),
     # notifications
     path("notifications/", NotificationsView.as_view(), name="notifications"),
     path("notifications/<uuid:notification_id>/toggle/", NotificationActionView.as_view(), kwargs={"action": "toggle"}, name="notification_toggle"),

@@ -215,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initDropdowns();
   initModals();
   initSidebar();
-  initThemeToggle();
 
   document.body.addEventListener('htmx:afterRequest', function (e) {
     if (e.detail.target.id === 'accounts-toast' && e.detail.successful) {
@@ -224,25 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-
-function initThemeToggle() {
-  const toggle = document.querySelector('[data-mf-theme]');
-  if (!toggle) return;
-  const moon = toggle.querySelector('[data-lucide="moon"]');
-  const sun = toggle.querySelector('[data-lucide="sun"]');
-  const syncIcons = () => {
-    const isDark = document.documentElement.classList.contains('dark');
-    if (moon) moon.classList.toggle('hidden', isDark);
-    if (sun) sun.classList.toggle('hidden', !isDark);
-  };
-  syncIcons();
-  toggle.addEventListener('click', () => {
-    const dark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('mf-theme', dark ? 'dark' : 'light');
-    syncIcons();
-    document.dispatchEvent(new CustomEvent('mf:themechange', { detail: { dark } }));
-  });
-}
 
 // ---------------------------------------------------------------------------
 // Trigger a manual sync (accounts page) via AJAX and surface the result as a

@@ -1,54 +1,14 @@
 {% load ui_extras %}
 
-<div class="mb-5">
-  <button class="btn-primary btn-block" type="button" data-mf-open-compose="new" title="New message">
-    <span class="material-symbols-outlined text-[1.1rem]">edit</span>New Message
-  </button>
-</div>
-
 <div class="space-y-0.5">
-  <h3 class="mb-2 px-3 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant/60">System</h3>
-  {% with inbox=folders.Inbox drafts=folders.Drafts sent=folders.SentItems archive=folders.Archive %}
-  <a href="{% url 'inbox' %}{% if folder != 'all' %}?folder=all{% endif %}"
+  <h3 class="mb-2 px-3 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant/60">Mailbox</h3>
+  {% with inbox=folders.Inbox %}
+  <a href="{% url 'inbox' %}"
      class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors {% if folder == 'all' or folder == 'inbox' or not folder %}bg-primary-soft font-medium text-primary ring-1 ring-primary/10{% else %}text-on-surface-variant hover:bg-surface-container{% endif %}"
      data-folder="all">
     <span class="material-symbols-outlined {% if folder == 'all' or folder == 'inbox' or not folder %}text-primary{% endif %}">inbox</span>
     <span class="flex-1 text-sm">Inbox</span>
-    {% if inbox.unread %}<span class="text-xs font-bold">{{ inbox.unread }}</span>{% endif %}
-  </a>
-
-  <a href="{% url 'inbox' %}?folder=unread"
-     class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors {% if folder == 'unread' %}bg-primary-soft font-medium text-primary ring-1 ring-primary/10{% else %}text-on-surface-variant hover:bg-surface-container{% endif %}" data-folder="unread">
-    <span class="material-symbols-outlined {% if folder == 'unread' %}text-primary{% endif %}">mark_email_unread</span>
-    <span class="flex-1 text-sm">Unread</span>
-    {% if inbox.unread %}<span class="text-xs font-bold">{{ inbox.unread }}</span>{% endif %}
-  </a>
-
-  <a href="{% url 'sent_items' %}"
-     class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors {% if folder == 'sent' %}bg-primary-soft font-medium text-primary ring-1 ring-primary/10{% else %}text-on-surface-variant hover:bg-surface-container{% endif %}" data-folder="sent">
-    <span class="material-symbols-outlined {% if folder == 'sent' %}text-primary{% endif %}">send</span>
-    <span class="flex-1 text-sm">Sent</span>
-    {% if sent.total %}<span class="text-xs font-bold">{{ sent.total }}</span>{% endif %}
-  </a>
-
-  <a href="{% url 'inbox' %}?folder=archive"
-     class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors {% if folder == 'archive' %}bg-primary-soft font-medium text-primary ring-1 ring-primary/10{% else %}text-on-surface-variant hover:bg-surface-container{% endif %}" data-folder="archive">
-    <span class="material-symbols-outlined {% if folder == 'archive' %}text-primary{% endif %}">archive</span>
-    <span class="flex-1 text-sm">Archive</span>
-    {% if archive.total %}<span class="text-xs font-bold">{{ archive.total }}</span>{% endif %}
-  </a>
-
-  <a href="{% url 'drafts' %}"
-     class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors {% if folder == 'drafts' %}bg-primary-soft font-medium text-primary ring-1 ring-primary/10{% else %}text-on-surface-variant hover:bg-surface-container{% endif %}" data-folder="drafts">
-    <span class="material-symbols-outlined {% if folder == 'drafts' %}text-primary{% endif %}">drafts</span>
-    <span class="flex-1 text-sm">Drafts</span>
-    {% if drafts.total %}<span class="text-xs font-bold">{{ drafts.total }}</span>{% endif %}
-  </a>
-
-  <a href="{% url 'inbox' %}?folder=trash"
-     class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors {% if folder == 'trash' %}bg-primary-soft font-medium text-primary ring-1 ring-primary/10{% else %}text-on-surface-variant hover:bg-surface-container{% endif %}" data-folder="trash">
-    <span class="material-symbols-outlined {% if folder == 'trash' %}text-primary{% endif %}">delete</span>
-    <span class="flex-1 text-sm">Trash</span>
+    {% if inbox.unread %}<span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">{{ inbox.unread }}</span>{% endif %}
   </a>
   {% endwith %}
 </div>

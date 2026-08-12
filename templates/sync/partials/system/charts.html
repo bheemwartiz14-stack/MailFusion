@@ -1,12 +1,12 @@
 {% load static %}
 
-<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
-  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4">
     <div>
       <h2 class="card-title">Synchronization Activity</h2>
       <p class="prose-muted mt-0.5">Sync runs grouped by status over the selected period</p>
     </div>
-    <div class="inline-flex items-center gap-1 rounded-xl border border-outline-variant bg-surface-container/50 p-1 dark:border-zinc-700 dark:bg-zinc-800" data-sys-range>
+    <div class="inline-flex items-center gap-1 rounded-xl border border-outline-variant bg-surface-container/50 p-1" data-sys-range>
       <button type="button" data-range="24h" class="sys-range-btn rounded-lg px-3 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:text-on-surface">24 Hours</button>
       <button type="button" data-range="7d" class="sys-range-btn rounded-lg px-3 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:text-on-surface">7 Days</button>
       <button type="button" data-range="30d" class="sys-range-btn rounded-lg px-3 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:text-on-surface">30 Days</button>

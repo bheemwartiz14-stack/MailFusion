@@ -1,6 +1,6 @@
 {% load ui_extras %}
 
-<div class="mf-kpi group relative overflow-hidden rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900" data-tone="{{ kpi.tone }}">
+<div class="mf-kpi group relative overflow-hidden rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg" data-tone="{{ kpi.tone }}">
   <div class="flex items-start justify-between">
     <span class="mf-kpi-icon grid size-11 shrink-0 place-items-center rounded-xl transition-transform duration-300 group-hover:scale-110">
       <i data-lucide="{{ kpi.icon }}" class="size-5"></i>
@@ -13,8 +13,8 @@
 
   <div class="mt-4 flex items-end justify-between gap-3">
     <div>
-      <p class="text-sm font-medium text-on-surface-variant dark:text-zinc-400">{{ kpi.label }}</p>
-      <p class="mt-1 text-3xl font-extrabold tracking-tight text-on-background dark:text-zinc-100">{{ kpi.value }}</p>
+      <p class="text-sm font-medium text-on-surface-variant">{{ kpi.label }}</p>
+      <p class="mt-1 text-3xl font-extrabold tracking-tight text-on-background">{{ kpi.value }}</p>
     </div>
     <div class="mf-kpi-spark flex h-10 items-end gap-1" aria-hidden="true">
       {% for h in kpi.spark %}

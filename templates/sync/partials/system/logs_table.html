@@ -1,7 +1,7 @@
 {% load ui_extras %}
 
-<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
-  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4">
     <div>
       <h2 class="card-title">Logs</h2>
       <p class="prose-muted mt-0.5">Consolidated event log channels</p>
@@ -9,7 +9,7 @@
     <button class="btn-secondary btn-sm" data-log-export title="Export logs as CSV"><i data-lucide="download" class="size-4"></i>Export CSV</button>
   </div>
 
-  <div class="border-b border-outline-variant px-5 py-3 dark:border-zinc-800">
+  <div class="border-b border-outline-variant px-5 py-3">
     <div class="flex flex-wrap items-center gap-2" data-sys-log-tabs>
       <button type="button" data-log-tab="audit" class="sys-log-tab rounded-lg px-3 py-1.5 text-xs font-semibold">Audit</button>
       <button type="button" data-log-tab="sync" class="sys-log-tab rounded-lg px-3 py-1.5 text-xs font-semibold">Synchronization</button>
@@ -24,7 +24,7 @@
 
   <div class="overflow-x-auto">
     <table class="w-full min-w-[720px]">
-      <thead class="border-b border-outline-variant bg-surface-container/50 dark:border-zinc-800 dark:bg-zinc-800/40">
+      <thead class="border-b border-outline-variant bg-surface-container/50">
         <tr>
           <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Timestamp</th>
           <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Level</th>
@@ -33,15 +33,15 @@
           <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-on-surface-variant">User</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-outline-variant dark:divide-zinc-800" data-sys-log-body>
+      <tbody class="divide-y divide-outline-variant" data-sys-log-body>
         {% for log in recent_syncs|slice:":8" %}
-        <tr class="transition-colors hover:bg-surface-container/50 dark:hover:bg-zinc-800/50" data-level="{% if log.status == 'failed' %}error{% else %}info{% endif %}">
+        <tr class="transition-colors hover:bg-surface-container/50" data-level="{% if log.status == 'failed' %}error{% else %}info{% endif %}">
           <td class="whitespace-nowrap px-5 py-3 text-xs text-on-surface-variant">{{ log.start_time|date:"Y-m-d H:i:s" }}</td>
           <td class="px-5 py-3">
             {% if log.status == 'failed' %}<span class="badge-danger">ERROR</span>{% else %}<span class="badge-info">INFO</span>{% endif %}
           </td>
-          <td class="px-5 py-3 text-sm text-on-surface dark:text-zinc-200">sync.engine</td>
-          <td class="max-w-xs truncate px-5 py-3 text-sm text-on-surface dark:text-zinc-200">
+          <td class="px-5 py-3 text-sm text-on-surface">sync.engine</td>
+          <td class="max-w-xs truncate px-5 py-3 text-sm text-on-surface">
             {% if log.status == 'failed' %}Sync failed for {{ log.account.email }}{% else %}Sync completed for {{ log.account.email }}{% endif %}
           </td>
           <td class="px-5 py-3 text-sm text-on-surface-variant">system</td>

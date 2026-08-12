@@ -6,15 +6,6 @@
 
 {% block page_actions %}
 <div class="flex flex-wrap items-center gap-2">
-  <a class="btn-secondary" href="{% url 'reply_modal' email.pk %}">
-    <span class="material-symbols-outlined text-[1.1rem]">reply</span><span>Reply</span>
-  </a>
-  <a class="btn-secondary" href="{% url 'reply_all_modal' email.pk %}">
-    <span class="material-symbols-outlined text-[1.1rem]">reply_all</span><span>Reply all</span>
-  </a>
-  <a class="btn-secondary" href="{% url 'forward_modal' email.pk %}">
-    <span class="material-symbols-outlined text-[1.1rem]">forward_to_inbox</span><span>Forward</span>
-  </a>
   <div class="relative">
     <button class="btn-icon" type="button" data-mf-menu-trigger aria-label="More actions"><span class="material-symbols-outlined">more_vert</span></button>
     <div class="absolute right-0 top-12 hidden w-56 rounded-xl border border-outline-variant bg-surface p-2 shadow-xl" data-mf-menu>

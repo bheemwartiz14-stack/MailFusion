@@ -2,14 +2,14 @@
 <div class="flex h-14 items-center justify-between gap-3 border-b border-outline-variant px-4">
   <div class="flex items-center gap-3">
     <input class="size-4 cursor-pointer rounded border-outline-variant text-primary focus:ring-primary/30" type="checkbox" id="mfSelectAll" data-mf-select-all aria-label="Select all on this page">
-    <h2 class="text-lg font-bold tracking-tight text-on-surface">
-      {% if folder == "sent" %}Sent{% elif folder == "drafts" %}Drafts{% elif folder == "search" %}Search{% else %}Inbox{% endif %}
-    </h2>
-    {% if total %}<span class="text-xs font-medium text-on-surface-variant">{{ total }}</span>{% endif %}
+    <h2 class="text-lg font-bold tracking-tight text-on-surface">Inbox</h2>
+    {% if page_obj.paginator.count %}<span class="text-xs font-medium text-on-surface-variant">{{ page_obj.paginator.count }}</span>{% endif %}
   </div>
 
   <div class="relative flex items-center gap-1">
     <button class="btn-icon !size-8" type="button" title="Bulk actions" data-mf-bulk-dropdown aria-label="Bulk actions">
+      <span class="material-symbols-outlined text-[1.1rem]">more_vert</span>
+    </button>
     <div class="absolute right-0 top-12 hidden w-56 rounded-xl border border-outline-variant bg-surface p-2 shadow-lg" data-mf-bulk-menu>
       <div class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Selected: <span data-mf-selected-count>0</span></div>
       <div class="my-1 h-px bg-outline-variant"></div>

@@ -354,12 +354,6 @@ EMAILS = [
 
 FOLDERS = [
     {"label": "Inbox", "icon": "bi-inbox", "count": 26, "url": "/inbox/"},
-    {"label": "Starred", "icon": "bi-star", "count": 7, "url": "/inbox/?folder=starred"},
-    {"label": "Sent", "icon": "bi-send", "count": 214, "url": "/inbox/?folder=sent"},
-    {"label": "Drafts", "icon": "bi-pencil", "count": 3, "url": "/inbox/?folder=drafts"},
-    {"label": "Archive", "icon": "bi-archive", "count": 1_204, "url": "/inbox/?folder=archive"},
-    {"label": "Spam", "icon": "bi-shield-exclamation", "count": 11, "url": "/inbox/?folder=spam"},
-    {"label": "Trash", "icon": "bi-trash", "count": 48, "url": "/inbox/?folder=trash"},
 ]
 
 ACTIVITY = [

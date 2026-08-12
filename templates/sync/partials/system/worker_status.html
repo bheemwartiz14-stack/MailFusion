@@ -1,7 +1,7 @@
 {% load ui_extras %}
 
-<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
-  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4">
     <div>
       <h2 class="card-title">Workers</h2>
       <p class="prose-muted mt-0.5">Celery consumers &amp; current activity</p>
@@ -11,15 +11,15 @@
     </span>
   </div>
 
-  <div class="divide-y divide-outline-variant dark:divide-zinc-800">
+  <div class="divide-y divide-outline-variant">
     {% for w in workers %}
-    <div class="group flex items-center gap-3 px-5 py-4 transition-colors hover:bg-surface-container/50 dark:hover:bg-zinc-800/40">
+    <div class="group flex items-center gap-3 px-5 py-4 transition-colors hover:bg-surface-container/50">
       <span class="relative grid size-9 shrink-0 place-items-center rounded-full {% if w.status == 'online' %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">
         <i data-lucide="cpu" class="size-4"></i>
-        {% if w.status == 'online' %}<span class="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success ring-2 ring-surface dark:ring-zinc-900"></span>{% endif %}
+        {% if w.status == 'online' %}<span class="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success ring-2 ring-surface"></span>{% endif %}
       </span>
       <div class="min-w-0 flex-1">
-        <p class="flex items-center gap-2 text-sm font-semibold text-on-surface dark:text-zinc-200">{{ w.name }}
+        <p class="flex items-center gap-2 text-sm font-semibold text-on-surface">{{ w.name }}
           <span class="text-xs font-medium {% if w.status == 'online' %}text-success{% else %}text-danger{% endif %}">{{ w.status }}</span>
         </p>
         <p class="truncate text-xs text-on-surface-variant">Current job: <span class="text-on-surface">{{ w.current_job }}</span></p>

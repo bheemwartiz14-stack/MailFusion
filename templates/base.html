@@ -58,13 +58,6 @@
   <script src="{% static 'js/vendor/htmx.min.js' %}"></script>
   <script src="{% static 'js/ui-components.js' %}"></script>
   <script>
-    // Apply persisted theme before paint to avoid flash.
-    (function () {
-      var saved = localStorage.getItem('mf-theme');
-      if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      }
-    })();
     // Initialise Lucide icons everywhere.
     document.addEventListener('DOMContentLoaded', function () {
       if (window.lucide && lucide.createIcons) { try { lucide.createIcons(); } catch (e) {} }

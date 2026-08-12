@@ -3,8 +3,6 @@
 
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
@@ -68,30 +66,6 @@
     --radius-2xl: 1.25rem;
     --radius-3xl: 1.5rem;     /* dialogs = rounded-3xl */
     --radius-full: 9999px;
-}
-
-/* ---------- Dark theme (semantic token override) ---------- */
-.dark {
-    --color-background: #0b1120;
-    --color-on-background: #e2e8f0;
-    --color-surface: #0f172a;
-    --color-surface-container-lowest: #0b1120;
-    --color-surface-container-low: #111827;
-    --color-surface-container: #1e293b;
-    --color-surface-container-high: #334155;
-    --color-surface-container-highest: #475569;
-    --color-on-surface: #e2e8f0;
-    --color-on-surface-variant: #94a3b8;
-    --color-outline: #475569;
-    --color-outline-variant: #1e293b;
-    --color-primary-soft: #16233f;
-    --color-primary-container: #0f2c52;
-    --color-secondary-container: #1e293b;
-    --color-on-secondary-container: #cbd5e1;
-    --color-success-container: #052e22;
-    --color-warning-container: #33210a;
-    --color-danger-container: #3b1017;
-    --color-info-container: #0c2940;
 }
 
 @layer base {

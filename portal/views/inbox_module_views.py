@@ -23,8 +23,9 @@ from datetime import date, datetime, time, timedelta
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
-from django.http import FileResponse, HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -36,7 +37,6 @@ from portal.services import (
     AttachmentService,
     EmailService,
     MailComposerService,
-    SearchService,
 )
 from portal.services.email_services import MailActionError
 from portal.services.mail_composer_service import MailComposeError
@@ -45,6 +45,7 @@ from portal.utils.html import sanitize_html
 logger = logging.getLogger(__name__)
 
 PAGE_SIZE = 25
+PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
 RATE_LIMIT = (20, 60)  # 20 writes per 60 seconds per user
 
 
@@ -60,20 +61,12 @@ FOLDER_MAP = {
     "": {},
     "all": {},
     "inbox": {"folder": "Inbox"},
-    "sent": {"folder": "SentItems"},
-    "drafts": {"folder": "Drafts", "include_drafts": True},
-    "archive": {"folder": "Archive"},
-    "starred": {"starred": True},
-    "flagged": {"flagged": True},
-    "unread": {"read": False},
-    "trash": {"folder": "DeletedItems"},
 }
 
 
 def _parse_filters(request, folder=""):
     """Parse inbox query-string filters into repository keyword arguments."""
     filters = dict(FOLDER_MAP.get((folder or "").lower(), {}))
-
     read = request.GET.get("read", "")
     if read == "read":
         filters["read"] = True
@@ -120,16 +113,23 @@ def _parse_filters(request, folder=""):
     return filters
 
 
-def _preserve_querystring(request, **overrides):
-    """Rebuild the current querystring with ``overrides`` applied."""
+def _page_query(request):
+    """Return the current GET params (minus ``page``) as a raw query string."""
     params = request.GET.copy()
-    for key, value in overrides.items():
-        if value:
-            params[key] = value
-        else:
-            params.pop(key, None)
+    params.pop("page", None)
     encoded = params.urlencode()
-    return f"?{encoded}" if encoded else ""
+    return f"&{encoded}" if encoded else ""
+
+
+def _inbox_page_size(request):
+    """Read a valid ``page_size`` for the inbox list."""
+    try:
+        value = int(request.GET.get("page_size", PAGE_SIZE))
+    except (TypeError, ValueError):
+        return PAGE_SIZE
+    if value not in PAGE_SIZE_OPTIONS:
+        return PAGE_SIZE
+    return value
 
 
 def _rate_limited(request):
@@ -173,29 +173,26 @@ class InboxView(LoginRequiredMixin, PortalView):
         filters.setdefault("include_drafts", folder.lower() == "drafts")
 
         emails = service.list_messages(request.user, **filters)
-        total = emails.count()
-        page = list(emails[0:PAGE_SIZE])
-        has_more = total > len(page)
+        page_obj = Paginator(emails, _inbox_page_size(request)).get_page(request.GET.get("page"))
         context = self.get_context_data()
         context.update(
-            emails=page,
-            total=total,
-            has_more=has_more,
-            next_offset=PAGE_SIZE,
+            emails=page_obj.object_list,
+            page_obj=page_obj,
             folder=folder,
             filters=filters,
             folders=service.folder_counts(request.user),
             accounts=service.list_accounts(request.user),
             categories=service.list_categories(request.user),
             tags=service.list_tags(request.user),
-            querystring=_preserve_querystring(request),
+            extra_querystring=_page_query(request),
+            page_size_options=PAGE_SIZE_OPTIONS,
             page_size=PAGE_SIZE,
             now=timezone.now(),
         )
         return render(request, self.template_name, context)
 
 class EmailListView(LoginRequiredMixin, View):
-    """HTMX partial: the next page of email rows for infinite scroll."""
+    """HTMX partial: a page of email rows (numbered pagination)."""
 
     def get(self, request):
         service = EmailService()
@@ -203,24 +200,16 @@ class EmailListView(LoginRequiredMixin, View):
         filters = _parse_filters(request, folder=folder)
         filters.setdefault("include_drafts", folder.lower() == "drafts")
 
-        try:
-            offset = max(0, int(request.GET.get("offset", 0)))
-        except (TypeError, ValueError):
-            offset = 0
-
         emails = service.list_messages(request.user, **filters)
-        total = emails.count()
-        page = list(emails[offset:offset + PAGE_SIZE])
-        has_more = total > offset + len(page)
+        page_obj = Paginator(emails, _inbox_page_size(request)).get_page(request.GET.get("page"))
 
         context = {
-            "emails": page,
-            "total": total,
-            "has_more": has_more,
-            "next_offset": offset + PAGE_SIZE,
+            "emails": page_obj.object_list,
+            "page_obj": page_obj,
             "folder": folder,
             "mode": request.GET.get("mode", "inbox"),
-            "querystring": _preserve_querystring(request),
+            "extra_querystring": _page_query(request),
+            "page_size_options": PAGE_SIZE_OPTIONS,
             "now": timezone.now(),
         }
         return render(request, "inbox/partials/email_list.html", context)
@@ -361,96 +350,8 @@ def _prefill_recipients(request, email, mode):
     return "", "", ""
 
 
-class ComposeView(LoginRequiredMixin, PortalView):
-    """
-    Compose a new email, continue an existing draft, or prefill a
-    reply / reply-all / forward composer. POST submits via
-    :class:`ComposeSubmitView`.
-    """
-
-    template_name = "inbox/compose.html"
-    active_page = "inbox"
-
-    def get(self, request, draft_id=None, email_id=None, mode="new"):
-        service = EmailService()
-        accounts = service.list_accounts(request.user)
-        if not accounts:
-            messages.warning(request, "Connect an Outlook account before composing.")
-            return redirect("accounts")
-
-        if email_id:
-            original = service.get_message(request.user, email_id)
-            if original is None:
-                messages.error(request, "Email not found.")
-                return redirect("inbox")
-        else:
-            original = None
-
-        draft = None
-        if draft_id:
-            draft = service.get_message(request.user, draft_id)
-            if draft is None or not draft.is_draft:
-                messages.error(request, "Draft not found.")
-                return redirect("drafts")
-
-        prefill = {
-            "to": "", "cc": "", "bcc": "", "subject": "", "body_html": "",
-            "body_text": "", "importance": "normal",
-        }
-        if draft:
-            prefill.update(
-                to=draft.toRecipients, cc=draft.ccRecipients, bcc=draft.bccRecipients,
-                subject=draft.subject, body_html=draft.body_html,
-                body_text=draft.body_text, importance=draft.importance,
-            )
-        elif original and mode in ("reply", "reply_all", "forward"):
-            to, cc, _ = _prefill_recipients(request, original, mode)
-            prefix = {"reply": "Re: ", "reply_all": "Re: ", "forward": "Fwd: "}[mode]
-            subject = original.subject
-            if not subject.lower().startswith(prefix.lower()):
-                subject = prefix + subject
-            quoted = _quote_body(original, mode)
-            prefill.update(to=to, cc=cc, subject=subject, body_html=quoted)
-
-        default_account = next((a for a in accounts if a.is_default), accounts[0])
-
-        context = self.get_context_data(
-            title="Compose",
-            breadcrumbs=[
-                {"label": "Unified Inbox", "url": reverse("inbox")},
-                {"label": "Compose"},
-            ],
-        )
-        context.update(
-            accounts=accounts,
-            default_account=default_account,
-            draft=draft,
-            original=original,
-            mode=mode,
-            **prefill,
-        )
-        return render(request, self.template_name, context)
-
-
-def _quote_body(email, mode):
-    """Build the quoted original message for reply/forward bodies."""
-    lines = []
-    if mode == "forward":
-        lines.append("-------- Forwarded message --------")
-    else:
-        lines.append("")
-    lines.append(f"On {email.received_at:%A, %B %d, %Y at %I:%M %p}, {email.sender_display} wrote:")
-    lines.append("")
-    if email.body_html:
-        return (
-            "<br>".join(lines[:1]) + "<br><br>"
-            f"<blockquote style='border-left:2px solid #ccc;margin:0 0 0 8px;padding:0 0 0 12px;'>{email.body_html}</blockquote>"
-        )
-    return "\n".join(lines[:1]) + "\n\n" + f"> {email.body_text or ''}"
-
-
 class ComposeSubmitView(LoginRequiredMixin, View):
-    """POST: send or save a compose / reply / forward."""
+    """POST: send a reply / reply-all to an existing message."""
 
     def post(self, request):
         if not _rate_limited(request):
@@ -458,153 +359,33 @@ class ComposeSubmitView(LoginRequiredMixin, View):
 
         composer = MailComposerService()
         service = EmailService()
-        account_id = request.POST.get("account", "")
-        account = service.get_account_for_user(request.user, account_id)
-        if account is None:
-            messages.error(request, "Pick a valid sending account.")
-            return redirect("compose")
-
-        data = {
-            "to": request.POST.get("to", "").strip(),
-            "cc": request.POST.get("cc", "").strip(),
-            "bcc": request.POST.get("bcc", "").strip(),
-            "subject": request.POST.get("subject", "").strip(),
-            "body_html": request.POST.get("body_html", ""),
-            "body_text": request.POST.get("body_text", ""),
-            "importance": request.POST.get("importance", "normal"),
-        }
-        attachments = _read_uploaded_files(request)
-        action = request.POST.get("submit", "send")
-        mode = request.POST.get("mode", "new")
-        draft_id = request.POST.get("draft_id", "")
+        mode = request.POST.get("mode", "reply")
         original_id = request.POST.get("original_id", "")
         original = service.get_message(request.user, original_id) if original_id else None
+        if original is None:
+            messages.error(request, "The message you are replying to could not be found.")
+            return redirect("inbox")
 
+        data = {
+            "body_html": request.POST.get("body_html", ""),
+            "body_text": request.POST.get("body_text", ""),
+            "subject": request.POST.get("subject", "").strip(),
+        }
+        attachments = _read_uploaded_files(request)
         try:
-            if action == "draft":
-                if mode in ("reply", "reply_all") and original:
-                    created = composer.save_reply_draft(
-                        request, request.user, original,
-                        body_html=data["body_html"], body_text=data["body_text"],
-                        subject=data["subject"], attachments=attachments,
-                        as_reply_all=(mode == "reply_all"),
-                    )
-                elif mode == "forward" and original:
-                    created = composer.save_forward_draft(
-                        request, request.user, original, to=data["to"],
-                        body_html=data["body_html"], body_text=data["body_text"],
-                        subject=data["subject"], attachments=attachments,
-                    )
-                else:
-                    draft = service.get_message(request.user, draft_id) if draft_id else None
-                    created = composer.save_draft(
-                        request, request.user, account, draft=draft, **data
-                    )
-                messages.success(request, "Draft saved.")
-                return redirect("compose", draft_id=created.pk)
-
-            # send
-            if mode in ("reply", "reply_all") and original:
-                composer.send_reply(
-                    request, request.user, original,
-                    body_html=data["body_html"], body_text=data["body_text"],
-                    subject=data["subject"], attachments=attachments,
-                    as_reply_all=(mode == "reply_all"),
-                )
-            elif mode == "forward" and original:
-                composer.send_forward(
-                    request, request.user, original, to=data["to"],
-                    body_html=data["body_html"], body_text=data["body_text"],
-                    subject=data["subject"], attachments=attachments,
-                )
-            else:
-                draft = service.get_message(request.user, draft_id) if draft_id else None
-                if draft and draft.is_draft:
-                    # Continue-from-draft: sync the latest edits then send.
-                    composer.save_draft(request, request.user, account, draft=draft, **data)
-                    composer.send_draft(request, request.user, draft)
-                else:
-                    composer.send_new(
-                        request, request.user, account, attachments=attachments, **data
-                    )
-            messages.success(request, "Email sent.")
+            composer.send_reply(
+                request, request.user, original,
+                body_html=data["body_html"], body_text=data["body_text"],
+                subject=data["subject"], attachments=attachments,
+                as_reply_all=(mode == "reply_all"),
+            )
+            messages.success(request, "Reply sent.")
         except (MailComposeError, MailActionError) as exc:
             messages.error(request, str(exc))
-            return redirect(request.POST.get("next", "inbox"))
         except Exception:  # noqa: BLE001
-            logger.exception("Compose submit failed")
-            messages.error(request, "Could not send the email. Please try again.")
-            return redirect(request.POST.get("next", "inbox"))
-
-        return redirect("sent_items")
-
-
-class ComposeAutosaveView(LoginRequiredMixin, View):
-    """POST (JSON): background auto-save of a draft."""
-
-    def post(self, request):
-        composer = MailComposerService()
-        service = EmailService()
-        account = service.get_account_for_user(request.user, request.POST.get("account", ""))
-        if account is None:
-            return JsonResponse({"ok": False, "error": "Invalid account"}, status=400)
-        draft = service.get_message(request.user, request.POST.get("draft_id", "")) if request.POST.get("draft_id") else None
-        try:
-            created = composer.save_draft(
-                request, request.user, account, draft=draft,
-                to=request.POST.get("to", ""), cc=request.POST.get("cc", ""),
-                bcc=request.POST.get("bcc", ""), subject=request.POST.get("subject", ""),
-                body_html=request.POST.get("body_html", ""),
-                body_text=request.POST.get("body_text", ""),
-                importance=request.POST.get("importance", "normal"),
-            )
-        except (MailComposeError, MailActionError) as exc:
-            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
-        return JsonResponse({
-            "ok": True, "draft_id": str(created.pk),
-            "saved_at": timezone.now().isoformat(),
-        })
-
-
-class ComposeModalView(LoginRequiredMixin, View):
-    """HTMX: load the composer inside a modal on the inbox page."""
-
-    def get(self, request, email_id=None, mode="new"):
-        service = EmailService()
-        accounts = service.list_accounts(request.user)
-        original = None
-        if email_id:
-            original = service.get_message(request.user, email_id)
-            if original is None:
-                return HttpResponse(status=404)
-        default_account = next((a for a in accounts if a.is_default), accounts[0])
-        prefill = {"to": "", "cc": "", "bcc": "", "subject": "", "body_html": ""}
-        if original and mode in ("reply", "reply_all"):
-            to, cc, _ = _prefill_recipients(request, original, mode)
-            subject = original.subject
-            prefix = "Re: "
-            if not subject.lower().startswith(prefix.lower()):
-                subject = prefix + subject
-            prefill = {
-                "to": to, "cc": cc, "bcc": "", "subject": subject,
-                "body_html": _quote_body(original, mode),
-            }
-        elif original and mode == "forward":
-            subject = original.subject
-            if not subject.lower().startswith("fwd:"):
-                subject = "Fwd: " + subject
-            prefill = {
-                "to": "", "cc": "", "bcc": "", "subject": subject,
-                "body_html": _quote_body(original, "forward"),
-            }
-        return render(
-            request,
-            "inbox/compose_modal.html",
-            {
-                "accounts": accounts, "default_account": default_account,
-                "original": original, "mode": mode, **prefill,
-            },
-        )
+            logger.exception("Reply submit failed")
+            messages.error(request, "Could not send the reply. Please try again.")
+        return redirect("inbox")
 
 
 def _read_uploaded_files(request):
@@ -622,54 +403,6 @@ def _read_uploaded_files(request):
 # --------------------------------------------------------------------------
 # Attachments on drafts / messages
 # --------------------------------------------------------------------------
-
-
-class ComposeAttachmentUploadView(LoginRequiredMixin, View):
-    """POST: attach uploaded files to a draft; returns an attachment item row."""
-
-    def post(self, request):
-        if not _rate_limited(request):
-            return HttpResponse("Too many requests", status=429)
-        composer = MailComposerService()
-        service = EmailService()
-        draft = service.get_message(request.user, request.POST.get("draft_id", ""))
-        if draft is None or not draft.is_draft:
-            return JsonResponse({"ok": False, "error": "Draft not found"}, status=404)
-        uploaded = _read_uploaded_files(request)
-        if not uploaded:
-            return JsonResponse({"ok": False, "error": "No files uploaded"}, status=400)
-        rows = []
-        try:
-            for name, content, content_type in uploaded:
-                composer.add_attachment(
-                    request, request.user, draft, name=name,
-                    content=content, content_type=content_type,
-                )
-                rows.append(name)
-        except (MailComposeError, MailActionError) as exc:
-            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
-        draft.refresh_from_db()
-        return render(
-            request,
-            "inbox/partials/attachment_rows.html",
-            {"draft": draft, "added": rows},
-        )
-
-
-class ComposeAttachmentRemoveView(LoginRequiredMixin, View):
-    """POST: detach a Graph attachment from a draft."""
-
-    def post(self, request, draft_id, attachment_id):
-        composer = MailComposerService()
-        service = EmailService()
-        draft = service.get_message(request.user, draft_id)
-        if draft is None or not draft.is_draft:
-            return HttpResponse(status=404)
-        try:
-            composer.remove_attachment(request, request.user, draft, attachment_id)
-        except (MailComposeError, MailActionError) as exc:
-            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
-        return JsonResponse({"ok": True})
 
 
 class AttachmentDownloadView(LoginRequiredMixin, View):
@@ -776,90 +509,8 @@ class EmailDownloadEmlView(LoginRequiredMixin, View):
 
 
 # --------------------------------------------------------------------------
-# Folders: drafts / sent / search
+# Folders
 # --------------------------------------------------------------------------
-
-
-class DraftsView(LoginRequiredMixin, PortalView):
-    template_name = "inbox/draft_list.html"
-    title = "Drafts"
-    breadcrumbs = [{"label": "Drafts"}]
-    active_page = "inbox"
-
-    def get(self, request):
-        service = EmailService()
-        filters = _parse_filters(request, folder="drafts")
-        filters["folder"] = "Drafts"
-        filters["include_drafts"] = True
-        emails = service.list_messages(request.user, **filters)
-        total = emails.count()
-        page = list(emails[0:PAGE_SIZE])
-        context = self.get_context_data()
-        context.update(
-            emails=page, total=total, has_more=total > len(page), next_offset=PAGE_SIZE,
-            folder="drafts", mode="drafts", filters=filters,
-            folders=service.folder_counts(request.user),
-            accounts=service.list_accounts(request.user),
-            categories=service.list_categories(request.user),
-            querystring=_preserve_querystring(request), page_size=PAGE_SIZE,
-            now=timezone.now(),
-        )
-        return render(request, self.template_name, context)
-
-
-class SentItemsView(LoginRequiredMixin, PortalView):
-    template_name = "inbox/sent_items.html"
-    title = "Sent Items"
-    breadcrumbs = [{"label": "Sent Items"}]
-    active_page = "inbox"
-
-    def get(self, request):
-        service = EmailService()
-        filters = _parse_filters(request, folder="sent")
-        filters["folder"] = "SentItems"
-        emails = service.list_messages(request.user, **filters)
-        total = emails.count()
-        page = list(emails[0:PAGE_SIZE])
-        context = self.get_context_data()
-        context.update(
-            emails=page, total=total, has_more=total > len(page), next_offset=PAGE_SIZE,
-            folder="sent", mode="sent", filters=filters,
-            folders=service.folder_counts(request.user),
-            accounts=service.list_accounts(request.user),
-            categories=service.list_categories(request.user),
-            querystring=_preserve_querystring(request), page_size=PAGE_SIZE,
-            now=timezone.now(),
-        )
-        return render(request, self.template_name, context)
-
-
-class SearchView(LoginRequiredMixin, PortalView):
-    template_name = "inbox/search.html"
-    title = "Search"
-    breadcrumbs = [{"label": "Search"}]
-    active_page = "inbox"
-
-    def get(self, request):
-        service = EmailService()
-        search_service = SearchService()
-        q = (request.GET.get("q", "") or "").strip()
-        filters = _parse_filters(request, folder="all")
-        filters["q"] = q or ""
-        results = search_service.search(request.user, q, **filters)
-        total = results.count()
-        page = list(results[0:PAGE_SIZE])
-        suggestions = search_service.suggestions(request.user, q) if q else []
-        context = self.get_context_data()
-        context.update(
-            q=q, emails=page, total=total, has_more=total > len(page),
-            next_offset=PAGE_SIZE, folder="search", mode="search", filters=filters,
-            suggestions=suggestions, folders=service.folder_counts(request.user),
-            accounts=service.list_accounts(request.user),
-            categories=service.list_categories(request.user),
-            querystring=_preserve_querystring(request), page_size=PAGE_SIZE,
-            now=timezone.now(),
-        )
-        return render(request, self.template_name, context)
 
 
 # --------------------------------------------------------------------------

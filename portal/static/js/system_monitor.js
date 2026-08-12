@@ -6,10 +6,6 @@
   var chart = null;
   var currentRange = '24h';
 
-  function isDark() {
-    return document.documentElement.classList.contains('dark');
-  }
-
   function readChartData() {
     var el = document.getElementById('sys-chart-data');
     if (!el) return null;
@@ -24,9 +20,8 @@
     if (canvas.offsetParent === null) return;
 
     var series = data[currentRange] || data['24h'] || { labels: [], success: [], processing: [], failed: [] };
-    var dark = isDark();
-    var tick = dark ? '#94a3b8' : '#64748b';
-    var gridC = dark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.14)';
+    var tick = '#64748b';
+    var gridC = 'rgba(100,116,139,0.14)';
 
     var config = {
       type: 'line',
@@ -45,7 +40,7 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: dark ? '#1e293b' : '#0f172a', titleColor: '#f1f5f9', bodyColor: '#cbd5e1',
+            backgroundColor: '#0f172a', titleColor: '#f1f5f9', bodyColor: '#cbd5e1',
             padding: 12, cornerRadius: 10, boxPadding: 4,
           },
         },
@@ -206,8 +201,6 @@
         requestAnimationFrame(reinit);
       });
     }
-
-    document.addEventListener('mf:themechange', function () { buildChart(); });
   }
 
   function domReady() {

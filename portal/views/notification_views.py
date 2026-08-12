@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 
-from portal.utils.querystring import _querystring
+from portal.utils.querystring import _page_size, _page_size_options, _querystring
 from ..base_view import (
     PortalView,
 )
@@ -23,7 +23,7 @@ class NotificationsView(LoginRequiredMixin, PortalView):
         context = super().get_context_data(**kwargs)
         status = self.request.GET.get("status", "")
         qs = self.service.list(status)
-        page_obj = Paginator(qs, self.page_size).get_page(self.request.GET.get("page"))
+        page_obj = Paginator(qs, _page_size(self.request, self.page_size)).get_page(self.request.GET.get("page"))
         unread = self.service.unread_count()
         context.update(
             page_obj=page_obj,
@@ -31,6 +31,7 @@ class NotificationsView(LoginRequiredMixin, PortalView):
             unread_count=unread,
             read_count=self.service.total_count() - unread,
             current_status=status,
+            page_size_options=_page_size_options(),
             extra_querystring=_querystring(self.request),
         )
         return context

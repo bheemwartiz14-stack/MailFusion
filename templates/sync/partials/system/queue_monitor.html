@@ -1,7 +1,7 @@
 {% load ui_extras %}
 
-<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
-  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4">
     <div>
       <h2 class="card-title">Queue Monitor</h2>
       <p class="prose-muted mt-0.5">Broker depth {{ queue.depth }} · Live task state</p>
@@ -12,25 +12,25 @@
   </div>
 
   <div class="grid grid-cols-2 gap-4 p-5">
-    <div class="rounded-xl bg-surface-container/50 p-3 dark:bg-zinc-800/50">
+    <div class="rounded-xl bg-surface-container/50 p-3">
       <p class="text-xs font-medium text-on-surface-variant">Pending</p>
-      <p class="mt-1 text-xl font-extrabold text-on-surface dark:text-zinc-100">{{ queue.pending }}</p>
+      <p class="mt-1 text-xl font-extrabold text-on-surface">{{ queue.pending }}</p>
     </div>
-    <div class="rounded-xl bg-surface-container/50 p-3 dark:bg-zinc-800/50">
+    <div class="rounded-xl bg-surface-container/50 p-3">
       <p class="text-xs font-medium text-on-surface-variant">Running</p>
       <p class="mt-1 text-xl font-extrabold text-info">{{ queue.running }}</p>
     </div>
-    <div class="rounded-xl bg-surface-container/50 p-3 dark:bg-zinc-800/50">
+    <div class="rounded-xl bg-surface-container/50 p-3">
       <p class="text-xs font-medium text-on-surface-variant">Failed</p>
       <p class="mt-1 text-xl font-extrabold text-danger">{{ queue.failed }}</p>
     </div>
-    <div class="rounded-xl bg-surface-container/50 p-3 dark:bg-zinc-800/50">
+    <div class="rounded-xl bg-surface-container/50 p-3">
       <p class="text-xs font-medium text-on-surface-variant">Completed Today</p>
       <p class="mt-1 text-xl font-extrabold text-success">{{ queue.completed_today }}</p>
     </div>
   </div>
 
-  <div class="flex items-center gap-2 border-t border-outline-variant px-5 py-4 dark:border-zinc-800">
+  <div class="flex items-center gap-2 border-t border-outline-variant px-5 py-4">
     <button class="btn-secondary btn-sm" data-queue-retry title="Retry failed jobs"><i data-lucide="rotate-cw" class="size-4"></i>Retry Failed</button>
     <button class="btn-danger btn-sm" data-queue-clear title="Clear queue"><i data-lucide="trash-2" class="size-4"></i>Clear Queue</button>
   </div>

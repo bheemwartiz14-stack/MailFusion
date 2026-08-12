@@ -5,7 +5,7 @@ from portal.base_view import (
     PortalView,
 )
 from portal.services import AuditService
-from portal.utils.querystring import _querystring
+from portal.utils.querystring import _page_size, _page_size_options, _querystring
 class AuditLogsView(LoginRequiredMixin, PortalView):
     template_name = "logs/list.html"
     title = "Audit Logs"
@@ -19,12 +19,13 @@ class AuditLogsView(LoginRequiredMixin, PortalView):
         status = self.request.GET.get("status", "")
         q = self.request.GET.get("q", "").strip()
         qs = self.service.search(status=status, query=q)
-        page_obj = Paginator(qs, self.page_size).get_page(self.request.GET.get("page"))
+        page_obj = Paginator(qs, _page_size(self.request, self.page_size)).get_page(self.request.GET.get("page"))
         context.update(
             page_obj=page_obj,
             logs=page_obj.object_list,
             current_status=status,
             query=q,
+            page_size_options=_page_size_options(),
             extra_querystring=_querystring(self.request),
         )
         return context

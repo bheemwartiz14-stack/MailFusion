@@ -1,5 +1,6 @@
 {% if page_obj %}
-<nav aria-label="Page navigation" class="mt-5 flex flex-wrap items-center justify-between gap-3">
+<nav aria-label="Page navigation" class="mt-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+  <!-- Results info -->
   <span class="text-sm text-on-surface-variant">
     {% if page_obj.paginator.count %}
       Showing <strong class="font-semibold text-on-surface">{{ page_obj.start_index }}&ndash;{{ page_obj.end_index }}</strong> of <strong class="font-semibold text-on-surface">{{ page_obj.paginator.count }}</strong> results
@@ -7,26 +8,96 @@
       No results
     {% endif %}
   </span>
-  <ul class="flex items-center gap-1">
-    <li>
+
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+    <!-- Page-size selector -->
+    <label class="flex items-center gap-2 text-sm text-on-surface-variant">
+      Rows
+      <select data-mf-page-size
+        class="rounded-lg border border-outline-variant bg-surface px-2.5 py-1.5 text-sm font-medium text-on-surface shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
+        aria-label="Rows per page">
+        {% for size in page_size_options %}
+        <option value="{{ size }}" {% if page_obj.paginator.per_page == size %}selected{% endif %}>{{ size }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <div class="flex items-center gap-1">
+      <!-- First -->
+      <a class="btn-icon {% if not page_obj.has_previous %}pointer-events-none opacity-40{% endif %}" {% if page_obj.has_previous %}href="?page=1{{ extra_querystring }}"{% endif %} aria-label="First page">
+        <span class="material-symbols-outlined text-[1.1rem]">first_page</span>
+      </a>
+      <!-- Previous -->
       <a class="btn-icon {% if not page_obj.has_previous %}pointer-events-none opacity-40{% endif %}" {% if page_obj.has_previous %}href="?page={{ page_obj.previous_page_number }}{{ extra_querystring }}"{% endif %} aria-label="Previous page">
         <span class="material-symbols-outlined text-[1.1rem]">chevron_left</span>
       </a>
-    </li>
-    {% for num in page_obj.paginator.page_range %}
-      {% if num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
-        <li>
-          <a class="flex size-9 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-300 ease-in-out {% if num == page_obj.number %}bg-primary text-on-primary shadow-sm{% else %}border border-outline-variant bg-surface text-on-surface-variant hover:bg-surface-container{% endif %}" href="?page={{ num }}{{ extra_querystring }}">{{ num }}</a>
-        </li>
-      {% elif num == 2 or num == page_obj.paginator.num_pages|add:"-1" %}
-        <li class="px-1 text-on-surface-variant">&hellip;</li>
-      {% endif %}
-    {% endfor %}
-    <li>
+
+      <!-- Page numbers (with smart ellipsis) -->
+      <ul class="flex items-center gap-1">
+        {% for num in page_obj.paginator.page_range %}
+          {% if num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+            <li>
+              <a class="flex size-9 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-300 ease-in-out {% if num == page_obj.number %}bg-primary text-on-primary shadow-sm{% else %}border border-outline-variant bg-surface text-on-surface-variant hover:bg-surface-container{% endif %}" href="?page={{ num }}{{ extra_querystring }}">{{ num }}</a>
+            </li>
+          {% elif num == 2 or num == page_obj.paginator.num_pages|add:"-1" %}
+            <li class="px-1 text-on-surface-variant">&hellip;</li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+
+      <!-- Next -->
       <a class="btn-icon {% if not page_obj.has_next %}pointer-events-none opacity-40{% endif %}" {% if page_obj.has_next %}href="?page={{ page_obj.next_page_number }}{{ extra_querystring }}"{% endif %} aria-label="Next page">
         <span class="material-symbols-outlined text-[1.1rem]">chevron_right</span>
       </a>
-    </li>
-  </ul>
+      <!-- Last -->
+      <a class="btn-icon {% if not page_obj.has_next %}pointer-events-none opacity-40{% endif %}" {% if page_obj.has_next %}href="?page={{ page_obj.paginator.num_pages }}{{ extra_querystring }}"{% endif %} aria-label="Last page">
+        <span class="material-symbols-outlined text-[1.1rem]">last_page</span>
+      </a>
+
+      <!-- Jump to page -->
+      <form class="ml-1 flex items-center gap-1" data-mf-jump-to-page aria-label="Jump to page form">
+        <span class="text-sm text-on-surface-variant">Go</span>
+        <input type="number" min="1" max="{{ page_obj.paginator.num_pages }}"
+          class="w-14 rounded-lg border border-outline-variant bg-surface px-2 py-1.5 text-center text-sm font-medium text-on-surface shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
+          aria-label="Jump to page" data-mf-jump-input>
+      </form>
+    </div>
+  </div>
 </nav>
+
+<script>
+  (function () {
+    function baseUrl() {
+      var url = new URL(window.location.href);
+      url.searchParams.set('page_size', '{{ page_obj.paginator.per_page }}');
+      return url;
+    }
+    // Page-size selector
+    var sizeSel = document.querySelector('[data-mf-page-size]');
+    if (sizeSel) {
+      sizeSel.addEventListener('change', function () {
+        var url = baseUrl();
+        url.searchParams.set('page_size', sizeSel.value);
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+      });
+    }
+    // Jump to page
+    var jumpForm = document.querySelector('[data-mf-jump-to-page]');
+    if (jumpForm) {
+      jumpForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var input = jumpForm.querySelector('[data-mf-jump-input]');
+        var n = parseInt(input.value, 10);
+        var max = parseInt(input.max, 10);
+        if (!isNaN(n) && n >= 1 && n <= max) {
+          var url = baseUrl();
+          url.searchParams.set('page', n);
+          window.location.href = url.toString();
+        }
+      });
+    }
+  })();
+</script>
 {% endif %}

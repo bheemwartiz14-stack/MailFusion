@@ -1,7 +1,7 @@
 {% load ui_extras %}
 
-<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
-  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4 dark:border-zinc-800">
+<div class="rounded-2xl border border-outline-variant bg-surface shadow-sm transition-colors">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-4">
     <div>
       <h2 class="card-title">System Health</h2>
       <p class="prose-muted mt-0.5">Infrastructure components in real time</p>
@@ -9,27 +9,27 @@
     <button class="btn-icon" data-refresh-health title="Refresh health" aria-label="Refresh health"><i data-lucide="refresh-cw" class="size-4"></i></button>
   </div>
 
-  <div class="divide-y divide-outline-variant dark:divide-zinc-800">
+  <div class="divide-y divide-outline-variant">
     {% for card in health_cards %}
-    <div class="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-surface-container/50 dark:hover:bg-zinc-800/40">
+    <div class="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-surface-container/50">
       {% if card.state == 'err' %}
       <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-danger/10 text-danger"><i data-lucide="{{ card.icon }}" class="size-4"></i></span>
       <div class="min-w-0 flex-1">
-        <p class="text-sm font-semibold text-on-surface dark:text-zinc-200">{{ card.name }}</p>
+        <p class="text-sm font-semibold text-on-surface">{{ card.name }}</p>
         <p class="truncate text-xs text-danger">Unavailable</p>
       </div>
       <span class="shrink-0 rounded-full bg-danger/10 px-2 py-0.5 text-xs font-semibold text-danger">Critical</span>
       {% elif card.state == 'warn' %}
       <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-warning/10 text-warning"><i data-lucide="{{ card.icon }}" class="size-4"></i></span>
       <div class="min-w-0 flex-1">
-        <p class="text-sm font-semibold text-on-surface dark:text-zinc-200">{{ card.name }}</p>
+        <p class="text-sm font-semibold text-on-surface">{{ card.name }}</p>
         <p class="truncate text-xs text-on-surface-variant">{{ card.last }}</p>
       </div>
       <span class="shrink-0 rounded-full bg-warning/10 px-2 py-0.5 text-xs font-semibold text-warning">Warning</span>
       {% else %}
       <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-success/10 text-success"><i data-lucide="{{ card.icon }}" class="size-4"></i></span>
       <div class="min-w-0 flex-1">
-        <p class="text-sm font-semibold text-on-surface dark:text-zinc-200">{{ card.name }}</p>
+        <p class="text-sm font-semibold text-on-surface">{{ card.name }}</p>
         <p class="truncate text-xs text-on-surface-variant">{{ card.last }}</p>
       </div>
       <span class="shrink-0 rounded-full bg-success/10 px-2 py-0.5 text-xs font-semibold text-success">Healthy</span>

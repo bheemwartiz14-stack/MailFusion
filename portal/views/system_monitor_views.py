@@ -23,7 +23,7 @@ from portal.models import (
     SyncLog,
 )
 from portal.utils.monitor import get_system_context
-from portal.utils.querystring import _querystring
+from portal.utils.querystring import _page_size, _page_size_options, _querystring
 from portal.utils.tasks import broker_healthy, queue_depth, worker_status
 
 
@@ -75,7 +75,7 @@ class SyncLogsView(LoginRequiredMixin, PortalView):
         if q:
             qs = qs.filter(account__name__icontains=q) | qs.filter(account__email__icontains=q)
         counts = dict(SyncLog.objects.values_list("status").annotate(c=Count("id")))
-        page_obj = Paginator(qs, self.page_size).get_page(self.request.GET.get("page"))
+        page_obj = Paginator(qs, _page_size(self.request, self.page_size)).get_page(self.request.GET.get("page"))
         context.update(
             page_obj=page_obj,
             logs=page_obj.object_list,
@@ -84,6 +84,7 @@ class SyncLogsView(LoginRequiredMixin, PortalView):
             current_status=status,
             query=q,
             current_account=account_id,
+            page_size_options=_page_size_options(),
             extra_querystring=_querystring(self.request),
         )
         return context
@@ -99,8 +100,13 @@ class SyncLogsPartialView(LoginRequiredMixin, PortalView):
         qs = SyncLog.objects.select_related("account").order_by("-start_time")
         if status:
             qs = qs.filter(status=status)
-        page_obj = Paginator(qs, self.page_size).get_page(self.request.GET.get("page"))
-        context.update(page_obj=page_obj, logs=page_obj.object_list)
+        page_obj = Paginator(qs, _page_size(self.request, self.page_size)).get_page(self.request.GET.get("page"))
+        context.update(
+            page_obj=page_obj,
+            logs=page_obj.object_list,
+            page_size_options=_page_size_options(),
+            extra_querystring=_querystring(self.request),
+        )
         return context
 
 

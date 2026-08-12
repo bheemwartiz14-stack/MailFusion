@@ -236,6 +236,25 @@ class AccountActionTests(TestCase):
             response = self.client.get(path)
             self.assertEqual(response.status_code, 200, path)
 
+    def test_inbox_renders_with_pagination(self):
+        from datetime import timedelta
+
+        for i in range(5):
+            Email.objects.create(
+                outlook_account=self.account,
+                graph_message_id=f"g{i}",
+                subject=f"Subject {i}",
+                from_email="a@b.co",
+                received_at=timezone.now() - timedelta(minutes=i),
+            )
+        for url in ["/inbox/", "/inbox/?page=1"]:
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200, url)
+
+    def test_dashboard_renders(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+
 
 class SyncLogTests(TestCase):
     def test_log_detail_renders(self):
